@@ -113,7 +113,11 @@ class _AssistanceRequestsScreenState extends State<AssistanceRequestsScreen> {
                                   onPressed: () => _requestService.acceptRequest(
                                     request.id,
                                     uid,
-                                    authState.firebaseUser?.displayName ?? authState.firebaseUser?.email ?? 'Volunteer',
+                                    authState.profile?.name.isNotEmpty ?? false
+                                        ? authState.profile!.name
+                                        : authState.firebaseUser?.displayName ??
+                                            authState.firebaseUser?.email ??
+                                            'Volunteer',
                                   ),
                                 ),
                               ),

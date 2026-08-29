@@ -24,6 +24,15 @@ class UserProfile {
   final bool isAnonymous;
   final DateTime? createdAt;
 
+  /// Up to two initials from [name] (e.g. "Kamala Fernando" -> "KF"),
+  /// falling back to "?" for a blank name.
+  String get initials {
+    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    final letters = parts.take(2).map((p) => p[0].toUpperCase());
+    return letters.join();
+  }
+
   Map<String, dynamic> toMap() => {
         'role': role == AppRole.passenger ? 'passenger' : 'volunteer',
         'name': name,
