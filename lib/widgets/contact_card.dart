@@ -21,8 +21,8 @@ class ContactCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.border, width: 1.5),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 16, offset: const Offset(0, 6))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,8 +73,9 @@ class ContactPickerRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: palette.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: palette.border, width: 1.5),
+          borderRadius: BorderRadius.circular(16),
+          border: selected ? Border.all(color: palette.cta, width: 1.5) : null,
+          boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 14, offset: const Offset(0, 5))],
         ),
         child: Row(
           children: [
@@ -103,9 +104,9 @@ class ContactPickerRow extends StatelessWidget {
               height: 22,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected ? palette.accent : Colors.transparent,
+                color: selected ? palette.cta : Colors.transparent,
                 shape: BoxShape.circle,
-                border: Border.all(color: palette.border, width: 1.5),
+                border: Border.all(color: selected ? palette.cta : palette.border, width: 1.5),
               ),
               child: selected ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
             ),

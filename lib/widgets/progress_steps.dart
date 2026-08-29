@@ -20,7 +20,7 @@ class ProgressSteps extends StatelessWidget {
             margin: EdgeInsets.only(right: i == total - 1 ? 0 : 6),
             height: 4,
             decoration: BoxDecoration(
-              color: filled ? palette.accent : palette.border,
+              color: filled ? palette.cta : palette.border,
               borderRadius: BorderRadius.circular(2),
             ),
           ),

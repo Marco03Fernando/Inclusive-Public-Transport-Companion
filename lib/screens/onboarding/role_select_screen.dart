@@ -9,6 +9,7 @@ import '../../core/state/auth_state.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/language_toggle.dart';
+import '../../widgets/living_pin_logo.dart';
 
 class RoleSelectScreen extends StatefulWidget {
   const RoleSelectScreen({super.key});
@@ -19,6 +20,7 @@ class RoleSelectScreen extends StatefulWidget {
 
 class _RoleSelectScreenState extends State<RoleSelectScreen> {
   bool _guestLoading = false;
+  final _pinKey = GlobalKey<LivingPinLogoState>();
 
   Future<void> _continueAsGuest(BuildContext context) async {
     setState(() => _guestLoading = true);
@@ -33,7 +35,9 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
     final palette = context.palette;
     final state = context.watch<AppState>();
 
-    void choose(AppRole role) {
+    Future<void> choose(AppRole role) async {
+      await _pinKey.currentState?.playConfirm();
+      if (!context.mounted) return;
       state.setRole(role);
       Navigator.of(context).pushReplacementNamed(Routes.signupBasic);
     }
@@ -54,24 +58,8 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: palette.accentSoft,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        'CP',
-                        style: GoogleFonts.manrope(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 26,
-                          color: palette.accent,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
+                    LivingPinLogo(key: _pinKey),
+                    const SizedBox(height: 2),
                     Text(
                       'Colombo Pal',
                       style: GoogleFonts.manrope(
@@ -162,14 +150,14 @@ class _RoleCard extends StatelessWidget {
     final palette = context.palette;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: palette.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: palette.border, width: 1.5),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 16, offset: const Offset(0, 6))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

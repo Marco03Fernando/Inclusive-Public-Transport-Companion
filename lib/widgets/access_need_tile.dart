@@ -25,9 +25,10 @@ class AccessNeedTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
-          color: checked ? palette.accentSoft : palette.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: checked ? palette.accent : palette.border, width: 1.5),
+          color: checked ? palette.ctaSoft : palette.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: checked ? palette.cta : palette.border, width: 1.5),
+          boxShadow: checked ? [BoxShadow(color: palette.cta.withValues(alpha: 0.16), blurRadius: 10, offset: const Offset(0, 3))] : null,
         ),
         child: Row(
           children: [
@@ -36,9 +37,9 @@ class AccessNeedTile extends StatelessWidget {
               height: 20,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: checked ? palette.accent : Colors.transparent,
+                color: checked ? palette.cta : Colors.transparent,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: checked ? palette.accent : palette.border, width: 1.5),
+                border: Border.all(color: checked ? palette.cta : palette.border, width: 1.5),
               ),
               child: checked
                   ? const Icon(Icons.check, size: 14, color: Colors.white)

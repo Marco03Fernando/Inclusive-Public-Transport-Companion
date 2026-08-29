@@ -28,11 +28,15 @@ class MapPlaceholder extends StatelessWidget {
           if (showRoute)
             CustomPaint(
               size: Size.infinite,
-              painter: _RoutePainter(accent: palette.accent, danger: palette.danger),
+              painter: _RoutePainter(accent: palette.cta, danger: palette.danger),
             ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: palette.surface, borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+              color: palette.surface,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 8, offset: const Offset(0, 3))],
+            ),
             child: Text(
               label,
               style: TextStyle(fontSize: 11, color: palette.muted, fontFamily: 'monospace'),

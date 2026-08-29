@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../data/mock_data.dart';
 import '../../widgets/alert_banner.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/demo_data_badge.dart';
 import '../../widgets/toggle_row.dart';
 
 class ProfileSharingScreen extends StatelessWidget {
@@ -36,6 +37,7 @@ class ProfileSharingScreen extends StatelessWidget {
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
           ),
           const SizedBox(height: 10),
+          const DemoDataBadge(),
           for (final entry in mockSharingHistory) ...[
             NoteCard(child: Text(entry)),
             const SizedBox(height: 10),

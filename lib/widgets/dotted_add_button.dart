@@ -14,7 +14,7 @@ class DottedAddButton extends StatelessWidget {
     final palette = context.palette;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       child: DottedBorderBox(
         child: Container(
           width: double.infinity,
@@ -52,7 +52,7 @@ class _DashedBorderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rrect = RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(14));
+    final rrect = RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(16));
     final path = Path()..addRRect(rrect);
     final paint = Paint()
       ..color = color

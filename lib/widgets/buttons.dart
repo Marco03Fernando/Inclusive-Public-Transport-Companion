@@ -14,18 +14,27 @@ class PrimaryButton extends StatelessWidget {
     final palette = context.palette;
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: palette.accent,
-          foregroundColor: palette.onAccent,
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          elevation: 0,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: onPressed == null
+              ? null
+              : [BoxShadow(color: palette.cta.withValues(alpha: 0.35), blurRadius: 18, offset: const Offset(0, 8))],
         ),
-        child: Text(
-          label,
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 15),
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: palette.cta,
+            foregroundColor: palette.onCta,
+            disabledBackgroundColor: palette.cta.withValues(alpha: 0.4),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 0,
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 15),
+          ),
         ),
       ),
     );
@@ -47,9 +56,10 @@ class SecondaryButton extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           foregroundColor: palette.text,
+          backgroundColor: palette.surface,
           side: BorderSide(color: palette.border, width: 1.5),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         child: Text(
           label,
@@ -71,18 +81,24 @@ class DangerButton extends StatelessWidget {
     final palette = context.palette;
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: palette.danger,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          elevation: 0,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: palette.danger.withValues(alpha: 0.3), blurRadius: 18, offset: const Offset(0, 8))],
         ),
-        child: Text(
-          label,
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 15),
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: palette.danger,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 0,
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 15),
+          ),
         ),
       ),
     );
@@ -106,9 +122,10 @@ class TextDangerButton extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           foregroundColor: palette.danger,
+          backgroundColor: palette.surface,
           side: BorderSide(color: palette.border, width: 1.5),
           padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         child: Text(
           label,

@@ -19,8 +19,8 @@ class SettingsLinkRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: palette.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: palette.border, width: 1.5),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 12, offset: const Offset(0, 5))],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -39,40 +39,49 @@ class AppBottomNavBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: palette.surface,
-        border: Border(top: BorderSide(color: palette.border)),
+        borderRadius: const BorderRadius.only(topLeft: Radius.circular(22), topRight: Radius.circular(22)),
+        boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 20, offset: const Offset(0, -6))],
       ),
       child: SafeArea(
         top: false,
-        child: Row(
-          children: tabs.map((tab) {
-            final active = tab.matches.contains(currentRoute);
-            final color = active ? palette.accent : palette.muted;
-            return Expanded(
-              child: InkWell(
-                onTap: active
-                    ? null
-                    : () => Navigator.of(context).pushReplacementNamed(tab.target),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(_tabIcons[tab.tab], size: 22, color: color),
-                      const SizedBox(height: 2),
-                      Text(
-                        context.t(_tabLabelKeys[tab.tab]!),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                          color: color,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(6, 10, 6, 10),
+          child: Row(
+            children: tabs.map((tab) {
+              final active = tab.matches.contains(currentRoute);
+              final color = active ? palette.cta : palette.muted;
+              return Expanded(
+                child: InkWell(
+                  onTap: active
+                      ? null
+                      : () => Navigator.of(context).pushReplacementNamed(tab.target),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: active ? palette.ctaSoft : Colors.transparent,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(_tabIcons[tab.tab], size: 22, color: color),
+                        const SizedBox(height: 3),
+                        Text(
+                          context.t(_tabLabelKeys[tab.tab]!),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                            color: color,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
