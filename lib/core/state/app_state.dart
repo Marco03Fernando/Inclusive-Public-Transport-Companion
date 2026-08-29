@@ -1,10 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show ThemeMode;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/mock_data.dart';
 import '../../models/access_need.dart';
 import '../localization/locale.dart';
+
+const _themeModePrefKey = 'themeMode';
 
 enum AppRole { passenger, volunteer }
 
@@ -17,6 +21,10 @@ enum SosStage { hidden, confirm, holding, activated }
 class AppState extends ChangeNotifier {
   AppRole role = AppRole.passenger;
   AppLocale locale = AppLocale.en;
+
+  // Defaults to the system setting until the persisted choice (if any)
+  // loads; always user-overridable from the profile screen from then on.
+  ThemeMode themeMode = ThemeMode.system;
 
   List<AccessNeed> accessNeeds = List.of(defaultAccessNeeds);
 
@@ -46,6 +54,26 @@ class AppState extends ChangeNotifier {
       elapsedSec++;
       notifyListeners();
     });
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_themeModePrefKey);
+    for (final mode in ThemeMode.values) {
+      if (mode.name == saved) {
+        themeMode = mode;
+        notifyListeners();
+        break;
+      }
+    }
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    themeMode = mode;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_themeModePrefKey, mode.name);
   }
 
   String get elapsedLabel {
