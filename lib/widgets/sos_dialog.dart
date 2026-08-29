@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/localization/locale.dart';
 import '../core/state/app_state.dart';
+import '../core/state/auth_state.dart';
 import '../core/theme/app_theme.dart';
+import '../models/contact.dart';
+import '../services/user_profile_service.dart';
+import 'sos_contact_row.dart';
 
 /// The SOS confirm -> press-and-hold -> activated modal, reachable from
 /// every eligible passenger screen. Mirrors the design's 3-second hold
@@ -113,8 +118,25 @@ class _SosHold extends StatelessWidget {
   }
 }
 
-class _SosActivated extends StatelessWidget {
+class _SosActivated extends StatefulWidget {
   const _SosActivated();
+
+  @override
+  State<_SosActivated> createState() => _SosActivatedState();
+}
+
+class _SosActivatedState extends State<_SosActivated> {
+  final _service = UserProfileService();
+  late final Future<List<Contact>> _contactsFuture = _loadContacts();
+
+  Future<List<Contact>> _loadContacts() {
+    final uid = context.read<AuthState>().uid;
+    if (uid == null) return Future.value(const []);
+    return _service.watchContacts(uid).first;
+  }
+
+  // Sri Lanka's Suwa Seriya free ambulance service.
+  static const _ambulanceNumber = '1990';
 
   @override
   Widget build(BuildContext context) {
@@ -143,10 +165,31 @@ class _SosActivated extends StatelessWidget {
             style: TextStyle(fontSize: 12, color: palette.muted, height: 1.5),
           ),
           const SizedBox(height: 14),
+          FutureBuilder<List<Contact>>(
+            future: _contactsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2)),
+                );
+              }
+              final contacts = snapshot.data ?? const [];
+              if (contacts.isEmpty) {
+                return Text(
+                  context.t('noContactsSaved'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: palette.muted),
+                );
+              }
+              return Column(children: [for (final c in contacts) SosContactRow(contact: c)]);
+            },
+          ),
+          const SizedBox(height: 4),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () => launchUrl(Uri(scheme: 'tel', path: _ambulanceNumber)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: palette.danger,
                 foregroundColor: Colors.white,
