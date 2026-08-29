@@ -6,6 +6,7 @@ class Routes {
   Routes._();
 
   static const roleSelect = '/role-select';
+  static const login = '/login';
   static const signupBasic = '/signup-basic';
   static const signupAccess = '/signup-access';
   static const signupContacts = '/signup-contacts';
@@ -26,11 +27,15 @@ class Routes {
   static const profileAccess = '/profile-access';
   static const profileSharing = '/profile-sharing';
 
+  static const requestAssistance = '/request-assistance';
+  static const requestStatus = '/request-status';
+
   static const volunteerHome = '/volunteer-home';
   static const volunteerFeed = '/volunteer-feed';
   static const volunteerProfile = '/volunteer-profile';
+  static const volunteerAssistanceRequests = '/volunteer-assistance-requests';
 
-  static const onboardingRoutes = {roleSelect, signupBasic, signupAccess, signupContacts};
+  static const onboardingRoutes = {roleSelect, login, signupBasic, signupAccess, signupContacts};
 
   /// Ports the design's `sosEligibleScreens` list: SOS is reachable from any
   /// passenger screen with an account, except the transient report-confirm
@@ -40,6 +45,7 @@ class Routes {
     shareSetup, shareActive,
     reportForm, reportMine,
     profileHome, profileContacts, profileAccess, profileSharing,
+    requestAssistance, requestStatus,
   };
 
   static bool showsBottomNav(String route) => !onboardingRoutes.contains(route);
@@ -63,13 +69,16 @@ const passengerTabs = [
   TabDef(BottomTab.plan, Routes.planSearch, {Routes.planSearch, Routes.planResults, Routes.planDetail}),
   TabDef(BottomTab.share, Routes.shareSetup, {Routes.shareSetup, Routes.shareActive}),
   TabDef(BottomTab.report, Routes.reportForm, {Routes.reportForm, Routes.reportConfirm, Routes.reportMine}),
-  TabDef(BottomTab.profile, Routes.profileHome,
-      {Routes.profileHome, Routes.profileContacts, Routes.profileAccess, Routes.profileSharing}),
+  TabDef(BottomTab.profile, Routes.profileHome, {
+    Routes.profileHome, Routes.profileContacts, Routes.profileAccess, Routes.profileSharing,
+    Routes.requestAssistance, Routes.requestStatus,
+  }),
 ];
 
 const volunteerTabs = [
   TabDef(BottomTab.home, Routes.volunteerHome, {Routes.volunteerHome}),
   TabDef(BottomTab.reports, Routes.volunteerFeed, {Routes.volunteerFeed}),
   TabDef(BottomTab.report, Routes.reportForm, {Routes.reportForm, Routes.reportConfirm}),
-  TabDef(BottomTab.profile, Routes.volunteerProfile, {Routes.volunteerProfile}),
+  TabDef(BottomTab.profile, Routes.volunteerProfile,
+      {Routes.volunteerProfile, Routes.volunteerAssistanceRequests}),
 ];

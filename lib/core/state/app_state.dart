@@ -19,6 +19,16 @@ class AppState extends ChangeNotifier {
   AppLocale locale = AppLocale.en;
 
   List<AccessNeed> accessNeeds = List.of(defaultAccessNeeds);
+
+  // Signup-wizard draft — each step's route replaces the last, so these
+  // survive on AppState (same pattern as accessNeeds) until the final
+  // "Finish setup" step creates the Firebase account.
+  String signupName = '';
+  String signupPhone = '';
+  String signupDob = '';
+  String signupEmail = '';
+  String signupPassword = '';
+
   Set<String> planFilterIds = {'wheelchair'};
   String reportTargetId = 'bus';
   String reportTypeId = 'crowded';
@@ -63,6 +73,26 @@ class AppState extends ChangeNotifier {
     accessNeeds = accessNeeds
         .map((n) => n.id == id ? n.copyWith(checked: !n.checked) : n)
         .toList();
+    notifyListeners();
+  }
+
+  void setAccessNeeds(List<AccessNeed> value) {
+    accessNeeds = value;
+    notifyListeners();
+  }
+
+  void setSignupBasic({
+    required String name,
+    required String phone,
+    required String dob,
+    required String email,
+    required String password,
+  }) {
+    signupName = name;
+    signupPhone = phone;
+    signupDob = dob;
+    signupEmail = email;
+    signupPassword = password;
     notifyListeners();
   }
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "592018861909",
+    "project_id": "iptc-e6931",
+    "storage_bucket": "iptc-e6931.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:592018861909:android:356245ccce70afd64f09dc",
+        "android_client_info": {
+          "package_name": "com.colombopal.colombo_pal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvwL1o3_wqkFCm-YO7kquvOU19jrdLLlw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

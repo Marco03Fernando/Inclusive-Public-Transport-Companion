@@ -5,12 +5,28 @@ import 'package:provider/provider.dart';
 import '../../core/localization/locale.dart';
 import '../../core/routes.dart';
 import '../../core/state/app_state.dart';
+import '../../core/state/auth_state.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/language_toggle.dart';
 
-class RoleSelectScreen extends StatelessWidget {
+class RoleSelectScreen extends StatefulWidget {
   const RoleSelectScreen({super.key});
+
+  @override
+  State<RoleSelectScreen> createState() => _RoleSelectScreenState();
+}
+
+class _RoleSelectScreenState extends State<RoleSelectScreen> {
+  bool _guestLoading = false;
+
+  Future<void> _continueAsGuest(BuildContext context) async {
+    setState(() => _guestLoading = true);
+    final ok = await context.read<AuthState>().continueAsGuest();
+    if (!context.mounted) return;
+    setState(() => _guestLoading = false);
+    if (ok) Navigator.of(context).pushReplacementNamed(Routes.volunteerHome);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,16 +115,29 @@ class RoleSelectScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Center(
-                  child: RichText(
-                    text: TextSpan(
-                      style: TextStyle(fontSize: 13, color: palette.muted),
-                      children: [
-                        TextSpan(text: '${context.t('haveAccount')} '),
-                        TextSpan(
-                          text: context.t('logIn'),
-                          style: TextStyle(color: palette.accent, fontWeight: FontWeight.w700),
-                        ),
-                      ],
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pushNamed(Routes.login),
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(fontSize: 13, color: palette.muted),
+                        children: [
+                          TextSpan(text: '${context.t('haveAccount')} '),
+                          TextSpan(
+                            text: context.t('logIn'),
+                            style: TextStyle(color: palette.accent, fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Center(
+                  child: TextButton(
+                    onPressed: _guestLoading ? null : () => _continueAsGuest(context),
+                    child: Text(
+                      _guestLoading ? context.t('loading') : context.t('continueAsGuest'),
+                      style: TextStyle(color: palette.muted, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
