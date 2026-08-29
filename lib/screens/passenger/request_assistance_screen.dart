@@ -42,7 +42,9 @@ class _RequestAssistanceScreenState extends State<RequestAssistanceScreen> {
     await _requestService.createRequest(AssistanceRequest(
       id: '',
       passengerUid: authState.uid!,
-      passengerName: authState.firebaseUser?.displayName ?? authState.firebaseUser?.email ?? 'Passenger',
+      passengerName: authState.profile?.name.isNotEmpty ?? false
+          ? authState.profile!.name
+          : authState.firebaseUser?.displayName ?? authState.firebaseUser?.email ?? 'Passenger',
       type: _type,
       note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
       status: AssistanceStatus.pending,

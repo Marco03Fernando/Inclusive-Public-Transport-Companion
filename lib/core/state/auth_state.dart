@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../models/access_need.dart';
+import '../../models/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/user_profile_service.dart';
 import 'app_state.dart';
@@ -26,7 +29,22 @@ class AuthState extends ChangeNotifier {
   bool loading = false;
   String? errorMessage;
 
+  /// The signed-in user's real Firestore profile — kept live so every
+  /// screen that shows the user's name/initials reads the same source
+  /// instead of each re-querying (or worse, hardcoding a placeholder).
+  UserProfile? profile;
+  StreamSubscription<UserProfile?>? _profileSub;
+
   String? get uid => firebaseUser?.uid;
+
+  void _watchProfile(String uid) {
+    _profileSub?.cancel();
+    profile = null;
+    _profileSub = _userProfileService.watchProfile(uid).listen((p) {
+      profile = p;
+      notifyListeners();
+    });
+  }
 
   Future<AppRole?> hydrateFromExistingSession() async {
     final user = _authService.currentUser;
@@ -34,6 +52,7 @@ class AuthState extends ChangeNotifier {
     if (user == null) return null;
     final role = await _userProfileService.getRole(user.uid);
     if (role != null) _appState.setRole(role);
+    _watchProfile(user.uid);
     return role;
   }
 
@@ -41,6 +60,7 @@ class AuthState extends ChangeNotifier {
         firebaseUser = await _authService.signInWithEmail(email, password);
         final role = await _userProfileService.getRole(firebaseUser!.uid) ?? AppRole.passenger;
         _appState.setRole(role);
+        _watchProfile(firebaseUser!.uid);
       });
 
   Future<bool> continueAsGuest() => _run(() async {
@@ -55,6 +75,7 @@ class AuthState extends ChangeNotifier {
           isAnonymous: true,
         );
         _appState.setRole(AppRole.volunteer);
+        _watchProfile(firebaseUser!.uid);
       });
 
   Future<bool> signUpAndCreateProfile({
@@ -79,11 +100,15 @@ class AuthState extends ChangeNotifier {
         );
         _appState.setRole(role);
         _appState.setAccessNeeds(accessNeeds);
+        _watchProfile(firebaseUser!.uid);
       });
 
   Future<void> signOut() async {
     await _authService.signOut();
     firebaseUser = null;
+    await _profileSub?.cancel();
+    _profileSub = null;
+    profile = null;
     notifyListeners();
   }
 
@@ -104,6 +129,12 @@ class AuthState extends ChangeNotifier {
       loading = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _profileSub?.cancel();
+    super.dispose();
   }
 }
 

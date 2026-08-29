@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/localization/locale.dart';
 import '../../core/routes.dart';
+import '../../core/state/auth_state.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/action_card.dart';
 import '../../widgets/alert_banner.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/demo_data_badge.dart';
 import '../../widgets/greeting_header.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -14,6 +17,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final profile = context.watch<AuthState>().profile;
+    final displayName = (profile?.name.isNotEmpty ?? false) ? profile!.name : 'Kamala Fernando';
     return AppScaffold(
       routeName: Routes.home,
       scrollableBody: false,
@@ -21,12 +26,14 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            GreetingHeader(greeting: context.t('goodAfternoon'), name: 'Kamala Fernando'),
+            GreetingHeader(greeting: context.t('goodAfternoon'), name: displayName),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (profile == null) ...[const DemoDataBadge(), const SizedBox(height: 4)],
+                  const DemoDataBadge(),
                   AlertBanner(
                     label: context.t('routeAlertLabel'),
                     message: 'Lift out of service at Fort Station, Platform 2 — reported 20 min ago',
@@ -64,6 +71,7 @@ class HomeScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
                   ),
                   const SizedBox(height: 8),
+                  const DemoDataBadge(),
                   NoteCard(
                     child: const Text('Your journey to Bambalapitiya was shared with Nimal Perera on Aug 19'),
                   ),

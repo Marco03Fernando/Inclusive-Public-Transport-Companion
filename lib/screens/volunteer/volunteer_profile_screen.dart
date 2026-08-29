@@ -8,6 +8,7 @@ import '../../core/state/auth_state.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
+import '../../widgets/demo_data_badge.dart';
 import '../../widgets/greeting_header.dart';
 import '../../widgets/settings_link_row.dart';
 import '../../widgets/theme_mode_selector.dart';
@@ -25,6 +26,8 @@ class VolunteerProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final state = context.watch<AppState>();
+    final profile = context.watch<AuthState>().profile;
+    final hasRealName = profile?.name.isNotEmpty ?? false;
     return AppScaffold(
       routeName: Routes.volunteerProfile,
       scrollableBody: false,
@@ -32,12 +35,19 @@ class VolunteerProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ProfileHeader(initials: 'RJ', name: 'Ruwan Jayasuriya', roleLabel: context.t('roleVolunteer')),
+            ProfileHeader(
+              initials: hasRealName ? profile!.initials : 'RJ',
+              name: hasRealName ? profile!.name : 'Ruwan Jayasuriya',
+              roleLabel: context.t('roleVolunteer'),
+            ),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (!hasRealName) ...[const DemoDataBadge(), const SizedBox(height: 4)],
+                  const DemoDataBadge(),
+                  const SizedBox(height: 8),
                   SettingsLinkRow(
                     label: context.t('activeArea'),
                     onTap: () {},

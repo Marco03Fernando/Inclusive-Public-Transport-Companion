@@ -60,6 +60,8 @@ class _ShareSetupScreenState extends State<ShareSetupScreen> {
                 return _contactPickerList(usingDemo ? mockContacts : realContacts, isDemo: usingDemo);
               },
             ),
+          const SizedBox(height: 10),
+          const DemoDataBadge(),
           NoteCard(
             tint: context.palette.surface2,
             child: RichText(

@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/alert_banner.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
+import '../../widgets/demo_data_badge.dart';
 import '../../widgets/map_placeholder.dart';
 
 class ShareActiveScreen extends StatelessWidget {
@@ -32,6 +33,7 @@ class ShareActiveScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const DemoDataBadge(),
                   SuccessBanner(
                     child: RichText(
                       text: TextSpan(

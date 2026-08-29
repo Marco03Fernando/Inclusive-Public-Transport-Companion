@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/localization/locale.dart';
 import '../../core/routes.dart';
+import '../../core/state/auth_state.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/action_card.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/demo_data_badge.dart';
 import '../../widgets/greeting_header.dart';
 import '../../widgets/stat_card.dart';
 
@@ -14,6 +17,8 @@ class VolunteerHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final profile = context.watch<AuthState>().profile;
+    final displayName = (profile?.name.isNotEmpty ?? false) ? profile!.name : 'Ruwan Jayasuriya';
     return AppScaffold(
       routeName: Routes.volunteerHome,
       scrollableBody: false,
@@ -21,12 +26,15 @@ class VolunteerHomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            GreetingHeader(greeting: context.t('welcomeBack'), name: 'Ruwan Jayasuriya'),
+            GreetingHeader(greeting: context.t('welcomeBack'), name: displayName),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (profile == null) ...[const DemoDataBadge(), const SizedBox(height: 4)],
+                  const DemoDataBadge(),
+                  const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

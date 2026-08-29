@@ -8,6 +8,7 @@ import '../../core/state/auth_state.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
+import '../../widgets/demo_data_badge.dart';
 import '../../widgets/greeting_header.dart';
 import '../../widgets/settings_link_row.dart';
 import '../../widgets/theme_mode_selector.dart';
@@ -25,6 +26,8 @@ class ProfileHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final state = context.watch<AppState>();
+    final profile = context.watch<AuthState>().profile;
+    final hasRealName = profile?.name.isNotEmpty ?? false;
     final languageLabel =
         '${context.t('languageWord')}: ${state.locale == AppLocale.en ? context.t('englishWord') : context.t('sinhalaWord')}';
 
@@ -35,12 +38,17 @@ class ProfileHomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ProfileHeader(initials: 'KF', name: 'Kamala Fernando', roleLabel: context.t('rolePassenger')),
+            ProfileHeader(
+              initials: hasRealName ? profile!.initials : 'KF',
+              name: hasRealName ? profile!.name : 'Kamala Fernando',
+              roleLabel: context.t('rolePassenger'),
+            ),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (!hasRealName) ...[const DemoDataBadge(), const SizedBox(height: 4)],
                   SettingsLinkRow(
                     label: context.t('emergencyContactsTitle'),
                     onTap: () => Navigator.of(context).pushReplacementNamed(Routes.profileContacts),
