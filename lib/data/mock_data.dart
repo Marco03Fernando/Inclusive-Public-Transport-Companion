@@ -4,8 +4,20 @@ import '../models/condition_report.dart';
 import '../models/contact.dart';
 import '../models/route_option.dart';
 
-/// Static mock data ported 1:1 from the design's `renderVals()`. No network
-/// or persistence — this is UI-only, so the same fixtures back every screen.
+/// ⚠️ DEMO / PLACEHOLDER DATA — every constant in this file is a static
+/// fixture, not a read from any backend. Route planning, condition reports,
+/// the volunteer feed and sharing history have no Firestore collection or
+/// service behind them yet, so these arrays are the only source for those
+/// screens; each screen that renders one shows a debug-only
+/// [DemoDataBadge] (see `lib/widgets/demo_data_badge.dart`) as a visible
+/// reminder. `mockContacts` is the one exception with a real backend
+/// (`UserProfileService.watchContacts`) — see `share_setup_screen.dart`,
+/// which prefers the real stream and only falls back to `mockContacts`
+/// when the signed-in user has saved none.
+///
+/// When a real backend is built for routes/reports/feed/history, replace
+/// the corresponding constant's call site with a service call and delete
+/// the fixture here — don't leave it as an unused dead fallback.
 
 const defaultAccessNeeds = [
   AccessNeed(id: 'wheelchair', labelKey: 'needWheelchair', checked: true),

@@ -24,6 +24,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.warn,
     required this.warnSoft,
     required this.onAccent,
+    required this.cta,
+    required this.ctaSoft,
+    required this.onCta,
+    required this.heroGradientStart,
+    required this.heroGradientEnd,
+    required this.shadow,
   });
 
   final Color rail;
@@ -43,6 +49,23 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color warnSoft;
   final Color onAccent;
 
+  /// The warm call-to-action color — every tappable primary action (buttons,
+  /// the active bottom-nav tab, selection states) uses this, while [accent]
+  /// stays the cooler brand/decorative teal (hero surfaces, icons, links).
+  final Color cta;
+  final Color ctaSoft;
+  final Color onCta;
+
+  /// Gradient stops for elevated hero surfaces (greeting header, profile
+  /// header). Distinct from [accent] so a saturated teal fill doesn't have
+  /// to double as icon/text-on-surface color too.
+  final Color heroGradientStart;
+  final Color heroGradientEnd;
+
+  /// Ambient shadow color for elevated cards — already tuned per-brightness
+  /// so callers just do `BoxShadow(color: palette.shadow, ...)`.
+  final Color shadow;
+
   static const light = AppPalette(
     rail: Color(0xFFF6F5F2),
     bg: Color(0xFFF9F8F5),
@@ -51,8 +74,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     text: Color(0xFF1C1A17),
     muted: Color(0xFF65635D),
     border: Color(0xFFDCDBD6),
-    accent: Color(0xFF00789C),
-    accentSoft: Color(0xFFCFEEF8),
+    accent: Color(0xFF0E7C86),
+    accentSoft: Color(0xFFCFEFEA),
     success: Color(0xFF298646),
     successSoft: Color(0xFFD4F1D8),
     danger: Color(0xFFC53637),
@@ -60,6 +83,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
     warn: Color(0xFFBB7400),
     warnSoft: Color(0xFFFEE3C5),
     onAccent: Color(0xFFFFFFFF),
+    cta: Color(0xFFFF6A4D),
+    ctaSoft: Color(0xFFFFE3DB),
+    onCta: Color(0xFFFFFFFF),
+    heroGradientStart: Color(0xFF0E7C86),
+    heroGradientEnd: Color(0xFF135F68),
+    shadow: Color(0x1F1C1A17),
   );
 
   static const dark = AppPalette(
@@ -79,6 +108,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
     warn: Color(0xFFDBA15C),
     warnSoft: Color(0xFF462D0B),
     onAccent: Color(0xFF00222B),
+    cta: Color(0xFFFF8562),
+    ctaSoft: Color(0xFF3A1C14),
+    onCta: Color(0xFF2B0D06),
+    heroGradientStart: Color(0xFF1C7986),
+    heroGradientEnd: Color(0xFF0A363D),
+    shadow: Color(0x66000000),
   );
 
   @override
@@ -99,6 +134,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? warn,
     Color? warnSoft,
     Color? onAccent,
+    Color? cta,
+    Color? ctaSoft,
+    Color? onCta,
+    Color? heroGradientStart,
+    Color? heroGradientEnd,
+    Color? shadow,
   }) {
     return AppPalette(
       rail: rail ?? this.rail,
@@ -117,6 +158,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
       warn: warn ?? this.warn,
       warnSoft: warnSoft ?? this.warnSoft,
       onAccent: onAccent ?? this.onAccent,
+      cta: cta ?? this.cta,
+      ctaSoft: ctaSoft ?? this.ctaSoft,
+      onCta: onCta ?? this.onCta,
+      heroGradientStart: heroGradientStart ?? this.heroGradientStart,
+      heroGradientEnd: heroGradientEnd ?? this.heroGradientEnd,
+      shadow: shadow ?? this.shadow,
     );
   }
 
@@ -140,6 +187,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
       warn: Color.lerp(warn, other.warn, t)!,
       warnSoft: Color.lerp(warnSoft, other.warnSoft, t)!,
       onAccent: Color.lerp(onAccent, other.onAccent, t)!,
+      cta: Color.lerp(cta, other.cta, t)!,
+      ctaSoft: Color.lerp(ctaSoft, other.ctaSoft, t)!,
+      onCta: Color.lerp(onCta, other.onCta, t)!,
+      heroGradientStart: Color.lerp(heroGradientStart, other.heroGradientStart, t)!,
+      heroGradientEnd: Color.lerp(heroGradientEnd, other.heroGradientEnd, t)!,
+      shadow: Color.lerp(shadow, other.shadow, t)!,
     );
   }
 }
@@ -172,8 +225,8 @@ class AppTheme {
   static ThemeData _build(AppPalette palette, Brightness brightness) {
     final colorScheme = ColorScheme(
       brightness: brightness,
-      primary: palette.accent,
-      onPrimary: palette.onAccent,
+      primary: palette.cta,
+      onPrimary: palette.onCta,
       secondary: palette.accent,
       onSecondary: palette.onAccent,
       error: palette.danger,
@@ -209,21 +262,23 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         hintStyle: TextStyle(color: palette.muted, fontSize: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: palette.border, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: palette.border, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: palette.accent, width: 1.5),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: palette.cta, width: 1.8),
         ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: palette.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 12,
+        shadowColor: palette.shadow,
       ),
       extensions: [palette],
     );

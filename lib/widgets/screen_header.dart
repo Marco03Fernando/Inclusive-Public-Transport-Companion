@@ -16,27 +16,30 @@ class ScreenHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     return Container(
-      decoration: BoxDecoration(
-        color: palette.bg,
-        border: Border(bottom: BorderSide(color: palette.border, width: 1.5)),
-      ),
+      color: palette.bg,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: SafeArea(
         bottom: false,
         child: Row(
           children: [
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: OutlinedButton(
-                onPressed: onBack ?? () => Navigator.of(context).maybePop(),
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  backgroundColor: palette.surface,
-                  side: BorderSide(color: palette.border, width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 10, offset: const Offset(0, 4))],
+              ),
+              child: SizedBox(
+                width: 34,
+                height: 34,
+                child: OutlinedButton(
+                  onPressed: onBack ?? () => Navigator.of(context).maybePop(),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    backgroundColor: palette.surface,
+                    side: BorderSide.none,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Icon(Icons.chevron_left, size: 20, color: palette.text),
                 ),
-                child: Icon(Icons.chevron_left, size: 20, color: palette.text),
               ),
             ),
             const SizedBox(width: 10),

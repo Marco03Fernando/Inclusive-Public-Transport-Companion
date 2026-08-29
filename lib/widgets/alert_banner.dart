@@ -17,8 +17,8 @@ class AlertBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: palette.warnSoft,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: palette.warn, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: palette.warn.withValues(alpha: 0.16), blurRadius: 14, offset: const Offset(0, 5))],
       ),
       child: RichText(
         text: TextSpan(
@@ -47,15 +47,15 @@ class SuccessBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: palette.successSoft,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: palette.success, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: palette.success.withValues(alpha: 0.16), blurRadius: 14, offset: const Offset(0, 5))],
       ),
       child: DefaultTextStyle(style: TextStyle(fontSize: 13, color: palette.text), child: child),
     );
   }
 }
 
-/// A plain bordered note card (recent activity, journey summary, sharing
+/// A plain elevated note card (recent activity, journey summary, sharing
 /// history rows).
 class NoteCard extends StatelessWidget {
   const NoteCard({super.key, required this.child, this.tint});
@@ -68,11 +68,11 @@ class NoteCard extends StatelessWidget {
     final palette = context.palette;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       decoration: BoxDecoration(
         color: tint ?? palette.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: palette.border, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: tint == null ? [BoxShadow(color: palette.shadow, blurRadius: 12, offset: const Offset(0, 5))] : null,
       ),
       child: DefaultTextStyle(style: TextStyle(fontSize: 13, color: palette.text), child: child),
     );

@@ -5,6 +5,7 @@ import '../../core/routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/mock_data.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/demo_data_badge.dart';
 import '../../widgets/route_option_card.dart';
 
 class PlanResultsScreen extends StatelessWidget {
@@ -25,6 +26,7 @@ class PlanResultsScreen extends StatelessWidget {
             style: TextStyle(fontSize: 12, color: palette.muted),
           ),
           const SizedBox(height: 12),
+          const DemoDataBadge(),
           for (final option in mockRouteOptions) ...[
             RouteOptionCard(
               option: option,

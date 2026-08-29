@@ -19,8 +19,8 @@ class StatCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: palette.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: palette.border, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 14, offset: const Offset(0, 6))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

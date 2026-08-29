@@ -15,13 +15,20 @@ class GreetingHeader extends StatelessWidget {
     final palette = context.palette;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 24),
       decoration: BoxDecoration(
-        color: palette.accent,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [palette.heroGradientStart, palette.heroGradientEnd],
         ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
+        boxShadow: [
+          BoxShadow(color: palette.heroGradientStart.withValues(alpha: 0.35), blurRadius: 24, offset: const Offset(0, 10)),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +66,11 @@ class ProfileHeader extends StatelessWidget {
             width: 64,
             height: 64,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: palette.accentSoft, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: palette.accentSoft,
+              shape: BoxShape.circle,
+              boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 14, offset: const Offset(0, 6))],
+            ),
             child: Text(
               initials,
               style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 22, color: palette.accent),

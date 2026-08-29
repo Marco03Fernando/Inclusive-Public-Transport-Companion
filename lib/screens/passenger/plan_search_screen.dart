@@ -28,8 +28,8 @@ class PlanSearchScreen extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: palette.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: palette.border, width: 1.5),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 16, offset: const Offset(0, 6))],
             ),
             child: Column(
               children: [

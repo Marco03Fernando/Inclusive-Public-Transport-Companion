@@ -6,6 +6,7 @@ import '../../data/mock_data.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/chip_selector.dart';
 import '../../widgets/condition_tile.dart';
+import '../../widgets/demo_data_badge.dart';
 
 class VolunteerFeedScreen extends StatefulWidget {
   const VolunteerFeedScreen({super.key});
@@ -38,6 +39,7 @@ class _VolunteerFeedScreenState extends State<VolunteerFeedScreen> {
             }),
           ),
           const SizedBox(height: 12),
+          const DemoDataBadge(),
           for (final item in mockVolunteerFeed) ...[
             ConditionTile(report: item),
             const SizedBox(height: 10),

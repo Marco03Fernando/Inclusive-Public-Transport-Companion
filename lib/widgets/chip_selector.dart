@@ -25,19 +25,20 @@ class SelectableChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: selected ? palette.accentSoft : Colors.transparent,
+          color: selected ? palette.ctaSoft : palette.surface,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: selected ? palette.accent : palette.border,
+            color: selected ? palette.cta : palette.border,
             width: 1.5,
           ),
+          boxShadow: selected ? [BoxShadow(color: palette.cta.withValues(alpha: 0.18), blurRadius: 10, offset: const Offset(0, 3))] : null,
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 12.5,
             fontWeight: FontWeight.w700,
-            color: selected ? palette.accent : palette.muted,
+            color: selected ? palette.cta : palette.muted,
           ),
         ),
       ),

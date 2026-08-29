@@ -18,14 +18,14 @@ class RouteOptionCard extends StatelessWidget {
     final high = option.accessScore == AccessScore.high;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: palette.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: palette.border, width: 1.5),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 16, offset: const Offset(0, 6))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

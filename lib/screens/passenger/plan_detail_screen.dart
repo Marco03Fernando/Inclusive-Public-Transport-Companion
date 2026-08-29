@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../data/mock_data.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/condition_tile.dart';
+import '../../widgets/demo_data_badge.dart';
 import '../../widgets/map_placeholder.dart';
 import '../../widgets/route_step_item.dart';
 
@@ -35,6 +36,7 @@ class PlanDetailScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
                   ),
                   const SizedBox(height: 10),
+                  const DemoDataBadge(),
                   for (var i = 0; i < mockRouteSteps.length; i++)
                     RouteStepItem(step: mockRouteSteps[i], isLast: i == mockRouteSteps.length - 1),
                   const SizedBox(height: 4),
@@ -43,6 +45,7 @@ class PlanDetailScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
                   ),
                   const SizedBox(height: 10),
+                  const DemoDataBadge(),
                   for (final c in mockRouteConditions) ...[
                     ConditionTile(report: c),
                     const SizedBox(height: 10),

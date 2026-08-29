@@ -5,6 +5,7 @@ import '../../core/routes.dart';
 import '../../data/mock_data.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/condition_tile.dart';
+import '../../widgets/demo_data_badge.dart';
 
 class ReportMineScreen extends StatelessWidget {
   const ReportMineScreen({super.key});
@@ -18,6 +19,7 @@ class ReportMineScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const DemoDataBadge(),
           for (final report in mockMyReports) ...[
             ConditionTile(report: report),
             const SizedBox(height: 10),
