@@ -5,10 +5,12 @@ import '../../core/localization/locale.dart';
 import '../../core/routes.dart';
 import '../../core/state/app_state.dart';
 import '../../core/state/auth_state.dart';
+import '../../core/theme/app_theme.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/greeting_header.dart';
 import '../../widgets/settings_link_row.dart';
+import '../../widgets/theme_mode_selector.dart';
 
 class ProfileHomeScreen extends StatelessWidget {
   const ProfileHomeScreen({super.key});
@@ -21,6 +23,7 @@ class ProfileHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final state = context.watch<AppState>();
     final languageLabel =
         '${context.t('languageWord')}: ${state.locale == AppLocale.en ? context.t('englishWord') : context.t('sinhalaWord')}';
@@ -59,6 +62,13 @@ class ProfileHomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   SettingsLinkRow(label: languageLabel, onTap: state.toggleLocale),
+                  const SizedBox(height: 20),
+                  Text(
+                    context.t('appearanceTitle'),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+                  ),
+                  const SizedBox(height: 10),
+                  ThemeModeSelector(mode: state.themeMode, onChanged: state.setThemeMode),
                   const SizedBox(height: 18),
                   TextDangerButton(label: context.t('logOut'), onPressed: () => _logOut(context)),
                 ],

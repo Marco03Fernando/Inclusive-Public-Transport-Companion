@@ -38,9 +38,10 @@ class Routes {
   static const onboardingRoutes = {roleSelect, login, signupBasic, signupAccess, signupContacts};
 
   /// Ports the design's `sosEligibleScreens` list: SOS is reachable from any
-  /// passenger screen with an account, except the transient report-confirm
-  /// success state, and never for volunteers.
-  static const _sosEligible = {
+  /// signed-in screen, except the transient report-confirm success state and
+  /// onboarding (no account yet). Volunteers are still people out in transit
+  /// on their own, so they get the same safety net as passengers.
+  static const _sosEligiblePassenger = {
     home, planSearch, planResults, planDetail,
     shareSetup, shareActive,
     reportForm, reportMine,
@@ -48,10 +49,17 @@ class Routes {
     requestAssistance, requestStatus,
   };
 
+  static const _sosEligibleVolunteer = {
+    volunteerHome, volunteerFeed, volunteerProfile, volunteerAssistanceRequests,
+    reportForm,
+  };
+
   static bool showsBottomNav(String route) => !onboardingRoutes.contains(route);
 
-  static bool showsSos(String route, AppRole role) =>
-      role == AppRole.passenger && _sosEligible.contains(route);
+  static bool showsSos(String route, AppRole role) => switch (role) {
+        AppRole.passenger => _sosEligiblePassenger.contains(route),
+        AppRole.volunteer => _sosEligibleVolunteer.contains(route),
+      };
 }
 
 enum BottomTab { home, plan, share, report, reports, profile }

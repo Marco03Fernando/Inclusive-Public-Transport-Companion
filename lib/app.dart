@@ -53,7 +53,7 @@ class ColomboPalApp extends StatelessWidget {
                     debugShowCheckedModeBanner: false,
                     theme: AppTheme.light,
                     darkTheme: AppTheme.dark,
-                    themeMode: ThemeMode.system,
+                    themeMode: state.themeMode,
                     home: const AuthGate(),
                     routes: {
                       Routes.roleSelect: (_) => const RoleSelectScreen(),
