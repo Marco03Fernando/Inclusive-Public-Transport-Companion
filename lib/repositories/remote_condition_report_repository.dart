@@ -5,18 +5,19 @@ import 'package:http/http.dart' as http;
 import '../models/condition_report.dart';
 import 'condition_report_repository.dart';
 
-/// REST-API-backed implementation of [ConditionReportRepository].
+/// Generic REST-API-backed implementation of [ConditionReportRepository].
 ///
-/// Not wired up yet — `main.dart` currently injects
-/// [LocalConditionReportRepository] into [ConditionReportService]. Once a
-/// backend endpoint exists, point [baseUrl] at it and swap that one line
-/// in `main.dart`; no screen, widget, or provider code needs to change.
+/// Not wired up — `main.dart` injects [FirebaseConditionReportRepository]
+/// by default. This is kept as an alternative for teams that end up on a
+/// custom REST backend instead of Firebase; point [baseUrl] at it and
+/// swap the one line in `main.dart` — no screen, widget, or provider
+/// code needs to change either way.
 ///
 /// Expected endpoints (adjust paths to match your actual API):
-/// - `GET    {baseUrl}/reports`              → list of report JSON objects
-/// - `POST   {baseUrl}/reports`               → create; body = report JSON, returns created report JSON
-/// - `PATCH  {baseUrl}/reports/{id}/status`    → admin verification; body = { "status": ..., "adminVerification": ... }
-/// - `DELETE {baseUrl}/reports/{id}`           → delete
+/// - `POST   {baseUrl}/reports`                     → create; body = report JSON, returns created report JSON
+/// - `GET    {baseUrl}/users/{userId}/reports`       → list of report JSON objects for that user
+/// - `PATCH  {baseUrl}/reports/{id}/status`           → body = { "status": ..., "adminComment": ... }
+/// - `DELETE {baseUrl}/reports/{id}`                  → delete
 ///
 /// Every request/response body uses exactly the shape produced by
 /// [ConditionReport.toJson] / consumed by [ConditionReport.fromJson].
@@ -42,17 +43,7 @@ class RemoteConditionReportRepository implements ConditionReportRepository {
       };
 
   @override
-  Future<List<ConditionReport>> fetchAll() async {
-    final response = await _client.get(_uri('/reports'), headers: _headers);
-    _throwIfError(response);
-    final list = jsonDecode(response.body) as List<dynamic>;
-    return list
-        .map((e) => ConditionReport.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
-  @override
-  Future<ConditionReport> create(ConditionReport report) async {
+  Future<ConditionReport> createReport(ConditionReport report) async {
     final response = await _client.post(
       _uri('/reports'),
       headers: _headers,
@@ -63,17 +54,28 @@ class RemoteConditionReportRepository implements ConditionReportRepository {
   }
 
   @override
-  Future<ConditionReport> updateStatus({
+  Future<List<ConditionReport>> getUserReports(String userId) async {
+    final response =
+        await _client.get(_uri('/users/$userId/reports'), headers: _headers);
+    _throwIfError(response);
+    final list = jsonDecode(response.body) as List<dynamic>;
+    return list
+        .map((e) => ConditionReport.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<ConditionReport> updateReportStatus({
     required String reportId,
     required ReportStatus status,
-    AdminVerification? adminVerification,
+    String? adminComment,
   }) async {
     final response = await _client.patch(
       _uri('/reports/$reportId/status'),
       headers: _headers,
       body: jsonEncode({
         'status': status.name,
-        'adminVerification': adminVerification?.toJson(),
+        'adminComment': adminComment,
       }),
     );
     _throwIfError(response);
@@ -81,7 +83,7 @@ class RemoteConditionReportRepository implements ConditionReportRepository {
   }
 
   @override
-  Future<void> delete(String reportId) async {
+  Future<void> deleteReport(String reportId) async {
     final response =
         await _client.delete(_uri('/reports/$reportId'), headers: _headers);
     _throwIfError(response);

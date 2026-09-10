@@ -8,15 +8,13 @@ import 'condition_report_repository.dart';
 /// On-device implementation of [ConditionReportRepository], storing all
 /// reports as a single JSON-encoded list under one SharedPreferences key.
 ///
-/// This is what the app uses today so Condition Reporting works fully
-/// offline. When a backend is ready, construct
-/// `ConditionReportService(repository: RemoteConditionReportRepository(...))`
-/// instead in `main.dart` — nothing else needs to change.
+/// No longer the default (see `main.dart`, which now injects
+/// [FirebaseConditionReportRepository]) — kept around for offline
+/// development/testing, or as an emergency fallback.
 class LocalConditionReportRepository implements ConditionReportRepository {
   static const _storageKey = 'condition_reports';
 
-  @override
-  Future<List<ConditionReport>> fetchAll() async {
+  Future<List<ConditionReport>> _readAll() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_storageKey);
     if (raw == null || raw.isEmpty) return [];
@@ -25,25 +23,34 @@ class LocalConditionReportRepository implements ConditionReportRepository {
     final reports = decoded
         .map((e) => ConditionReport.fromJson(e as Map<String, dynamic>))
         .toList();
-    reports.sort((a, b) => b.submittedAt.compareTo(a.submittedAt));
+    reports.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return reports;
   }
 
   @override
-  Future<ConditionReport> create(ConditionReport report) async {
-    final reports = await fetchAll();
-    reports.insert(0, report);
+  Future<ConditionReport> createReport(ConditionReport report) async {
+    final reports = await _readAll();
+    final withId = report.id.isEmpty
+        ? report.copyWith(id: DateTime.now().microsecondsSinceEpoch.toString())
+        : report;
+    reports.insert(0, withId);
     await _persist(reports);
-    return report;
+    return withId;
   }
 
   @override
-  Future<ConditionReport> updateStatus({
+  Future<List<ConditionReport>> getUserReports(String userId) async {
+    final reports = await _readAll();
+    return reports.where((r) => r.userId == userId).toList();
+  }
+
+  @override
+  Future<ConditionReport> updateReportStatus({
     required String reportId,
     required ReportStatus status,
-    AdminVerification? adminVerification,
+    String? adminComment,
   }) async {
-    final reports = await fetchAll();
+    final reports = await _readAll();
     final index = reports.indexWhere((r) => r.id == reportId);
     if (index == -1) {
       throw StateError('Report $reportId was not found locally.');
@@ -51,7 +58,8 @@ class LocalConditionReportRepository implements ConditionReportRepository {
 
     final updated = reports[index].copyWith(
       status: status,
-      adminVerification: adminVerification,
+      adminComment: adminComment,
+      updatedAt: DateTime.now(),
     );
     reports[index] = updated;
     await _persist(reports);
@@ -59,8 +67,8 @@ class LocalConditionReportRepository implements ConditionReportRepository {
   }
 
   @override
-  Future<void> delete(String reportId) async {
-    final reports = await fetchAll();
+  Future<void> deleteReport(String reportId) async {
+    final reports = await _readAll();
     reports.removeWhere((r) => r.id == reportId);
     await _persist(reports);
   }

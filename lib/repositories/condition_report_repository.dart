@@ -6,33 +6,32 @@ import '../models/condition_report.dart';
 /// implementation, so the backend can be swapped without touching any
 /// screen, widget, or provider:
 ///
-/// - [LocalConditionReportRepository] — on-device storage (wired up now).
-/// - [RemoteConditionReportRepository] — REST API (stubbed, ready to point
-///   at a real base URL).
-/// - A Firestore-backed repository can be added the same way: implement
-///   this interface, mapping each method onto `collection('reports')`
-///   reads/writes and returning/accepting [ConditionReport] via
-///   [ConditionReport.toJson] / [ConditionReport.fromJson].
+/// - [LocalConditionReportRepository] — on-device storage.
+/// - [RemoteConditionReportRepository] — generic REST API.
+/// - [FirebaseConditionReportRepository] — Firestore + Firebase Storage
+///   (this is what's wired up in `main.dart` now).
 ///
-/// Whichever implementation is active, [updateStatus] is the single entry
-/// point admin verification flows use to move a report from
-/// `ReportStatus.underReview` to `ReportStatus.verified` (or back), so
-/// that logic also doesn't need to change per backend.
+/// Whichever implementation is active, [updateReportStatus] is the
+/// single entry point admin verification flows use to move a report
+/// between [ReportStatus.underReview] and [ReportStatus.verified], so
+/// that logic doesn't need to change per backend either.
 abstract class ConditionReportRepository {
-  /// Returns all reports, most recent first.
-  Future<List<ConditionReport>> fetchAll();
+  /// Creates a new report and returns it with any server-assigned
+  /// fields filled in (e.g. the generated document ID, uploaded photo
+  /// URL, and server timestamp).
+  Future<ConditionReport> createReport(ConditionReport report);
 
-  /// Persists a new report and returns it (with any server-assigned
-  /// fields filled in, once there is a server).
-  Future<ConditionReport> create(ConditionReport report);
+  /// Returns all reports submitted by [userId], most recent first.
+  Future<List<ConditionReport>> getUserReports(String userId);
 
-  /// Applies an admin review decision to an existing report.
-  Future<ConditionReport> updateStatus({
+  /// Applies a status change (typically an admin review decision) to an
+  /// existing report and returns the updated report.
+  Future<ConditionReport> updateReportStatus({
     required String reportId,
     required ReportStatus status,
-    AdminVerification? adminVerification,
+    String? adminComment,
   });
 
   /// Removes a report (e.g. user retracts a mistaken report).
-  Future<void> delete(String reportId);
+  Future<void> deleteReport(String reportId);
 }

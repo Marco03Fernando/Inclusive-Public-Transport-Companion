@@ -4,6 +4,7 @@
 /// JSON-serializable model used once a report is submitted — it imports
 /// and re-exports everything in this file, so most other files only need
 /// to import `condition_report.dart`.
+library;
 
 /// What kind of thing is being reported on.
 enum ReportSubject { bus, station, restArea, other }

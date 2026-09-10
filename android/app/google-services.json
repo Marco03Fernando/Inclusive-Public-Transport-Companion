@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "926782424480",
+    "project_id": "colombopal-app",
+    "storage_bucket": "colombopal-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926782424480:android:5206d90532f148a54fd0c5",
+        "android_client_info": {
+          "package_name": "com.example.colombopal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDglBSIpoTDQt5_H01ORZ4scjchFrD-oig"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

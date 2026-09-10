@@ -2,62 +2,61 @@ import 'report_model.dart';
 
 export 'report_model.dart';
 
-/// Record of an admin's review decision on a report. Kept as its own
-/// small class so a report can be created with `adminVerification: null`
-/// today and have this filled in later by an admin panel / backend
-/// webhook without changing the [ConditionReport] shape.
-class AdminVerification {
-  final String? verifiedBy;
-  final DateTime? verifiedAt;
-  final String? notes;
-
-  const AdminVerification({this.verifiedBy, this.verifiedAt, this.notes});
-
-  Map<String, dynamic> toJson() => {
-        'verifiedBy': verifiedBy,
-        'verifiedAt': verifiedAt?.toIso8601String(),
-        'notes': notes,
-      };
-
-  factory AdminVerification.fromJson(Map<String, dynamic> json) => AdminVerification(
-        verifiedBy: json['verifiedBy'] as String?,
-        verifiedAt: json['verifiedAt'] == null
-            ? null
-            : DateTime.tryParse(json['verifiedAt'] as String),
-        notes: json['notes'] as String?,
-      );
-}
-
-/// A finalized, submitted condition report.
+/// A finalized condition report.
 ///
 /// This is the model that leaves the device: [ConditionReportService]
-/// and the repository layer pass this around, and [toJson]/[fromJson]
-/// define the exact wire format for a future REST API or Firestore
-/// document — see the class-level doc in `condition_report_repository.dart`
-/// for the intended backend shape.
+/// and the repository layer pass this around. [toJson]/[fromJson] are a
+/// generic wire format used by the local/REST repositories; the
+/// Firestore-specific document shape (flat `locationName`/`latitude`/
+/// `longitude`, `photoUrl`, etc.) is handled inside
+/// `firebase_condition_report_repository.dart` so this model stays free
+/// of any Firebase dependency.
 class ConditionReport {
+  /// Firestore document ID (called `reportId` in the document itself).
+  /// Empty until the repository has actually persisted the report.
   final String id;
+
+  /// UID of the user who submitted this report. Assigned by
+  /// [ReportsProvider] from [AuthService.currentUserId] before the report
+  /// reaches the repository — screens never need to know about it.
+  final String userId;
+
   final ReportSubject subject;
   final String vehicleOrStationNumber;
   final ReportLocation location;
   final ConditionType conditionType;
   final String description;
+
+  /// Local on-device file path from the image picker, before upload.
+  /// Transient — never persisted. Null once there's no local file (e.g.
+  /// after loading a report back down from Firestore).
   final String? photoPath;
-  final DateTime submittedAt;
+
+  /// Public download URL once the photo has been uploaded to Firebase
+  /// Storage. This is what gets persisted and displayed.
+  final String? photoUrl;
+
+  final DateTime createdAt;
+  final DateTime? updatedAt;
   final ReportStatus status;
-  final AdminVerification? adminVerification;
+
+  /// Free-text note an admin can attach when reviewing a report.
+  final String? adminComment;
 
   const ConditionReport({
     required this.id,
+    this.userId = '',
     required this.subject,
     required this.vehicleOrStationNumber,
     required this.location,
     required this.conditionType,
     required this.description,
     this.photoPath,
-    required this.submittedAt,
+    this.photoUrl,
+    required this.createdAt,
+    this.updatedAt,
     this.status = ReportStatus.underReview,
-    this.adminVerification,
+    this.adminComment,
   });
 
   /// Short title line used on the "My Reports" cards, e.g. "Bus NB-1234".
@@ -67,23 +66,24 @@ class ConditionReport {
     return '$subjectLabel ${vehicleOrStationNumber.trim()}';
   }
 
-  /// Human-friendly "Submitted ..." line used on the "My Reports" cards.
+  /// Human-friendly "Submitted ..." line used on the "My Reports" cards,
+  /// e.g. "Submitted today, 9:20 AM".
   String get submittedLabel {
     final now = DateTime.now();
-    final isToday = now.year == submittedAt.year &&
-        now.month == submittedAt.month &&
-        now.day == submittedAt.day;
+    final isToday = now.year == createdAt.year &&
+        now.month == createdAt.month &&
+        now.day == createdAt.day;
     if (isToday) {
-      return 'Submitted today, ${_formatTime(submittedAt)}';
+      return 'Submitted today, ${_formatTime(createdAt)}';
     }
 
     final yesterday = now.subtract(const Duration(days: 1));
-    final isYesterday = yesterday.year == submittedAt.year &&
-        yesterday.month == submittedAt.month &&
-        yesterday.day == submittedAt.day;
+    final isYesterday = yesterday.year == createdAt.year &&
+        yesterday.month == createdAt.month &&
+        yesterday.day == createdAt.day;
     if (isYesterday) return 'Submitted yesterday';
 
-    final days = now.difference(submittedAt).inDays;
+    final days = now.difference(createdAt).inDays;
     return 'Submitted $days day${days == 1 ? '' : 's'} ago';
   }
 
@@ -102,11 +102,15 @@ class ConditionReport {
   /// Builds a submittable [ConditionReport] from a completed
   /// [ConditionReportDraft]. Assumes Step 1 already guaranteed [subject]
   /// and [conditionType] are set (form validation enforces this).
+  ///
+  /// [id] and [userId] are left empty/blank here — the repository
+  /// assigns the real Firestore document ID, and [ReportsProvider] fills
+  /// in [userId] from the signed-in user right before submission.
   factory ConditionReport.fromDraft(ConditionReportDraft draft) {
     assert(draft.subject != null, 'Draft must have a subject before submitting.');
     assert(draft.conditionType != null, 'Draft must have a condition type before submitting.');
     return ConditionReport(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      id: '',
       subject: draft.subject!,
       vehicleOrStationNumber: draft.vehicleOrStationNumber.trim(),
       location: draft.reportLocation ??
@@ -116,59 +120,58 @@ class ConditionReport {
       conditionType: draft.conditionType!,
       description: draft.description.trim(),
       photoPath: draft.photoPath,
-      submittedAt: DateTime.now(),
+      createdAt: DateTime.now(),
       status: ReportStatus.underReview,
     );
   }
 
   ConditionReport copyWith({
+    String? id,
+    String? userId,
+    String? photoPath,
+    String? photoUrl,
+    DateTime? updatedAt,
     ReportStatus? status,
-    AdminVerification? adminVerification,
+    String? adminComment,
   }) {
     return ConditionReport(
-      id: id,
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
       subject: subject,
       vehicleOrStationNumber: vehicleOrStationNumber,
       location: location,
       conditionType: conditionType,
       description: description,
-      photoPath: photoPath,
-      submittedAt: submittedAt,
+      photoPath: photoPath ?? this.photoPath,
+      photoUrl: photoUrl ?? this.photoUrl,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
-      adminVerification: adminVerification ?? this.adminVerification,
+      adminComment: adminComment ?? this.adminComment,
     );
   }
 
-  /// JSON shape designed to map 1:1 onto a future REST/Firestore document:
-  /// ```json
-  /// {
-  ///   "id": "1735300000000000",
-  ///   "subject": "bus",
-  ///   "vehicleOrStationNumber": "NB-1234",
-  ///   "location": { "latitude": 6.9271, "longitude": 79.8612, "label": "Current location attached" },
-  ///   "conditionType": "brokenRamp",
-  ///   "description": "Ramp is bent and won't lower.",
-  ///   "photoPath": "/data/.../report_photo.jpg",
-  ///   "submittedAt": "2026-08-28T09:20:00.000",
-  ///   "status": "underReview",
-  ///   "adminVerification": null
-  /// }
-  /// ```
+  /// Generic JSON shape used by the local (SharedPreferences) and REST
+  /// repositories. Not used by the Firestore repository — see
+  /// `firebase_condition_report_repository.dart` for that mapping.
   Map<String, dynamic> toJson() => {
         'id': id,
+        'userId': userId,
         'subject': subject.name,
         'vehicleOrStationNumber': vehicleOrStationNumber,
         'location': location.toJson(),
         'conditionType': conditionType.name,
         'description': description,
-        'photoPath': photoPath,
-        'submittedAt': submittedAt.toIso8601String(),
+        'photoUrl': photoUrl,
+        'createdAt': createdAt.toIso8601String(),
+        'updatedAt': updatedAt?.toIso8601String(),
         'status': status.name,
-        'adminVerification': adminVerification?.toJson(),
+        'adminComment': adminComment,
       };
 
   factory ConditionReport.fromJson(Map<String, dynamic> json) => ConditionReport(
-        id: json['id'] as String,
+        id: json['id'] as String? ?? '',
+        userId: json['userId'] as String? ?? '',
         subject: ReportSubject.values.byName(json['subject'] as String),
         vehicleOrStationNumber: json['vehicleOrStationNumber'] as String? ?? '',
         location: json['location'] == null
@@ -176,11 +179,10 @@ class ConditionReport {
             : ReportLocation.fromJson(json['location'] as Map<String, dynamic>),
         conditionType: ConditionType.values.byName(json['conditionType'] as String),
         description: json['description'] as String? ?? '',
-        photoPath: json['photoPath'] as String?,
-        submittedAt: DateTime.parse(json['submittedAt'] as String),
+        photoUrl: json['photoUrl'] as String?,
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        updatedAt: json['updatedAt'] == null ? null : DateTime.tryParse(json['updatedAt'] as String),
         status: ReportStatus.values.byName(json['status'] as String? ?? 'underReview'),
-        adminVerification: json['adminVerification'] == null
-            ? null
-            : AdminVerification.fromJson(json['adminVerification'] as Map<String, dynamic>),
+        adminComment: json['adminComment'] as String?,
       );
 }
