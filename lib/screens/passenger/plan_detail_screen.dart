@@ -1,25 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../../models/google_route.dart';
-
 import '../../core/localization/locale.dart';
 import '../../core/routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/mock_data.dart';
+import '../../models/google_route.dart';
+import '../../services/polyline_decoder.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/condition_tile.dart';
 import '../../widgets/demo_data_badge.dart';
 import '../../widgets/route_step_item.dart';
 
-class PlanDetailScreen extends StatelessWidget {
-  const PlanDetailScreen({super.key, required this.route});
+class PlanDetailScreen extends StatefulWidget {
+  const PlanDetailScreen({
+    super.key,
+    required this.route,
+  });
 
   final GoogleRoute route;
 
   @override
+  State<PlanDetailScreen> createState() => _PlanDetailScreenState();
+}
+
+class _PlanDetailScreenState extends State<PlanDetailScreen> {
+
+  @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+
+    final routePoints =
+        PolylineDecoder.decode(widget.route.encodedPolyline);
+
+    final routePolyline = Polyline(
+      polylineId: const PolylineId('selected_route'),
+      points: routePoints,
+      width: 5,
+    );
+
     return AppScaffold(
       routeName: Routes.planDetail,
       title: 'Bus 138 + Coastal Line',
@@ -39,6 +58,24 @@ class PlanDetailScreen extends StatelessWidget {
                 ),
                 zoomControlsEnabled: true,
                 myLocationButtonEnabled: false,
+                polylines: {
+                  routePolyline,
+                },
+                onMapCreated: (controller) {
+
+                  if (routePoints.isEmpty) {
+                    return;
+                  }
+
+                  final bounds = _getRouteBounds(routePoints);
+
+                  controller.animateCamera(
+                    CameraUpdate.newLatLngBounds(
+                      bounds,
+                      60,
+                    ),
+                  );
+                },
               ),
             ),
             Padding(
@@ -84,4 +121,35 @@ class PlanDetailScreen extends StatelessWidget {
       ),
     );
   }
+
+  LatLngBounds _getRouteBounds(List<LatLng> points) {
+    var minLat = points.first.latitude;
+    var maxLat = points.first.latitude;
+    var minLng = points.first.longitude;
+    var maxLng = points.first.longitude;
+
+    for (final point in points) {
+      if (point.latitude < minLat) {
+        minLat = point.latitude;
+      }
+
+      if (point.latitude > maxLat) {
+        maxLat = point.latitude;
+      }
+
+      if (point.longitude < minLng) {
+        minLng = point.longitude;
+      }
+
+      if (point.longitude > maxLng) {
+        maxLng = point.longitude;
+      }
+    }
+
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+  }
 }
+
