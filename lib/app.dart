@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'models/google_route.dart';
+
 import 'core/localization/locale.dart';
 import 'core/routes.dart';
 import 'core/state/app_state.dart';
@@ -60,12 +62,19 @@ class ColomboPalApp extends StatelessWidget {
                       Routes.login: (_) => const LoginScreen(),
                       Routes.signupBasic: (_) => const SignupBasicScreen(),
                       Routes.signupAccess: (_) => const SignupAccessScreen(),
-                      Routes.signupContacts: (_) => const SignupContactsScreen(),
+                      Routes.signupContacts: (_) =>
+                          const SignupContactsScreen(),
 
                       Routes.home: (_) => const HomeScreen(),
                       Routes.planSearch: (_) => const PlanSearchScreen(),
                       Routes.planResults: (_) => const PlanResultsScreen(),
-                      Routes.planDetail: (_) => const PlanDetailScreen(),
+                      Routes.planDetail: (context) {
+                        final route =
+                            ModalRoute.of(context)!.settings.arguments
+                                as GoogleRoute;
+
+                        return PlanDetailScreen(route: route);
+                      },
                       Routes.shareSetup: (_) => const ShareSetupScreen(),
                       Routes.shareActive: (_) => const ShareActiveScreen(),
 
@@ -74,16 +83,21 @@ class ColomboPalApp extends StatelessWidget {
                       Routes.reportMine: (_) => const ReportMineScreen(),
 
                       Routes.profileHome: (_) => const ProfileHomeScreen(),
-                      Routes.profileContacts: (_) => const ProfileContactsScreen(),
+                      Routes.profileContacts: (_) =>
+                          const ProfileContactsScreen(),
                       Routes.profileAccess: (_) => const ProfileAccessScreen(),
-                      Routes.profileSharing: (_) => const ProfileSharingScreen(),
-                      Routes.requestAssistance: (_) => const RequestAssistanceScreen(),
+                      Routes.profileSharing: (_) =>
+                          const ProfileSharingScreen(),
+                      Routes.requestAssistance: (_) =>
+                          const RequestAssistanceScreen(),
                       Routes.requestStatus: (_) => const RequestStatusScreen(),
 
                       Routes.volunteerHome: (_) => const VolunteerHomeScreen(),
                       Routes.volunteerFeed: (_) => const VolunteerFeedScreen(),
-                      Routes.volunteerProfile: (_) => const VolunteerProfileScreen(),
-                      Routes.volunteerAssistanceRequests: (_) => const AssistanceRequestsScreen(),
+                      Routes.volunteerProfile: (_) =>
+                          const VolunteerProfileScreen(),
+                      Routes.volunteerAssistanceRequests: (_) =>
+                          const AssistanceRequestsScreen(),
                     },
                   ),
                 );

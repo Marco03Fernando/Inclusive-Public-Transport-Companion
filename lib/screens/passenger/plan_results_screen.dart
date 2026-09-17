@@ -4,11 +4,10 @@ import '../../models/google_route.dart';
 import '../../models/route_request.dart';
 import '../../services/route_service.dart';
 import '../../widgets/route_option_card.dart';
+import '../../core/routes.dart';
 
 class PlanResultsScreen extends StatefulWidget {
-  const PlanResultsScreen({
-    super.key,
-  });
+  const PlanResultsScreen({super.key});
 
   @override
   State<PlanResultsScreen> createState() => _PlanResultsScreenState();
@@ -27,8 +26,7 @@ class _PlanResultsScreenState extends State<PlanResultsScreen> {
       return;
     }
 
-    final request =
-        ModalRoute.of(context)!.settings.arguments as RouteRequest;
+    final request = ModalRoute.of(context)!.settings.arguments as RouteRequest;
 
     _routesFuture = RouteService.getRoutes(request);
 
@@ -38,16 +36,12 @@ class _PlanResultsScreenState extends State<PlanResultsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Route Options'),
-      ),
+      appBar: AppBar(title: const Text('Route Options')),
       body: FutureBuilder<List<GoogleRoute>>(
         future: _routesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -65,11 +59,7 @@ class _PlanResultsScreenState extends State<PlanResultsScreen> {
           final routes = snapshot.data ?? [];
 
           if (routes.isEmpty) {
-            return const Center(
-              child: Text(
-                'No transit routes found.',
-              ),
-            );
+            return const Center(child: Text('No transit routes found.'));
           }
 
           return ListView.builder(
@@ -81,7 +71,11 @@ class _PlanResultsScreenState extends State<PlanResultsScreen> {
               return RouteOptionCard(
                 route: route,
                 onTap: () {
-                  // We will connect the route detail screen next.
+                  Navigator.pushNamed(
+                    context,
+                    Routes.planDetail,
+                    arguments: route,
+                  );
                 },
               );
             },
