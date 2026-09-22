@@ -1,0 +1,515 @@
+﻿{
+    "routes":  [
+                   {
+                       "legs":  [
+                                    {
+                                        "distanceMeters":  13904,
+                                        "duration":  "2828s",
+                                        "staticDuration":  "2828s",
+                                        "polyline":  {
+                                                         "encodedPolyline":  "{oei@ctbgNlBHG|@GZy@E@E?DzBFb@?pBMdBAnCTn@LvBr@fDp@j@Rv@f@z@z@`@~@DN@Nz@~Bn@~ALr@Bf@IbASv@s@nBIz@?t@PdAXfAT`@j@h@`ChAtBbApAx@bA|@TVT^fBdErAfDr@nAbA~Ar@|A|AlEv@nCbAtELx@@z@Ej@[|Aa@xA]pB_@jFKvAKl@Qn@iAnDSx@Gp@@r@l@|F?^Gd@Yr@aB~C_BpCa@hAc@hB}@~C{@fDq@pBQV_@ZsBbAcBhAk@f@KLWx@u@nDEb@?v@Ln@p@nBJn@TnF@`DEbEMbHB`BDj@XbAPTjA|CXx@`@|APrAPzB@`@EbGObCYjB@`@gApFC\\?VHVX\\l@`@t@Jn@Dn@Ej@H~@XvAr@XXRZF\\@j@O|@iAhFMdABZJ\\HPpAt@LHb@h@x@`AX`@|A`Bp@~@^x@R~@t@zFXbB\\bA|AfCn@~@RHx@tANz@BjBAdC[?L??DJ?@VH?W??uDE_BMq@pDkAd@W`@]^g@tAsCfBaC~@u@`@Up@S`@E~@AlC@`BGpAUp@QxD{Ab@[Vc@fAkCDOz@wAt@q@xBwAh@m@^{@Jc@f@aHD_@\\eAJUv@{@x@u@v@c@n@Qb@ItDCf@EdAWnAk@|EgC^g@X{@d@cCTyARi@X_@h@UdAYfAKp@@x@RzCt@d@@n@IbA]r@a@rDuCz@_@xDwAdB}@z@WvEaAxBYrAWvFoAtBYjGa@l@ObBcApDoC~DoDbDcCt@_@z@WdASt@YtBsAdBwAT]`AeCVw@Ze@d@]|CyArDsBnA]n@EtA?~C@j@AxQqAjCWhAYjAa@bAOtAG^If@Q`@UbCeCt@c@nHiCvDyApAYj@KEQ"
+                                                     },
+                                        "startLocation":  {
+                                                              "latLng":  {
+                                                                             "latitude":  6.9147028,
+                                                                             "longitude":  79.97265809999999
+                                                                         }
+                                                          },
+                                        "endLocation":  {
+                                                            "latLng":  {
+                                                                           "latitude":  6.8564799999999995,
+                                                                           "longitude":  79.9455
+                                                                       }
+                                                        },
+                                        "steps":  [
+                                                      {
+                                                          "distanceMeters":  61,
+                                                          "staticDuration":  "63s",
+                                                          "polyline":  {
+                                                                           "encodedPolyline":  "{oei@ctbgNlBH"
+                                                                       },
+                                                          "startLocation":  {
+                                                                                "latLng":  {
+                                                                                               "latitude":  6.9147028,
+                                                                                               "longitude":  79.97265809999999
+                                                                                           }
+                                                                            },
+                                                          "endLocation":  {
+                                                                              "latLng":  {
+                                                                                             "latitude":  6.9141520000000005,
+                                                                                             "longitude":  79.9726087
+                                                                                         }
+                                                                          },
+                                                          "navigationInstruction":  {
+                                                                                        "maneuver":  "DEPART",
+                                                                                        "instructions":  "Sri Lanka Institute Of Information Technology Rd මත දකුණ දිශානතිව\nභාවිතයට සීමා කළ මාර්ගයක්\nAuditorium පසු කරන්න (වමෙන්)"
+                                                                                    },
+                                                          "localizedValues":  {
+                                                                                  "distance":  {
+                                                                                                   "text":  "61 මී"
+                                                                                               },
+                                                                                  "staticDuration":  {
+                                                                                                         "text":  "මිනිත්තු 1"
+                                                                                                     }
+                                                                              },
+                                                          "travelMode":  "WALK"
+                                                      },
+                                                      {
+                                                          "distanceMeters":  50,
+                                                          "staticDuration":  "45s",
+                                                          "polyline":  {
+                                                                           "encodedPolyline":  "mlei@ysbgNG|@GZ"
+                                                                       },
+                                                          "startLocation":  {
+                                                                                "latLng":  {
+                                                                                               "latitude":  6.9141520000000005,
+                                                                                               "longitude":  79.9726087
+                                                                                           }
+                                                                            },
+                                                          "endLocation":  {
+                                                                              "latLng":  {
+                                                                                             "latitude":  6.9142262999999993,
+                                                                                             "longitude":  79.9721632
+                                                                                         }
+                                                                          },
+                                                          "navigationInstruction":  {
+                                                                                        "maneuver":  "TURN_RIGHT",
+                                                                                        "instructions":  "දකුණට හැරී Sri Lanka Institute Of Information Technology Rd හි රැඳෙන්න\nභාවිතයට සීමා කළ මාර්ගයක්\nBoc Smart පසු කරන්න (දකුණෙන් මී 33 ඉදිරියෙන්)"
+                                                                                    },
+                                                          "localizedValues":  {
+                                                                                  "distance":  {
+                                                                                                   "text":  "50 මී"
+                                                                                               },
+                                                                                  "staticDuration":  {
+                                                                                                         "text":  "මිනිත්තු 1"
+                                                                                                     }
+                                                                              },
+                                                          "travelMode":  "WALK"
+                                                      },
+                                                      {
+                                                          "distanceMeters":  33,
+                                                          "staticDuration":  "25s",
+                                                          "polyline":  {
+                                                                           "encodedPolyline":  "}lei@_qbgNy@E"
+                                                                       },
+                                                          "startLocation":  {
+                                                                                "latLng":  {
+                                                                                               "latitude":  6.9142262999999993,
+                                                                                               "longitude":  79.9721632
+                                                                                           }
+                                                                            },
+                                                          "endLocation":  {
+                                                                              "latLng":  {
+                                                                                             "latitude":  6.9145229,
+                                                                                             "longitude":  79.97218749999999
+                                                                                         }
+                                                                          },
+                                                          "navigationInstruction":  {
+                                                                                        "maneuver":  "TURN_RIGHT",
+                                                                                        "instructions":  "Machteck Mobile (pvt) LTD හි දී කඩුවෙල පාර/නව නුවර පාර වෙත දකුණට හරවන්න\nගමනාන්තය දකුණු පැත්තෙහි වනු ඇත"
+                                                                                    },
+                                                          "localizedValues":  {
+                                                                                  "distance":  {
+                                                                                                   "text":  "33 මී"
+                                                                                               },
+                                                                                  "staticDuration":  {
+                                                                                                         "text":  "මිනිත්තු 1"
+                                                                                                     }
+                                                                              },
+                                                          "travelMode":  "WALK"
+                                                      },
+                                                      {
+                                                          "distanceMeters":  7268,
+                                                          "staticDuration":  "1248s",
+                                                          "polyline":  {
+                                                                           "encodedPolyline":  "unei@kqbgN?DzBFb@?pBMdBAnCTn@LvBr@fDp@j@Rv@f@z@z@`@~@DN@Nz@~Bn@~ALr@Bf@IbASv@s@nBIz@?t@PdAXfAT`@j@h@`ChAtBbApAx@bA|@TVT^fBdErAfDr@nAbA~Ar@|A|AlEv@nCbAtELx@@z@Ej@[|Aa@xA]pB_@jFKvAKl@Qn@iAnDSx@Gp@@r@l@|F?^Gd@Yr@aB~C_BpCa@hAc@hB}@~C{@fDq@pBQV_@ZsBbAcBhAk@f@KLWx@u@nDEb@?v@Ln@p@nBJn@TnF@`DEbEMbHB`BDj@XbAPTjA|CXx@`@|APrAPzB@`@EbGObCYjB@`@gApFC\\?VHVX\\l@`@t@Jn@Dn@Ej@H~@XvAr@XXRZF\\@j@O|@iAhFMdABZJ\\HPpAt@LHb@h@x@`AX`@|A`Bp@~@^x@R~@t@zFXbB\\bA|AfCn@~@RHx@tANz@BjBAdC[?"
+                                                                       },
+                                                          "startLocation":  {
+                                                                                "latLng":  {
+                                                                                               "latitude":  6.91451,
+                                                                                               "longitude":  79.97222
+                                                                                           }
+                                                                            },
+                                                          "endLocation":  {
+                                                                              "latLng":  {
+                                                                                             "latitude":  6.9022099999999993,
+                                                                                             "longitude":  79.9181
+                                                                                         }
+                                                                          },
+                                                          "navigationInstruction":  {
+                                                                                        "instructions":  "බසය Liberty දෙසට"
+                                                                                    },
+                                                          "localizedValues":  {
+                                                                                  "distance":  {
+                                                                                                   "text":  "7.3 km"
+                                                                                               },
+                                                                                  "staticDuration":  {
+                                                                                                         "text":  "මිනිත්තු 21"
+                                                                                                     }
+                                                                              },
+                                                          "transitDetails":  {
+                                                                                 "stopDetails":  {
+                                                                                                     "arrivalStop":  {
+                                                                                                                         "name":  "Battaramulla",
+                                                                                                                         "location":  {
+                                                                                                                                          "latLng":  {
+                                                                                                                                                         "latitude":  6.9022099999999993,
+                                                                                                                                                         "longitude":  79.9181
+                                                                                                                                                     }
+                                                                                                                                      }
+                                                                                                                     },
+                                                                                                     "arrivalTime":  "2026-09-22T04:39:27Z",
+                                                                                                     "departureStop":  {
+                                                                                                                           "name":  "Slit Campus Malabe",
+                                                                                                                           "location":  {
+                                                                                                                                            "latLng":  {
+                                                                                                                                                           "latitude":  6.91451,
+                                                                                                                                                           "longitude":  79.97222
+                                                                                                                                                       }
+                                                                                                                                        }
+                                                                                                                       },
+                                                                                                     "departureTime":  "2026-09-22T04:18:39Z"
+                                                                                                 },
+                                                                                 "localizedValues":  {
+                                                                                                         "arrivalTime":  {
+                                                                                                                             "time":  {
+                                                                                                                                          "text":  "10.09"
+                                                                                                                                      },
+                                                                                                                             "timeZone":  "Asia/Colombo"
+                                                                                                                         },
+                                                                                                         "departureTime":  {
+                                                                                                                               "time":  {
+                                                                                                                                            "text":  "09.48"
+                                                                                                                                        },
+                                                                                                                               "timeZone":  "Asia/Colombo"
+                                                                                                                           }
+                                                                                                     },
+                                                                                 "headsign":  "Liberty",
+                                                                                 "headway":  "300s",
+                                                                                 "transitLine":  {
+                                                                                                     "agencies":  [
+                                                                                                                      {
+                                                                                                                          "name":  "Road Passenger Transport Authority - Western Province",
+                                                                                                                          "phoneNumber":  "+94 112 871 353",
+                                                                                                                          "uri":  "http://www.rpta.wp.gov.lk/"
+                                                                                                                      }
+                                                                                                                  ],
+                                                                                                     "name":  "Kaduwela-Kollupitiya",
+                                                                                                     "color":  "#f28204",
+                                                                                                     "nameShort":  "177",
+                                                                                                     "textColor":  "#000000",
+                                                                                                     "vehicle":  {
+                                                                                                                     "name":  {
+                                                                                                                                  "text":  "බසය"
+                                                                                                                              },
+                                                                                                                     "type":  "BUS",
+                                                                                                                     "iconUri":  "//maps.gstatic.com/mapfiles/transit/iw2/6/bus2.png"
+                                                                                                                 }
+                                                                                                 },
+                                                                                 "stopCount":  20
+                                                                             },
+                                                          "travelMode":  "TRANSIT"
+                                                      },
+                                                      {
+                                                          "distanceMeters":  4,
+                                                          "staticDuration":  "3s",
+                                                          "polyline":  {
+                                                                           "encodedPolyline":  "kaci@c_xfN?D"
+                                                                       },
+                                                          "startLocation":  {
+                                                                                "latLng":  {
+                                                                                               "latitude":  6.9021414,
+                                                                                               "longitude":  79.9180999
+                                                                                           }
+                                                                            },
+                                                          "endLocation":  {
+                                                                              "latLng":  {
+                                                                                             "latitude":  6.9021415,
+                                                                                             "longitude":  79.9180666
+                                                                                         }
+                                                                          },
+                                                          "navigationInstruction":  {
+                                                                                        "maneuver":  "DEPART",
+                                                                                        "instructions":  "කඩුවෙල පාර/කෝට්ටේ - බෝපේ පාර/නව නුවර පාර/ප්‍රධාන වීදිය සිට Rajamalwatta Rd දෙසට බස්නාහිර දිශානතිව"
+                                                                                    },
+                                                          "localizedValues":  {
+                                                                                  "distance":  {
+                                                                                                   "text":  "4 මී"
+                                                                                               },
+                                                                                  "staticDuration":  {
+                                                                                                         "text":  "මිනිත්තු 1"
+                                                                                                     }
+                                                                              },
+                                                          "travelMode":  "WALK"
+                                                      },
+                                                      {
+                                                          "distanceMeters":  7,
+                                                          "staticDuration":  "15s",
+                                                          "polyline":  {
+                                                                           "encodedPolyline":  "kaci@}~wfNJ?"
+                                                                       },
+                                                          "startLocation":  {
+                                                                                "latLng":  {
+                                                                                               "latitude":  6.9021415,
+                                                                                               "longitude":  79.9180666
+                                                                                           }
+                                                                            },
+                                                          "endLocation":  {
+                                                                              "latLng":  {
+                                                                                             "latitude":  6.9020758,
+                                                                                             "longitude":  79.9180672
+                                                                                         }
+                                                                          },
+                                                          "navigationInstruction":  {
+                                                                                        "maneuver":  "TURN_LEFT",
+                                                                                        "instructions":  "Standard Technology Sri Lanka හි දී වමට හැරී Rajamalwatta Rd වෙතට යන්න"
+                                                                                    },
+                                                          "localizedValues":  {
+                                                                                  "distance":  {
+                                                                                                   "text":  "7 මී"
+                                                                                               },
+                                                                                  "staticDuration":  {
+                                                                                                         "text":  "මිනිත්තු 1"
+                                                                                                     }
+                                                                              },
+                                                          "travelMode":  "WALK"
+                                                      },
+                                                      {
+                                                          "distanceMeters":  13,
+                                                          "staticDuration":  "12s",
+                                                          "polyline":  {
+                                                                           "encodedPolyline":  "_aci@}~wfN@V"
+                                                                       },
+                                                          "startLocation":  {
+                                                                                "latLng":  {
+                                                                                               "latitude":  6.9020758,
+                                                                                               "longitude":  79.9180672
+                                                                                           }
+                                                                            },
+                                                          "endLocation":  {
+                                                                              "latLng":  {
+                                                                                             "latitude":  6.9020749,
+                                                                                             "longitude":  79.9179496
+                                                                                         }
+                                                                          },
+                                                          "navigationInstruction":  {
+                                                                                        "maneuver":  "TURN_RIGHT",
+                                                                                        "instructions":  "Withane Book Shop හි දී කඩුවෙල පාර/කෝට්ටේ - බෝපේ පාර/ප්‍රධාන වීදිය වෙත දකුණට හරවන්න\nගමනාන්තය වම් පැත්තෙහි වනු ඇත"
+                                                                                    },
+                                                          "localizedValues":  {
+                                                                                  "distance":  {
+                                                                                                   "text":  "13 මී"
+                                                                                               },
+                                                                                  "staticDuration":  {
+                                                                                                         "text":  "මිනිත්තු 1"
+                                                                                                     }
+                                                                              },
+                                                          "travelMode":  "WALK"
+                                                      },
+                                                      {
+                                                          "distanceMeters":  6468,
+                                                          "staticDuration":  "1117s",
+                                                          "polyline":  {
+                                                                           "encodedPolyline":  "s`ci@e~wfNW??uDE_BMq@pDkAd@W`@]^g@tAsCfBaC~@u@`@Up@S`@E~@AlC@`BGpAUp@QxD{Ab@[Vc@fAkCDOz@wAt@q@xBwAh@m@^{@Jc@f@aHD_@\\eAJUv@{@x@u@v@c@n@Qb@ItDCf@EdAWnAk@|EgC^g@X{@d@cCTyARi@X_@h@UdAYfAKp@@x@RzCt@d@@n@IbA]r@a@rDuCz@_@xDwAdB}@z@WvEaAxBYrAWvFoAtBYjGa@l@ObBcApDoC~DoDbDcCt@_@z@WdASt@YtBsAdBwAT]`AeCVw@Ze@d@]|CyArDsBnA]n@EtA?~C@j@AxQqAjCWhAYjAa@bAOtAG^If@Q`@UbCeCt@c@nHiCvDyApAYj@KEQ"
+                                                                       },
+                                                          "startLocation":  {
+                                                                                "latLng":  {
+                                                                                               "latitude":  6.9020196,
+                                                                                               "longitude":  79.91794999999999
+                                                                                           }
+                                                                            },
+                                                          "endLocation":  {
+                                                                              "latLng":  {
+                                                                                             "latitude":  6.8564799999999995,
+                                                                                             "longitude":  79.9455
+                                                                                         }
+                                                                          },
+                                                          "navigationInstruction":  {
+                                                                                        "instructions":  "බසය Kottawa Bus Stop දෙසට"
+                                                                                    },
+                                                          "localizedValues":  {
+                                                                                  "distance":  {
+                                                                                                   "text":  "6.5 km"
+                                                                                               },
+                                                                                  "staticDuration":  {
+                                                                                                         "text":  "මිනිත්තු 19"
+                                                                                                     }
+                                                                              },
+                                                          "transitDetails":  {
+                                                                                 "stopDetails":  {
+                                                                                                     "arrivalStop":  {
+                                                                                                                         "name":  "Araliya Uyana Bus Stop",
+                                                                                                                         "location":  {
+                                                                                                                                          "latLng":  {
+                                                                                                                                                         "latitude":  6.8564799999999995,
+                                                                                                                                                         "longitude":  79.9455
+                                                                                                                                                     }
+                                                                                                                                      }
+                                                                                                                     },
+                                                                                                     "arrivalTime":  "2026-09-22T05:03:34Z",
+                                                                                                     "departureStop":  {
+                                                                                                                           "name":  "Battaramulla",
+                                                                                                                           "location":  {
+                                                                                                                                            "latLng":  {
+                                                                                                                                                           "latitude":  6.9020196,
+                                                                                                                                                           "longitude":  79.91794999999999
+                                                                                                                                                       }
+                                                                                                                                        }
+                                                                                                                       },
+                                                                                                     "departureTime":  "2026-09-22T04:44:57Z"
+                                                                                                 },
+                                                                                 "localizedValues":  {
+                                                                                                         "arrivalTime":  {
+                                                                                                                             "time":  {
+                                                                                                                                          "text":  "10.33"
+                                                                                                                                      },
+                                                                                                                             "timeZone":  "Asia/Colombo"
+                                                                                                                         },
+                                                                                                         "departureTime":  {
+                                                                                                                               "time":  {
+                                                                                                                                            "text":  "10.14"
+                                                                                                                                        },
+                                                                                                                               "timeZone":  "Asia/Colombo"
+                                                                                                                           }
+                                                                                                     },
+                                                                                 "headsign":  "Kottawa Bus Stop",
+                                                                                 "headway":  "300s",
+                                                                                 "transitLine":  {
+                                                                                                     "agencies":  [
+                                                                                                                      {
+                                                                                                                          "name":  "Road Passenger Transport Authority - Western Province",
+                                                                                                                          "phoneNumber":  "+94 112 871 353",
+                                                                                                                          "uri":  "http://www.rpta.wp.gov.lk/"
+                                                                                                                      }
+                                                                                                                  ],
+                                                                                                     "name":  "Kottawa-Borella",
+                                                                                                     "color":  "#f28204",
+                                                                                                     "nameShort":  "174",
+                                                                                                     "textColor":  "#000000",
+                                                                                                     "vehicle":  {
+                                                                                                                     "name":  {
+                                                                                                                                  "text":  "බසය"
+                                                                                                                              },
+                                                                                                                     "type":  "BUS",
+                                                                                                                     "iconUri":  "//maps.gstatic.com/mapfiles/transit/iw2/6/bus2.png"
+                                                                                                                 }
+                                                                                                 },
+                                                                                 "stopCount":  16
+                                                                             },
+                                                          "travelMode":  "TRANSIT"
+                                                      }
+                                                  ],
+                                        "localizedValues":  {
+                                                                "distance":  {
+                                                                                 "text":  "13.9 km"
+                                                                             },
+                                                                "duration":  {
+                                                                                 "text":  "මිනිත්තු 47"
+                                                                             },
+                                                                "staticDuration":  {
+                                                                                       "text":  "මිනිත්තු 47"
+                                                                                   }
+                                                            },
+                                        "stepsOverview":  {
+                                                              "multiModalSegments":  [
+                                                                                         {
+                                                                                             "stepStartIndex":  0,
+                                                                                             "stepEndIndex":  2,
+                                                                                             "navigationInstruction":  {
+                                                                                                                           "instructions":  "Slit Campus Malabe වෙත ඇවිද යන්න"
+                                                                                                                       },
+                                                                                             "travelMode":  "WALK"
+                                                                                         },
+                                                                                         {
+                                                                                             "stepStartIndex":  3,
+                                                                                             "stepEndIndex":  3,
+                                                                                             "navigationInstruction":  {
+                                                                                                                           "instructions":  "බසය Liberty දෙසට"
+                                                                                                                       },
+                                                                                             "travelMode":  "TRANSIT"
+                                                                                         },
+                                                                                         {
+                                                                                             "stepStartIndex":  4,
+                                                                                             "stepEndIndex":  6,
+                                                                                             "navigationInstruction":  {
+                                                                                                                           "instructions":  "Battaramulla වෙත ඇවිද යන්න"
+                                                                                                                       },
+                                                                                             "travelMode":  "WALK"
+                                                                                         },
+                                                                                         {
+                                                                                             "stepStartIndex":  7,
+                                                                                             "stepEndIndex":  7,
+                                                                                             "navigationInstruction":  {
+                                                                                                                           "instructions":  "බසය Kottawa Bus Stop දෙසට"
+                                                                                                                       },
+                                                                                             "travelMode":  "TRANSIT"
+                                                                                         }
+                                                                                     ]
+                                                          }
+                                    }
+                                ],
+                       "distanceMeters":  13904,
+                       "duration":  "3129s",
+                       "staticDuration":  "3129s",
+                       "polyline":  {
+                                        "encodedPolyline":  "{oei@ctbgNlBHG|@GZy@E@E?DzBFb@?pBMdBAnCTn@LvBr@fDp@j@Rv@f@z@z@`@~@DN@Nz@~Bn@~ALr@Bf@IbASv@s@nBIz@?t@PdAXfAT`@j@h@`ChAtBbApAx@bA|@TVT^fBdErAfDr@nAbA~Ar@|A|AlEv@nCbAtELx@@z@Ej@[|Aa@xA]pB_@jFKvAKl@Qn@iAnDSx@Gp@@r@l@|F?^Gd@Yr@aB~C_BpCa@hAc@hB}@~C{@fDq@pBQV_@ZsBbAcBhAk@f@KLWx@u@nDEb@?v@Ln@p@nBJn@TnF@`DEbEMbHB`BDj@XbAPTjA|CXx@`@|APrAPzB@`@EbGObCYjB@`@gApFC\\?VHVX\\l@`@t@Jn@Dn@Ej@H~@XvAr@XXRZF\\@j@O|@iAhFMdABZJ\\HPpAt@LHb@h@x@`AX`@|A`Bp@~@^x@R~@t@zFXbB\\bA|AfCn@~@RHx@tANz@BjBAdC[?L??DJ?@VH?W??uDE_BMq@pDkAd@W`@]^g@tAsCfBaC~@u@`@Up@S`@E~@AlC@`BGpAUp@QxD{Ab@[Vc@fAkCDOz@wAt@q@xBwAh@m@^{@Jc@f@aHD_@\\eAJUv@{@x@u@v@c@n@Qb@ItDCf@EdAWnAk@|EgC^g@X{@d@cCTyARi@X_@h@UdAYfAKp@@x@RzCt@d@@n@IbA]r@a@rDuCz@_@xDwAdB}@z@WvEaAxBYrAWvFoAtBYjGa@l@ObBcApDoC~DoDbDcCt@_@z@WdASt@YtBsAdBwAT]`AeCVw@Ze@d@]|CyArDsBnA]n@EtA?~C@j@AxQqAjCWhAYjAa@bAOtAG^If@Q`@UbCeCt@c@nHiCvDyApAYj@KEQ"
+                                    },
+                       "viewport":  {
+                                        "low":  {
+                                                    "latitude":  6.8564482,
+                                                    "longitude":  79.9179484
+                                                },
+                                        "high":  {
+                                                     "latitude":  6.9147028,
+                                                     "longitude":  79.97265809999999
+                                                 }
+                                    },
+                       "travelAdvisory":  {
+                                              "transitFare":  {
+
+                                                              }
+                                          },
+                       "localizedValues":  {
+                                               "distance":  {
+                                                                "text":  "13.9 km"
+                                                            },
+                                               "duration":  {
+                                                                "text":  "මිනිත්තු 52"
+                                                            },
+                                               "staticDuration":  {
+                                                                      "text":  "මිනිත්තු 52"
+                                                                  },
+                                               "transitFare":  {
+
+                                                               }
+                                           },
+                       "routeLabels":  [
+                                           "DEFAULT_ROUTE"
+                                       ]
+                   }
+               ],
+    "geocodingResults":  {
+                             "origin":  {
+                                            "geocoderStatus":  {
+
+                                                               },
+                                            "type":  [
+                                                         "establishment",
+                                                         "point_of_interest",
+                                                         "university"
+                                                     ],
+                                            "placeId":  "ChIJxXFnGttW4joRNnWaq0TjYyw"
+                                        },
+                             "destination":  {
+                                                 "geocoderStatus":  {
+
+                                                                    },
+                                                 "type":  [
+                                                              "establishment",
+                                                              "point_of_interest",
+                                                              "university"
+                                                          ],
+                                                 "placeId":  "ChIJh2V5QF9Q4joR4uUuB3PQdAo"
+                                             }
+                         }
+}

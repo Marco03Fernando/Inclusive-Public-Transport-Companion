@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:http/http.dart' as http;
 
@@ -6,31 +7,26 @@ import '../models/google_route.dart';
 import '../models/route_request.dart';
 import '../models/transit_segment.dart';
 import '../models/transit_stop.dart';
+import '../models/route_instruction.dart';
+import '../models/journey_segment.dart';
 
 class RouteService {
-  static const String _apiKey =
-      String.fromEnvironment('GOOGLE_MAPS_API_KEY');
+  static const String _apiKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
 
   static const String _url =
       'https://routes.googleapis.com/directions/v2:computeRoutes';
 
-  static Future<List<GoogleRoute>> getRoutes(
-    RouteRequest request,
-  ) async {
+  static Future<List<GoogleRoute>> getRoutes(RouteRequest request) async {
     final requestBody = {
-      'origin': {
-        'address': request.origin,
-      },
-      'destination': {
-        'address': request.destination,
-      },
+      'origin': {'address': request.origin},
+      'destination': {'address': request.destination},
       'travelMode': 'TRANSIT',
       'computeAlternativeRoutes': request.computeAlternativeRoutes,
       'transitPreferences': {
         'routingPreference':
             request.transitPreference == TransitPreference.fewerTransfers
-                ? 'FEWER_TRANSFERS'
-                : 'LESS_WALKING',
+            ? 'FEWER_TRANSFERS'
+            : 'LESS_WALKING',
       },
     };
 
@@ -44,7 +40,9 @@ class RouteService {
             'routes.distanceMeters,'
             'routes.polyline.encodedPolyline,'
             'routes.legs.steps.navigationInstruction,'
-            'routes.legs.steps.transitDetails',
+            'routes.legs.steps.travelMode,'
+            'routes.legs.steps.transitDetails,'
+            'routes.legs.stepsOverview',
       },
       body: jsonEncode(requestBody),
     );
@@ -61,35 +59,26 @@ class RouteService {
     final routes = data['routes'] as List<dynamic>? ?? [];
 
     return routes
-        .map(
-          (route) => _parseRoute(
-            route as Map<String, dynamic>,
-          ),
-        )
+        .map((route) => _parseRoute(route as Map<String, dynamic>))
         .toList();
   }
 
-  static GoogleRoute _parseRoute(
-    Map<String, dynamic> route,
-  ) {
+  static GoogleRoute _parseRoute(Map<String, dynamic> route) {
     final durationString = route['duration'] as String? ?? '0s';
 
-    final durationSeconds = int.tryParse(
-          durationString.replaceAll('s', ''),
-        ) ??
-        0;
+    final durationSeconds =
+        int.tryParse(durationString.replaceAll('s', '')) ?? 0;
 
-    final distanceMeters =
-        (route['distanceMeters'] as num?)?.toInt() ?? 0;
+    final distanceMeters = (route['distanceMeters'] as num?)?.toInt() ?? 0;
 
     final encodedPolyline =
-        (route['polyline']
-                as Map<String, dynamic>?)?['encodedPolyline'] ??
-            '';
+        (route['polyline'] as Map<String, dynamic>?)?['encodedPolyline'] ?? '';
 
     final transitSegments = <TransitSegment>[];
+    final instructions = <RouteInstruction>[];
 
     final legs = route['legs'] as List<dynamic>? ?? [];
+    final journeySegments = <JourneySegment>[];
 
     for (final leg in legs) {
       final legMap = leg as Map<String, dynamic>;
@@ -99,6 +88,28 @@ class RouteService {
       for (final step in steps) {
         final stepMap = step as Map<String, dynamic>;
 
+        final navigationInstruction =
+            stepMap['navigationInstruction'] as Map<String, dynamic>?;
+
+        final instructionsText =
+            navigationInstruction?['instructions'] as String?;
+
+        final travelMode = stepMap['travelMode'] as String? ?? 'UNKNOWN';
+
+        developer.log(
+          'ROUTE STEP → $travelMode | $instructionsText',
+          name: 'RouteService',
+        );
+
+        if (instructionsText != null && instructionsText.trim().isNotEmpty) {
+          instructions.add(
+            RouteInstruction(
+              instruction: instructionsText,
+              travelMode: travelMode,
+            ),
+          );
+        }
+
         final transitDetails =
             stepMap['transitDetails'] as Map<String, dynamic>?;
 
@@ -106,8 +117,47 @@ class RouteService {
           continue;
         }
 
-        transitSegments.add(
-          _parseTransitSegment(transitDetails),
+        transitSegments.add(_parseTransitSegment(transitDetails));
+      }
+
+      final stepsOverview = legMap['stepsOverview'] as Map<String, dynamic>?;
+
+      final multiModalSegments =
+          stepsOverview?['multiModalSegments'] as List<dynamic>? ?? [];
+
+      for (final segment in multiModalSegments) {
+        final segmentMap = segment as Map<String, dynamic>;
+
+        final travelMode = segmentMap['travelMode'] as String? ?? 'UNKNOWN';
+
+        final navigationInstruction =
+            segmentMap['navigationInstruction'] as Map<String, dynamic>?;
+
+        final instruction =
+            navigationInstruction?['instructions'] as String? ?? '';
+
+        final stepStartIndex =
+            (segmentMap['stepStartIndex'] as num?)?.toInt() ?? 0;
+
+        TransitSegment? transitSegment;
+
+        if (travelMode == 'TRANSIT' && stepStartIndex < steps.length) {
+          final firstStep = steps[stepStartIndex] as Map<String, dynamic>;
+
+          final transitDetails =
+              firstStep['transitDetails'] as Map<String, dynamic>?;
+
+          if (transitDetails != null) {
+            transitSegment = _parseTransitSegment(transitDetails);
+          }
+        }
+
+        journeySegments.add(
+          JourneySegment(
+            travelMode: travelMode,
+            instruction: instruction,
+            transitSegment: transitSegment,
+          ),
         );
       }
     }
@@ -117,35 +167,29 @@ class RouteService {
       distanceMeters: distanceMeters,
       encodedPolyline: encodedPolyline,
       transitSegments: transitSegments,
+      instructions: instructions,
+      journeySegments: journeySegments,
     );
   }
 
   static TransitSegment _parseTransitSegment(
     Map<String, dynamic> transitDetails,
   ) {
-    final stopDetails =
-        transitDetails['stopDetails'] as Map<String, dynamic>?;
+    final stopDetails = transitDetails['stopDetails'] as Map<String, dynamic>?;
 
-    final transitLine =
-        transitDetails['transitLine'] as Map<String, dynamic>?;
+    final transitLine = transitDetails['transitLine'] as Map<String, dynamic>?;
 
-    final vehicle =
-        transitLine?['vehicle'] as Map<String, dynamic>?;
+    final vehicle = transitLine?['vehicle'] as Map<String, dynamic>?;
 
-    final vehicleType =
-        vehicle?['type'] as String? ?? 'TRANSIT';
+    final vehicleType = vehicle?['type'] as String? ?? 'TRANSIT';
 
-    final lineName =
-        transitLine?['name'] as String? ?? 'Unknown line';
+    final lineName = transitLine?['name'] as String? ?? 'Unknown line';
 
-    final lineShortName =
-        transitLine?['nameShort'] as String?;
+    final lineShortName = transitLine?['nameShort'] as String?;
 
-    final headsign =
-        transitDetails['headsign'] as String?;
+    final headsign = transitDetails['headsign'] as String?;
 
-    final stopCount =
-        (transitDetails['stopCount'] as num?)?.toInt() ?? 0;
+    final stopCount = (transitDetails['stopCount'] as num?)?.toInt() ?? 0;
 
     return TransitSegment(
       vehicleType: vehicleType,
@@ -154,21 +198,18 @@ class RouteService {
       headsign: headsign,
       departureStop: _parseStop(
         stopDetails?['departureStop'] as Map<String, dynamic>?,
-        departureTime:
-            stopDetails?['departureTime'] as String?,
+        departureTime: stopDetails?['departureTime'] as String?,
       ),
       arrivalStop: _parseStop(
         stopDetails?['arrivalStop'] as Map<String, dynamic>?,
-        arrivalTime:
-            stopDetails?['arrivalTime'] as String?,
+        arrivalTime: stopDetails?['arrivalTime'] as String?,
       ),
       stopCount: stopCount,
     );
   }
 
   static TransitStop? _parseStop(
-    Map<String, dynamic>? stop,
-    {
+    Map<String, dynamic>? stop, {
     String? departureTime,
     String? arrivalTime,
   }) {
@@ -178,17 +219,13 @@ class RouteService {
 
     final name = stop['name'] as String? ?? 'Unknown stop';
 
-    final location =
-        stop['location'] as Map<String, dynamic>?;
+    final location = stop['location'] as Map<String, dynamic>?;
 
-    final latLng =
-        location?['latLng'] as Map<String, dynamic>?;
+    final latLng = location?['latLng'] as Map<String, dynamic>?;
 
-    final latitude =
-        (latLng?['latitude'] as num?)?.toDouble() ?? 0;
+    final latitude = (latLng?['latitude'] as num?)?.toDouble() ?? 0;
 
-    final longitude =
-        (latLng?['longitude'] as num?)?.toDouble() ?? 0;
+    final longitude = (latLng?['longitude'] as num?)?.toDouble() ?? 0;
 
     return TransitStop(
       name: name,

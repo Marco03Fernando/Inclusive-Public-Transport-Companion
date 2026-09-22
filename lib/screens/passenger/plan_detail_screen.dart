@@ -6,6 +6,7 @@ import '../../core/routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/mock_data.dart';
 import '../../models/google_route.dart';
+import '../../models/route_option.dart';
 import '../../services/polyline_decoder.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/condition_tile.dart';
@@ -13,10 +14,7 @@ import '../../widgets/demo_data_badge.dart';
 import '../../widgets/route_step_item.dart';
 
 class PlanDetailScreen extends StatefulWidget {
-  const PlanDetailScreen({
-    super.key,
-    required this.route,
-  });
+  const PlanDetailScreen({super.key, required this.route});
 
   final GoogleRoute route;
 
@@ -25,19 +23,63 @@ class PlanDetailScreen extends StatefulWidget {
 }
 
 class _PlanDetailScreenState extends State<PlanDetailScreen> {
-
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
 
-    final routePoints =
-        PolylineDecoder.decode(widget.route.encodedPolyline);
+    final routePoints = PolylineDecoder.decode(widget.route.encodedPolyline);
 
     final routePolyline = Polyline(
       polylineId: const PolylineId('selected_route'),
       points: routePoints,
+      color: Colors.blue,
       width: 5,
     );
+
+    final routeMarkers = <Marker>{
+      Marker(
+        markerId: const MarkerId('start'),
+        position: routePoints.first,
+        infoWindow: const InfoWindow(title: 'Starting Point'),
+      ),
+      Marker(
+        markerId: const MarkerId('destination'),
+        position: routePoints.last,
+        infoWindow: const InfoWindow(title: 'Destination'),
+      ),
+    };
+
+    final routeSteps = widget.route.journeySegments.asMap().entries.map((
+      entry,
+    ) {
+      final segment = entry.value;
+
+      if (segment.isTransit && segment.transitSegment != null) {
+        final transit = segment.transitSegment!;
+
+        final line = transit.lineShortName ?? transit.lineName;
+
+        final direction = transit.headsign ?? '';
+
+        final stops = transit.stopCount;
+
+        return RouteStep(
+          n: entry.key + 1,
+          text: 'BUS $line → $direction',
+          detail:
+              '${transit.departureStop?.name ?? 'Unknown stop'}'
+              ' → '
+              '${transit.arrivalStop?.name ?? 'Unknown stop'}'
+              ' • $stops stops',
+        );
+      }
+
+      return RouteStep(
+        n: entry.key + 1,
+        text: segment.instruction,
+        detail: 'Walking',
+      );
+    }).toList();
 
     return AppScaffold(
       routeName: Routes.planDetail,
@@ -58,11 +100,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                 ),
                 zoomControlsEnabled: true,
                 myLocationButtonEnabled: false,
-                polylines: {
-                  routePolyline,
-                },
+                polylines: {routePolyline},
+                markers: routeMarkers,
                 onMapCreated: (controller) {
-
                   if (routePoints.isEmpty) {
                     return;
                   }
@@ -70,10 +110,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                   final bounds = _getRouteBounds(routePoints);
 
                   controller.animateCamera(
-                    CameraUpdate.newLatLngBounds(
-                      bounds,
-                      60,
-                    ),
+                    CameraUpdate.newLatLngBounds(bounds, 60),
                   );
                 },
               ),
@@ -92,13 +129,21 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const DemoDataBadge(),
-                  for (var i = 0; i < mockRouteSteps.length; i++)
-                    RouteStepItem(
-                      step: mockRouteSteps[i],
-                      isLast: i == mockRouteSteps.length - 1,
-                    ),
+
+                  if (routeSteps.isEmpty)
+                    const Text('No step-by-step instructions available.')
+                  else ...[
+                    const DemoDataBadge(),
+
+                    for (var i = 0; i < routeSteps.length; i++)
+                      RouteStepItem(
+                        step: routeSteps[i],
+                        isLast: i == routeSteps.length - 1,
+                      ),
+                  ],
+
                   const SizedBox(height: 4),
+
                   Text(
                     context.t('reportedAlongRoute'),
                     style: TextStyle(
@@ -109,6 +154,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                   ),
                   const SizedBox(height: 10),
                   const DemoDataBadge(),
+
                   for (final c in mockRouteConditions) ...[
                     ConditionTile(report: c),
                     const SizedBox(height: 10),
@@ -152,4 +198,3 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
     );
   }
 }
-
