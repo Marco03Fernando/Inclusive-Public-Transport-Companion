@@ -83,7 +83,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
     return AppScaffold(
       routeName: Routes.planDetail,
-      title: 'Bus 138 + Coastal Line',
+      title: widget.route.routeName,
       scrollableBody: false,
       onBack: () =>
           Navigator.of(context).pushReplacementNamed(Routes.planResults),

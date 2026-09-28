@@ -27,67 +27,88 @@ class RouteOptionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ----------------------------------------------------------
+              // BUS JOURNEY
+              // ----------------------------------------------------------
+              if (route.transitSegments.isNotEmpty)
+                ..._buildBusSequence(context),
+
+              const SizedBox(height: 18),
+
+              // ----------------------------------------------------------
+              // DIVIDER
+              // ----------------------------------------------------------
+              const Divider(),
+
+              const SizedBox(height: 14),
+
+              // ----------------------------------------------------------
+              // JOURNEY TIME
+              // ----------------------------------------------------------
               Row(
                 children: [
-                  const Icon(Icons.directions_bus),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      route.routeName,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
+                  const Icon(
+                    Icons.schedule,
+                    size: 19,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Duration : $durationMinutes '
+                    '${durationMinutes == 1 ? 'minute' : 'minutes'}',
                   ),
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
+              // ----------------------------------------------------------
+              // DISTANCE
+              // ----------------------------------------------------------
               Row(
                 children: [
-                  const Icon(Icons.schedule, size: 18),
-                  const SizedBox(width: 6),
-                  Text('$durationMinutes min'),
-
-                  const SizedBox(width: 20),
-
-                  const Icon(Icons.straighten, size: 18),
-                  const SizedBox(width: 6),
-                  Text(_formatDistance(route.distanceMeters)),
-
-                  const SizedBox(width: 20),
-
-                  const Icon(Icons.swap_horiz, size: 18),
-                  const SizedBox(width: 6),
-                  Text('${route.transferCount} transfers'),
+                  const Icon(
+                    Icons.straighten,
+                    size: 19,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Distance : ${_formatDistance(route.distanceMeters)}',
+                  ),
                 ],
               ),
 
-              if (route.transitSegments.isNotEmpty) ...[
-                const SizedBox(height: 14),
+              const SizedBox(height: 10),
 
-                ...route.transitSegments.map(
-                  (segment) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.directions_transit,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _segmentText(segment),
-                          ),
-                        ),
-                      ],
-                    ),
+              // ----------------------------------------------------------
+              // TRANSFERS
+              // ----------------------------------------------------------
+              Row(
+                children: [
+                  const Icon(
+                    Icons.swap_horiz,
+                    size: 19,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Text(
+                    'Transfers: ${route.transferCount} '
+                    '${route.transferCount == 1 ? 'transfer' : 'transfers'}',
+                  ),
+                ],
+              ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
 
+              // ----------------------------------------------------------
+              // COMPACT BUS SEQUENCE
+              // ----------------------------------------------------------
+              if (route.transitSegments.isNotEmpty)
+                _buildCompactBusSequence(),
+
+              const SizedBox(height: 14),
+
+              // ----------------------------------------------------------
+              // VIEW ROUTE
+              // ----------------------------------------------------------
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -102,13 +123,95 @@ class RouteOptionCard extends StatelessWidget {
     );
   }
 
-  String _formatDistance(int meters) {
-    if (meters < 1000) {
-      return '$meters m';
+  List<Widget> _buildBusSequence(BuildContext context) {
+    final widgets = <Widget>[];
+
+    for (var i = 0; i < route.transitSegments.length; i++) {
+      final segment = route.transitSegments[i];
+
+      widgets.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.directions_bus,
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                _segmentText(segment),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      // Down arrow between buses
+      if (i < route.transitSegments.length - 1) {
+        widgets.add(
+          const Padding(
+            padding: EdgeInsets.only(
+              left: 2,
+              top: 4,
+              bottom: 4,
+            ),
+            child: Icon(
+              Icons.arrow_downward,
+              size: 22,
+            ),
+          ),
+        );
+      }
     }
 
-    final kilometers = meters / 1000;
-    return '${kilometers.toStringAsFixed(1)} km';
+    return widgets;
+  }
+
+  Widget _buildCompactBusSequence() {
+    final widgets = <Widget>[];
+
+    for (var i = 0; i < route.transitSegments.length; i++) {
+      final segment = route.transitSegments[i];
+
+      if (i > 0) {
+        widgets.add(
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Icon(
+              Icons.arrow_forward,
+              size: 20,
+            ),
+          ),
+        );
+      }
+
+      widgets.add(
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.directions_bus,
+              size: 20,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              segment.lineShortName ?? segment.lineName,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Row(
+      children: widgets,
+    );
   }
 
   String _segmentText(TransitSegment segment) {
@@ -119,6 +222,23 @@ class RouteOptionCard extends StatelessWidget {
         ? 'Bus'
         : segment.vehicleType;
 
+    final destination = segment.headsign;
+
+    if (destination != null &&
+        destination.trim().isNotEmpty) {
+      return '$vehicle $line ($destination)';
+    }
+
     return '$vehicle $line';
+  }
+
+  String _formatDistance(int meters) {
+    if (meters < 1000) {
+      return '$meters m';
+    }
+
+    final kilometers = meters / 1000;
+
+    return '${kilometers.toStringAsFixed(1)} km';
   }
 }
