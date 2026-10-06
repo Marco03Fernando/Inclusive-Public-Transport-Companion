@@ -14,7 +14,7 @@ enum ConditionType { brokenRamp, noSeat, overcrowded, unsafe }
 
 /// Review status shown on the "My Reports" screen and used by admin
 /// verification handling.
-enum ReportStatus { underReview, verified }
+enum ReportStatus { underReview, verified, accepted, rejected }
 
 extension ReportSubjectLabel on ReportSubject {
   String get label {
@@ -27,6 +27,21 @@ extension ReportSubjectLabel on ReportSubject {
         return 'REST AREA';
       case ReportSubject.other:
         return 'OTHER';
+    }
+  }
+}
+
+extension ReportStatusLabel on ReportStatus {
+  String get label {
+    switch (this) {
+      case ReportStatus.underReview:
+        return 'UNDER REVIEW';
+      case ReportStatus.verified:
+        return 'VERIFIED';
+      case ReportStatus.accepted:
+        return 'ACCEPTED';
+      case ReportStatus.rejected:
+        return 'REJECTED';
     }
   }
 }
@@ -56,17 +71,6 @@ extension ConditionTypeLabel on ConditionType {
         return 'Overcrowded';
       case ConditionType.unsafe:
         return 'Unsafe';
-    }
-  }
-}
-
-extension ReportStatusLabel on ReportStatus {
-  String get label {
-    switch (this) {
-      case ReportStatus.underReview:
-        return 'UNDER REVIEW';
-      case ReportStatus.verified:
-        return 'VERIFIED';
     }
   }
 }

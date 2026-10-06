@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../models/condition_report.dart';
@@ -24,22 +26,41 @@ class ReportsProvider extends ChangeNotifier {
   List<ConditionReport> _reports = [];
   bool _isLoading = false;
   String? _error;
+  String? _sessionUserId;
 
   /// Newest-first list of the current user's reports.
   List<ConditionReport> get reports => List.unmodifiable(_reports);
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  /// Loads the signed-in user's reports. Call once, e.g. right when
-  /// "My Reports" appears — signs the device in (anonymously, if it
-  /// hasn't been already) before querying Firestore.
+  /// Loads or clears the reports to match the signed-in user. Called from
+  /// `ChangeNotifierProxyProvider.update` in `main.dart`, i.e. DURING a
+  /// build — so the actual work is deferred to a microtask.
+  void syncSession({required String? userId}) {
+    if (userId == _sessionUserId) return;
+    _sessionUserId = userId;
+
+    if (userId == null) {
+      _reports = [];
+      _isLoading = false;
+      _error = null;
+      scheduleMicrotask(notifyListeners);
+    } else {
+      scheduleMicrotask(loadReports);
+    }
+  }
+
+  /// Loads the signed-in user's reports from Firestore.
   Future<void> loadReports() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
       final userId = await _authService.ensureSignedIn();
-      _reports = await _service.getUserReports(userId);
+      final reports = await _service.getUserReports(userId);
+      // Signed out (or switched account) while this was loading.
+      if (userId != _authService.currentUserId) return;
+      _reports = reports;
     } catch (_) {
       _error = 'Could not load your reports. Please try again.';
     } finally {

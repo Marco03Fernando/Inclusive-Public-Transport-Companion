@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// ColomboPal — Firebase Storage security rules.
+//
+// Report photos live at condition_reports/{userId}/{reportId}.jpg.
+// Admin role is read from Firestore users/{uid}.role (same source as
+// firestore.rules).
+//
+// Deploy: firebase deploy --only storage
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAdmin() {
+      return request.auth != null
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /condition_reports/{userId}/{fileName} {
+      allow read: if request.auth != null
+        && (request.auth.uid == userId || isAdmin());
+
+      // Only the owner uploads, only images, max 10 MB.
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+
+      allow delete: if request.auth != null
+        && (request.auth.uid == userId || isAdmin());
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/auth_provider.dart';
 import '../providers/reports_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/report_card.dart';
@@ -47,6 +48,11 @@ class MyReportsScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: const Text('My Reports'),
         actions: [
+          IconButton(
+            tooltip: 'Sign out',
+            icon: const Icon(Icons.logout),
+            onPressed: () => context.read<AuthProvider>().signOut(),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.md),
             child: Semantics(

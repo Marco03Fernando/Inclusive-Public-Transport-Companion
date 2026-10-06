@@ -3,42 +3,43 @@ import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'admin/providers/admin_auth_provider.dart';
+import 'admin/providers/admin_reports_provider.dart';
+import 'admin/repositories/firebase_admin_report_repository.dart';
+import 'admin/services/admin_auth_service.dart';
+import 'admin/services/admin_report_service.dart';
+import 'providers/auth_provider.dart';
 import 'providers/reports_provider.dart';
 import 'repositories/firebase_condition_report_repository.dart';
-import 'screens/my_reports_screen.dart';
+import 'screens/auth_gate.dart';
 import 'services/auth_service.dart';
 import 'services/condition_report_service.dart';
 import 'theme/app_theme.dart';
 
-/// ColomboPal — Condition Reporting feature.
+/// ColomboPal — single entry point for users AND admins.
 ///
-/// This entry point wires up the "Condition Reporting" flow:
-///   1. My Reports (start screen for this preview)
-///   2. Report Condition — Step 1/2
-///   3. Report Condition — Step 2/2
+/// Flow:
+///   App → Login / Register (Firebase Auth, email + password)
+///       → read `users/{uid}.role` from Firestore
+///       → role "user"  → My Reports (report conditions)
+///       → role "admin" → Admin Dashboard (review / delete reports)
 ///
-/// Reports are validated, built into a `ConditionReport`, and saved
-/// through `ConditionReportService`, which talks to
-/// `FirebaseConditionReportRepository` (Firestore + Firebase Storage).
+/// Routing lives in `screens/auth_gate.dart`. Registration always creates
+/// `users/{uid}` with `role: "user"`; admin accounts are set up by hand in
+/// the Firebase console (see `services/auth_service.dart`).
 ///
-/// To point at a different backend later, change ONLY the `repository:`
-/// line below — e.g. back to `LocalConditionReportRepository()` for
-/// offline dev, or `RemoteConditionReportRepository(baseUrl: ...)` for a
-/// custom REST API. Nothing in `screens/`, `widgets/`, or `providers/`
-/// needs to change either way.
+/// Wiring (both sides): Screen → Provider → Service → Repository → Firebase.
+/// Reports live in the `condition_reports` collection, photos in Firebase
+/// Storage at `condition_reports/{userId}/{reportId}.jpg`.
 ///
-/// IMPORTANT — before this runs you need to:
-///  1. Add `google-services.json` (Android) and `GoogleService-Info.plist`
-///     (iOS) from your Firebase project, or run `flutterfire configure`
-///     to generate `lib/firebase_options.dart` and pass
-///     `options: DefaultFirebaseOptions.currentPlatform` to
-///     `Firebase.initializeApp()` below instead.
-///  2. Enable Anonymous auth in Firebase Console → Authentication →
-///     Sign-in method (this app signs devices in anonymously — see
-///     `services/auth_service.dart`).
-///  3. Create the `condition_reports` Firestore collection (it's created
-///     automatically on first write) and set security rules — see the
-///     notes in `firebase_condition_report_repository.dart`.
+/// IMPORTANT — Firebase console setup:
+///  1. Authentication → Sign-in method → enable Email/Password.
+///  2. Deploy `firestore.rules` and `storage.rules` from the project root
+///     (`firebase deploy --only firestore:rules,storage`) — they are what
+///     actually stop normal users from reading or changing admin data.
+///  3. For each admin: create the account in Authentication, then a
+///     Firestore document `users/{uid}` with
+///     `{ name: "Admin", email: "...", role: "admin" }`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -66,17 +67,66 @@ class ColomboPalApp extends StatelessWidget {
           create: (_) => AuthService(),
         ),
 
+        ChangeNotifierProvider<AuthProvider>(
+          create: (context) => AuthProvider(
+            service: context.read<AuthService>(),
+          ),
+        ),
+
+        // ---- User side ----
+
         Provider<ConditionReportService>(
           create: (_) => ConditionReportService(
             repository: FirebaseConditionReportRepository(),
           ),
         ),
 
-        ChangeNotifierProvider<ReportsProvider>(
+        // Loads the signed-in USER's reports on login and clears them on
+        // sign-out, so one account never sees another account's list.
+        ChangeNotifierProxyProvider<AuthProvider, ReportsProvider>(
           create: (context) => ReportsProvider(
             service: context.read<ConditionReportService>(),
             authService: context.read<AuthService>(),
-          )..loadReports(),
+          ),
+          update: (context, auth, reports) {
+            final isUser =
+                auth.status == AuthStatus.authenticated && !auth.isAdmin;
+            reports!.syncSession(userId: isUser ? auth.profile!.uid : null);
+            return reports;
+          },
+        ),
+
+        // ---- Admin side ----
+
+        Provider<AdminAuthService>(
+          create: (_) => AdminAuthService(),
+        ),
+
+        Provider<AdminReportService>(
+          create: (_) => AdminReportService(
+            repository: FirebaseAdminReportRepository(),
+          ),
+        ),
+
+        // Independently verifies users/{uid}.role == "admin".
+        ChangeNotifierProvider<AdminAuthProvider>(
+          create: (context) => AdminAuthProvider(
+            service: context.read<AdminAuthService>(),
+          ),
+          lazy: false,
+        ),
+
+        // Live subscription to ALL reports that only runs while a VERIFIED
+        // admin is signed in: it starts on sign-in and is cancelled +
+        // cleared on sign-out, so normal users never open it.
+        ChangeNotifierProxyProvider<AdminAuthProvider, AdminReportsProvider>(
+          create: (context) => AdminReportsProvider(
+            service: context.read<AdminReportService>(),
+          ),
+          update: (context, adminAuth, reports) {
+            reports!.syncSession(isAdmin: adminAuth.isAdmin);
+            return reports;
+          },
         ),
       ],
       child: MaterialApp(
@@ -103,7 +153,7 @@ class ColomboPalApp extends StatelessWidget {
           );
         },
 
-        home: const MyReportsScreen(),
+        home: const AuthGate(),
       ),
     );
   }
