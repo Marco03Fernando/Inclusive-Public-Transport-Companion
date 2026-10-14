@@ -2,9 +2,10 @@ rules_version = '2';
 
 // ColomboPal — Firestore security rules.
 //
-// Roles come from users/{uid}.role ("user" | "admin"). Users can create
-// their own profile ONLY with role "user" and can never change a role, so
-// admin accounts can only be made in the Firebase console.
+// Roles come from users/{uid}.role ("passenger" | "volunteer" | "admin").
+// Users can create their own profile ONLY as passenger/volunteer and can
+// never change a role, so admin accounts can only be made in the Firebase
+// console.
 //
 // Deploy: firebase deploy --only firestore:rules
 service cloud.firestore {
@@ -23,18 +24,27 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
 
-      // Registration (AuthService.register / fetchProfile).
+      // Sign-up wizard / guest volunteer / missing-profile fallback
+      // (UserProfileService.createProfile).
       allow create: if signedIn()
         && request.auth.uid == uid
-        && request.resource.data.role == 'user'
-        && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'createdAt']);
+        && request.resource.data.role in ['passenger', 'volunteer']
+        && request.resource.data.keys().hasOnly([
+             'role', 'name', 'email', 'phone', 'dob',
+             'accessNeeds', 'isAnonymous', 'createdAt']);
 
-      // Own name/email may change; the role never can from the client.
+      // Own details (e.g. access needs) may change; the role never can
+      // from the client.
       allow update: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.role == resource.data.role;
 
       allow delete: if false;
+
+      // Emergency contacts (UserProfileService) — owner only.
+      match /contacts/{contactId} {
+        allow read, write: if signedIn() && request.auth.uid == uid;
+      }
     }
 
     // ---- Condition reports ----
@@ -56,6 +66,27 @@ service cloud.firestore {
       // Admins may delete any report; owners may retract their own.
       allow delete: if isAdmin()
         || (signedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    // ---- Request Assistance (AssistanceRequestService) ----
+    match /assistance_requests/{requestId} {
+      // Volunteers browse open requests; passengers watch their own.
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.resource.data.passengerUid == request.auth.uid
+        && request.resource.data.status == 'pending';
+
+      // The passenger may cancel; a volunteer may accept a pending request
+      // (claiming it for themselves) and then complete it.
+      allow update: if isAdmin()
+        || (signedIn() && (
+             resource.data.passengerUid == request.auth.uid
+             || resource.data.volunteerUid == request.auth.uid
+             || (resource.data.status == 'pending'
+                 && request.resource.data.volunteerUid == request.auth.uid)));
+
+      allow delete: if isAdmin();
     }
   }
 }

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/routes.dart';
+import '../../core/state/auth_state.dart';
 import '../providers/admin_auth_provider.dart';
 import '../widgets/admin_message_state.dart';
 import 'admin_dashboard_screen.dart';
 
-/// The single door into the admin screens.
+/// The single door into the admin screens (route [Routes.admin]).
 ///
-/// `AuthGate` only routes here when the signed-in profile has
-/// `role: "admin"`; this gate re-verifies that independently:
+/// `AuthGate` / the login screen only route here when the signed-in
+/// profile has `role: "admin"`; this gate re-verifies that independently:
 ///  - still checking        → spinner
 ///  - not a verified admin  → "no admin access" + sign out
 ///  - verified admin        → [AdminDashboardScreen]
@@ -48,7 +50,11 @@ class AdminGate extends StatelessWidget {
               title: 'No admin access',
               message: 'This account does not have admin access.',
               actionLabel: 'SIGN OUT',
-              onAction: () => context.read<AdminAuthProvider>().signOut(),
+              onAction: () async {
+                await context.read<AuthState>().signOut();
+                if (!context.mounted) return;
+                Navigator.of(context).pushNamedAndRemoveUntil(Routes.roleSelect, (route) => false);
+              },
             ),
           ),
         );

@@ -1,44 +1,75 @@
-/// Role stored in `users/{uid}.role`.
-///
-/// Normal users get [UserRole.user] automatically when they register.
-/// [UserRole.admin] is only ever set by hand in the Firebase console —
-/// the Firestore security rules stop anyone from giving themselves a role.
-enum UserRole { user, admin }
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// The Firestore profile document at `users/{uid}`:
-///
-/// ```json
-/// { "name": "...", "email": "...", "role": "user" | "admin" }
-/// ```
+import '../core/state/app_state.dart';
+import 'access_need.dart';
+
+/// The Firestore profile document at `users/{uid}`. Its `role` field
+/// ([AppRole.name]) decides which home the app routes to — including the
+/// admin dashboard for `role: "admin"`.
 class UserProfile {
-  final String uid;
-  final String name;
-  final String email;
-  final UserRole role;
-
   const UserProfile({
     required this.uid,
-    required this.name,
-    required this.email,
     required this.role,
+    required this.name,
+    this.email = '',
+    required this.phone,
+    required this.dob,
+    required this.accessNeeds,
+    required this.isAnonymous,
+    this.createdAt,
   });
 
-  bool get isAdmin => role == UserRole.admin;
+  final String uid;
+  final AppRole role;
+  final String name;
+  final String email;
+  final String phone;
+  final String dob;
+  final List<AccessNeed> accessNeeds;
+  final bool isAnonymous;
+  final DateTime? createdAt;
+
+  bool get isAdmin => role == AppRole.admin;
+
+  /// Up to two initials from [name] (e.g. "Kamala Fernando" -> "KF"),
+  /// falling back to "?" for a blank name.
+  String get initials {
+    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    final letters = parts.take(2).map((p) => p[0].toUpperCase());
+    return letters.join();
+  }
 
   Map<String, dynamic> toMap() => {
+        'role': role.name,
         'name': name,
         'email': email,
-        'role': role.name,
+        'phone': phone,
+        'dob': dob,
+        'accessNeeds': accessNeeds.map((n) => {'id': n.id, 'checked': n.checked}).toList(),
+        'isAnonymous': isAnonymous,
+        'createdAt': FieldValue.serverTimestamp(),
       };
 
-  /// Anything other than exactly "admin" is treated as a normal user, so a
-  /// missing or mistyped role can never grant admin access.
-  factory UserProfile.fromMap(String uid, Map<String, dynamic> data) {
+  /// Rehydrates access needs against [defaults] so labels/order stay defined
+  /// client-side (see lib/data/mock_data.dart) — Firestore only stores which
+  /// ids are checked, never the label key.
+  factory UserProfile.fromMap(String uid, Map<String, dynamic> map, List<AccessNeed> defaults) {
+    final checkedIds = <String>{};
+    for (final entry in (map['accessNeeds'] as List<dynamic>? ?? const [])) {
+      final entryMap = entry as Map<String, dynamic>;
+      if (entryMap['checked'] == true) checkedIds.add(entryMap['id'] as String);
+    }
     return UserProfile(
       uid: uid,
-      name: data['name'] as String? ?? '',
-      email: data['email'] as String? ?? '',
-      role: data['role'] == UserRole.admin.name ? UserRole.admin : UserRole.user,
+      role: AppRole.fromName(map['role']),
+      name: map['name'] as String? ?? '',
+      email: map['email'] as String? ?? '',
+      phone: map['phone'] as String? ?? '',
+      dob: map['dob'] as String? ?? '',
+      accessNeeds: defaults.map((n) => n.copyWith(checked: checkedIds.contains(n.id))).toList(),
+      isAnonymous: map['isAnonymous'] as bool? ?? false,
+      createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
     );
   }
 }

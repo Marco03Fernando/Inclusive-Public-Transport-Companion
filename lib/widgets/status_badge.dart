@@ -1,89 +1,55 @@
 import 'package:flutter/material.dart';
 
+import '../core/localization/locale.dart';
+import '../core/theme/app_theme.dart';
 import '../models/condition_report.dart';
-import '../theme/app_theme.dart';
 
+/// Review-status pill for condition reports — used on "My Reports", the
+/// route-conditions / community lists, and the admin module.
 class StatusBadge extends StatelessWidget {
+  const StatusBadge({super.key, required this.status, this.label});
+
   final ReportStatus status;
 
-  const StatusBadge({
-    super.key,
-    required this.status,
-  });
+  /// Overrides the default localized status label.
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
-    final style = _getStyle(status.label);
-
+    final palette = context.palette;
+    final (color, bg) = switch (status) {
+      ReportStatus.verified || ReportStatus.accepted => (palette.success, palette.successSoft),
+      ReportStatus.rejected => (palette.danger, palette.dangerSoft),
+      ReportStatus.underReview => (palette.warn, palette.warnSoft),
+    };
+    final text = label ?? context.t(status.labelKey);
     return Semantics(
-      label: 'Status ${status.label}',
+      label: 'Status $text',
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 6,
-        ),
-        decoration: BoxDecoration(
-          color: style.backgroundColor,
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-          border: Border.all(
-            color: style.textColor,
-            width: 1,
-          ),
-        ),
-        child: Text(
-          status.label.toUpperCase(),
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.3,
-            color: style.textColor,
-          ),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+        child: Text(text, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
       ),
-    );
-  }
-
-  _BadgeStyle _getStyle(String label) {
-    final value = label.toLowerCase();
-
-    if (value.contains('approved') ||
-        value.contains('verified') ||
-        value.contains('completed')) {
-      return const _BadgeStyle(
-        backgroundColor: Color(0xFFDCFCE7),
-        textColor: Color(0xFF166534),
-      );
-    }
-
-    if (value.contains('rejected') ||
-        value.contains('declined')) {
-      return const _BadgeStyle(
-        backgroundColor: Color(0xFFFEE2E2),
-        textColor: Color(0xFFB91C1C),
-      );
-    }
-
-    if (value.contains('pending') ||
-        value.contains('review')) {
-      return const _BadgeStyle(
-        backgroundColor: Color(0xFFFEF3C7),
-        textColor: Color(0xFF92400E),
-      );
-    }
-
-    return const _BadgeStyle(
-      backgroundColor: AppColors.grey200,
-      textColor: AppColors.grey700,
     );
   }
 }
 
-class _BadgeStyle {
-  final Color backgroundColor;
-  final Color textColor;
+/// The "High"/"Medium" access-score pill on route option cards.
+class AccessScoreBadge extends StatelessWidget {
+  const AccessScoreBadge({super.key, required this.label, required this.high});
 
-  const _BadgeStyle({
-    required this.backgroundColor,
-    required this.textColor,
-  });
+  final String label;
+  final bool high;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final color = high ? palette.accent : palette.muted;
+    final bg = high ? palette.accentSoft : palette.surface2;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+    );
+  }
 }

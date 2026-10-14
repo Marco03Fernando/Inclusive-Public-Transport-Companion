@@ -9,8 +9,9 @@ library;
 /// What kind of thing is being reported on.
 enum ReportSubject { bus, station, restArea, other }
 
-/// The type of accessibility problem being reported.
-enum ConditionType { brokenRamp, noSeat, overcrowded, unsafe }
+/// The type of accessibility problem being reported. Stored in Firestore
+/// by [Enum.name], so existing values must never be renamed.
+enum ConditionType { brokenRamp, noSeat, overcrowded, unsafe, unclean, other }
 
 /// Review status shown on the "My Reports" screen and used by admin
 /// verification handling.
@@ -29,6 +30,20 @@ extension ReportSubjectLabel on ReportSubject {
         return 'OTHER';
     }
   }
+
+  /// `context.t` key for the report form's "What are you reporting?" chips.
+  String get labelKey {
+    switch (this) {
+      case ReportSubject.bus:
+        return 'targetBus';
+      case ReportSubject.station:
+        return 'targetStation';
+      case ReportSubject.restArea:
+        return 'targetRest';
+      case ReportSubject.other:
+        return 'targetOther';
+    }
+  }
 }
 
 extension ReportStatusLabel on ReportStatus {
@@ -44,6 +59,9 @@ extension ReportStatusLabel on ReportStatus {
         return 'REJECTED';
     }
   }
+
+  /// `context.t` key for the localized status pill — doubles as [name].
+  String get labelKey => name;
 }
 
 extension ConditionTypeLabel on ConditionType {
@@ -57,6 +75,10 @@ extension ConditionTypeLabel on ConditionType {
         return 'OVERCROWDED';
       case ConditionType.unsafe:
         return 'UNSAFE';
+      case ConditionType.unclean:
+        return 'UNCLEAN';
+      case ConditionType.other:
+        return 'OTHER';
     }
   }
 
@@ -71,6 +93,28 @@ extension ConditionTypeLabel on ConditionType {
         return 'Overcrowded';
       case ConditionType.unsafe:
         return 'Unsafe';
+      case ConditionType.unclean:
+        return 'Unclean';
+      case ConditionType.other:
+        return 'Other';
+    }
+  }
+
+  /// `context.t` key for the report form's "Condition type" chips.
+  String get labelKey {
+    switch (this) {
+      case ConditionType.brokenRamp:
+        return 'condLift';
+      case ConditionType.noSeat:
+        return 'condNoSeat';
+      case ConditionType.overcrowded:
+        return 'condCrowded';
+      case ConditionType.unsafe:
+        return 'condUnsafe';
+      case ConditionType.unclean:
+        return 'condClean';
+      case ConditionType.other:
+        return 'condOther';
     }
   }
 }

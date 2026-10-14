@@ -17,19 +17,13 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -52,11 +46,30 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDjnLK-widbWHwej5UTai-5CVp3w8cvcso',
+    appId: '1:592018861909:web:d1a700c2794ef3774f09dc',
+    messagingSenderId: '592018861909',
+    projectId: 'iptc-e6931',
+    authDomain: 'iptc-e6931.firebaseapp.com',
+    storageBucket: 'iptc-e6931.firebasestorage.app',
+    measurementId: 'G-4QZV62R3CX',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC2ctjBKiFg7hJAez2KvNZNuQNGAgAqwxE',
-    appId: '1:1048096594514:android:84b0c6d9ce7b203201dd8b',
-    messagingSenderId: '1048096594514',
-    projectId: 'colombopal-app',
-    storageBucket: 'colombopal-app.firebasestorage.app',
+    apiKey: 'AIzaSyDvwL1o3_wqkFCm-YO7kquvOU19jrdLLlw',
+    appId: '1:592018861909:android:356245ccce70afd64f09dc',
+    messagingSenderId: '592018861909',
+    projectId: 'iptc-e6931',
+    storageBucket: 'iptc-e6931.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyADxY7T_YkaNKmN74d-BjvvYes67sGWAMA',
+    appId: '1:592018861909:ios:308f0861895512954f09dc',
+    messagingSenderId: '592018861909',
+    projectId: 'iptc-e6931',
+    storageBucket: 'iptc-e6931.firebasestorage.app',
+    iosBundleId: 'com.colombopal.colomboPal',
   );
 }

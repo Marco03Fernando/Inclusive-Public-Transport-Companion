@@ -1,0 +1,135 @@
+import '../models/access_need.dart';
+import '../models/chip_option.dart';
+import '../models/condition_report.dart';
+import '../models/contact.dart';
+import '../models/route_option.dart';
+
+/// ⚠️ DEMO / PLACEHOLDER DATA — every constant in this file is a static
+/// fixture, not a read from any backend. Route planning, route conditions,
+/// the volunteer feed and sharing history have no Firestore collection or
+/// service behind them yet, so these arrays are the only source for those
+/// screens; each screen that renders one shows a debug-only
+/// [DemoDataBadge] (see `lib/widgets/demo_data_badge.dart`) as a visible
+/// reminder. `mockContacts` is the one exception with a real backend
+/// (`UserProfileService.watchContacts`) — see `share_setup_screen.dart`,
+/// which prefers the real stream and only falls back to `mockContacts`
+/// when the signed-in user has saved none.
+///
+/// When a real backend is built for routes/reports/feed/history, replace
+/// the corresponding constant's call site with a service call and delete
+/// the fixture here — don't leave it as an unused dead fallback.
+
+const defaultAccessNeeds = [
+  AccessNeed(id: 'wheelchair', labelKey: 'needWheelchair', checked: true),
+  AccessNeed(id: 'visual', labelKey: 'needVisual', checked: false),
+  AccessNeed(id: 'hearing', labelKey: 'needHearing', checked: false),
+  AccessNeed(id: 'mobility', labelKey: 'needMobility', checked: true),
+  AccessNeed(id: 'cognitive', labelKey: 'needCognitive', checked: false),
+];
+
+const planFilterOptions = [
+  ChipOption(id: 'wheelchair', labelKey: 'filterWheelchair'),
+  ChipOption(id: 'lowfloor', labelKey: 'filterLowfloor'),
+  ChipOption(id: 'stairs', labelKey: 'filterStairs'),
+  ChipOption(id: 'quiet', labelKey: 'filterQuiet'),
+];
+
+const mockContacts = [
+  Contact(name: 'Nimal Perera', relation: 'Son', phone: '+94 77 123 4567'),
+  Contact(name: 'Kumari Silva', relation: 'Daughter', phone: '+94 71 987 6543'),
+];
+
+const mockRouteOptions = [
+  RouteOption(
+    mode: 'Bus 138 + Coastal Line',
+    duration: '42 min',
+    transfers: 1,
+    accessScore: AccessScore.high,
+    crowding: 'Moderate',
+  ),
+  RouteOption(
+    mode: 'Bus 100 direct',
+    duration: '55 min',
+    transfers: 0,
+    accessScore: AccessScore.medium,
+    crowding: 'Low',
+  ),
+  RouteOption(
+    mode: 'Tuk + Bus 138',
+    duration: '38 min',
+    transfers: 1,
+    accessScore: AccessScore.medium,
+    crowding: 'High',
+  ),
+];
+
+const mockRouteSteps = [
+  RouteStep(n: 1, text: 'Walk to Nugegoda Bus Stand', detail: '350 m, level pavement'),
+  RouteStep(
+    n: 2,
+    text: 'Bus 138 to Fort',
+    detail: 'Low-floor, wheelchair ramp available · 25 min',
+  ),
+  RouteStep(
+    n: 3,
+    text: 'Fort Railway Station',
+    detail: 'Lift available, tactile paving, rest area on Platform 1',
+  ),
+  RouteStep(
+    n: 4,
+    text: 'Coastal Line to Bambalapitiya',
+    detail: '12 min, priority seating near door',
+  ),
+];
+
+/// Display-only row for the still-demo route-condition / community lists
+/// (rendered with `ConditionTile`). Real submitted reports are
+/// [ConditionReport]s.
+typedef DemoCondition = ({String title, String location, ReportStatus status, String? date});
+
+const List<DemoCondition> mockRouteConditions = [
+  (
+    title: 'Crowded during peak hours',
+    location: 'Bus 138, 5–6:30pm',
+    status: ReportStatus.verified,
+    date: null,
+  ),
+  (
+    title: 'Lift out of service',
+    location: 'Fort Station, Platform 2',
+    status: ReportStatus.underReview,
+    date: null,
+  ),
+];
+
+const List<DemoCondition> mockVolunteerFeed = [
+  (
+    title: 'Lift out of service',
+    location: 'Fort Station, Platform 2',
+    status: ReportStatus.underReview,
+    date: 'Today',
+  ),
+  (
+    title: 'Crowded during peak hours',
+    location: 'Bus 138',
+    status: ReportStatus.verified,
+    date: 'Yesterday',
+  ),
+  (
+    title: 'Rest area unclean',
+    location: 'Bambalapitiya Station',
+    status: ReportStatus.underReview,
+    date: 'Aug 18',
+  ),
+  (
+    title: 'Tactile paving damaged',
+    location: 'Maradana Station entrance',
+    status: ReportStatus.verified,
+    date: 'Aug 14',
+  ),
+];
+
+const mockSharingHistory = [
+  'Aug 19 — Shared with Nimal Perera, ended after 38 min',
+  'Aug 15 — Shared with Kumari Silva, ended after 51 min',
+];

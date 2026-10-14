@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/routes.dart';
+import '../../core/state/auth_state.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/section_label.dart';
 import '../models/report_filter.dart';
@@ -14,6 +16,12 @@ import 'admin_reports_screen.dart';
 /// reports. Tapping a card opens the report list on that status.
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
+
+  Future<void> _signOut(BuildContext context) async {
+    await context.read<AuthState>().signOut();
+    if (!context.mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil(Routes.roleSelect, (route) => false);
+  }
 
   void _openReports(BuildContext context, ReportFilter filter) {
     context.read<AdminReportsProvider>().setFilter(filter);
@@ -37,7 +45,7 @@ class AdminDashboardScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Sign out',
             icon: const Icon(Icons.logout),
-            onPressed: () => context.read<AdminAuthProvider>().signOut(),
+            onPressed: () => _signOut(context),
           ),
         ],
       ),

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../models/user_profile.dart';
+import '../../core/state/app_state.dart';
 import '../models/admin_profile.dart';
 
 /// Admin-role verification for the admin screens.
@@ -48,6 +48,6 @@ class AdminAuthService {
 
   Future<bool> _isAdmin(String uid) async {
     final doc = await _firestore.collection(_usersCollection).doc(uid).get();
-    return doc.data()?['role'] == UserRole.admin.name;
+    return AppRole.fromName(doc.data()?['role']) == AppRole.admin;
   }
 }
