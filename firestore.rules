@@ -68,7 +68,16 @@ service cloud.firestore {
         && request.resource.data.routeId is string
         && request.resource.data.routeId.size() <= 12
         && request.resource.data.routeId.matches('^[A-Z0-9]+([/-][A-Z0-9]+)*$')
-        && request.resource.data.routeId.matches('.*[0-9].*');
+        && request.resource.data.routeId.matches('.*[0-9].*')
+        // Community Reports consent, chosen once here and never editable
+        // by the reporter afterwards (there is no owner update rule). A
+        // public name may only be the reporter's own profile name, and
+        // only on a report they agreed to share.
+        && request.resource.data.get('shareWithCommunity', false) is bool
+        && (request.resource.data.get('publicDisplayName', null) == null
+            || (request.resource.data.shareWithCommunity == true
+                && request.resource.data.publicDisplayName
+                     == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name));
 
       // Only admins review, only these three fields, and only to a known
       // status. Reporters have no update rule, so they can never change
@@ -82,6 +91,74 @@ service cloud.firestore {
       // Admins may delete any report; owners may retract their own.
       allow delete: if isAdmin()
         || (signedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    // ---- Community Reports: privacy-safe public copies ----
+    //
+    // public_condition_reports/{reportId} mirrors an ACCEPTED report whose
+    // reporter opted in (shareWithCommunity == true), with whitelisted
+    // fields only: no userId, contact details, exact coordinates, admin
+    // comment or audit fields. Every signed-in user may read it; nobody
+    // reads anyone else's private condition_reports.
+    //
+    // Only admins write it, and every value must match the private report
+    // as it will be after the write (getAfter), so a copy can't be
+    // published for an unverified / non-consenting report, or with
+    // altered content or contributor name. The app publishes in the same
+    // transaction as the acceptance and removes the copy on any other
+    // decision or on deletion.
+    // The public coordinate must be the private one rounded to 3 decimal
+    // places (≈110 m), exactly as the app writes it — never the precise
+    // position. (A plain "close enough" check would also let the exact
+    // value through.)
+    function approxEqual(pubValue, srcValue) {
+      return (srcValue == null && pubValue == null)
+        || (srcValue != null && pubValue != null
+            && math.abs(pubValue - math.round(srcValue * 1000) / 1000.0) < 0.0000001);
+    }
+
+    function publishable(src, pub) {
+      return src.status in ['accepted', 'verified']
+        && src.get('shareWithCommunity', false) == true
+        && src.reportType in ['positive', 'issue']
+        && pub.reportType == src.reportType
+        && pub.routeNumber == src.get('routeNumber', '')
+        && pub.routeId == src.get('routeId', '')
+        && pub.subject == src.subject
+        && pub.vehicleOrStationNumber == src.get('vehicleOrStationNumber', '')
+        && pub.conditionType == src.conditionType
+        && pub.description == src.get('description', '')
+        && pub.locationName == src.get('locationName', '')
+        && approxEqual(pub.get('latitude', null), src.get('latitude', null))
+        && approxEqual(pub.get('longitude', null), src.get('longitude', null))
+        && (pub.get('photoUrl', null) == null
+            || pub.photoUrl == src.get('photoUrl', null))
+        && pub.get('contributorName', null) == src.get('publicDisplayName', null)
+        && pub.status == src.status
+        && pub.createdAt == src.createdAt
+        && pub.publishedAt == request.time;
+    }
+
+    match /public_condition_reports/{reportId} {
+      allow read: if signedIn();
+
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly([
+             'reportType', 'routeNumber', 'routeId', 'subject',
+             'vehicleOrStationNumber', 'conditionType', 'description',
+             'locationName', 'latitude', 'longitude', 'photoUrl',
+             'contributorName', 'status', 'createdAt', 'publishedAt'])
+        && publishable(
+             getAfter(/databases/$(database)/documents/condition_reports/$(reportId)).data,
+             request.resource.data);
+
+      // Admins may unpublish anything. A reporter retracting their own
+      // report removes its public copy in the same batch (get() sees the
+      // private report as it was before that batch).
+      allow delete: if isAdmin()
+        || (signedIn()
+            && get(/databases/$(database)/documents/condition_reports/$(reportId)).data.userId
+                 == request.auth.uid);
     }
 
     // ---- Request Assistance (AssistanceRequestService) ----

@@ -56,6 +56,13 @@ class ConditionReport {
   /// Free-text note an admin can attach when reviewing a report.
   final String? adminComment;
 
+  /// Reporter opted in to Community Reports (see
+  /// [ReportFields.shareWithCommunity]). False for legacy reports.
+  final bool shareWithCommunity;
+
+  /// Name the reporter chose to show publicly, or null for anonymous.
+  final String? publicDisplayName;
+
   const ConditionReport({
     required this.id,
     this.userId = '',
@@ -73,6 +80,8 @@ class ConditionReport {
     this.updatedAt,
     this.status = ReportStatus.underReview,
     this.adminComment,
+    this.shareWithCommunity = false,
+    this.publicDisplayName,
   });
 
   /// True when the report is tied to a valid bus route.
@@ -100,37 +109,11 @@ class ConditionReport {
 
   /// Human-friendly "Submitted ..." line used on the "My Reports" cards,
   /// e.g. "Submitted today, 9:20 AM".
-  String get submittedLabel {
-    final now = DateTime.now();
-    final isToday =
-        now.year == createdAt.year &&
-        now.month == createdAt.month &&
-        now.day == createdAt.day;
-    if (isToday) {
-      return 'Submitted today, ${_formatTime(createdAt)}';
-    }
-
-    final yesterday = now.subtract(const Duration(days: 1));
-    final isYesterday =
-        yesterday.year == createdAt.year &&
-        yesterday.month == createdAt.month &&
-        yesterday.day == createdAt.day;
-    if (isYesterday) return 'Submitted yesterday';
-
-    final days = now.difference(createdAt).inDays;
-    return 'Submitted $days day${days == 1 ? '' : 's'} ago';
-  }
+  String get submittedLabel => submittedLabelFor(createdAt);
 
   static String _titleCase(String s) {
     if (s.isEmpty) return s;
     return s[0] + s.substring(1).toLowerCase();
-  }
-
-  static String _formatTime(DateTime dt) {
-    final hour12 = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-    final minute = dt.minute.toString().padLeft(2, '0');
-    final period = dt.hour >= 12 ? 'PM' : 'AM';
-    return '$hour12:$minute $period';
   }
 
   /// Builds a submittable [ConditionReport] from a completed
@@ -173,8 +156,15 @@ class ConditionReport {
       photoPath: draft.photoPath,
       createdAt: DateTime.now(),
       status: ReportStatus.underReview,
+      shareWithCommunity: draft.shareWithCommunity,
+      publicDisplayName: draft.shareWithCommunity
+          ? _nonBlank(draft.publicDisplayName)
+          : null,
     );
   }
+
+  static String? _nonBlank(String? value) =>
+      value == null || value.trim().isEmpty ? null : value;
 
   ConditionReport copyWith({
     String? id,
@@ -202,6 +192,8 @@ class ConditionReport {
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
       adminComment: adminComment ?? this.adminComment,
+      shareWithCommunity: shareWithCommunity,
+      publicDisplayName: publicDisplayName,
     );
   }
 
@@ -224,6 +216,8 @@ class ConditionReport {
     'updatedAt': updatedAt?.toIso8601String(),
     'status': status.name,
     'adminComment': adminComment,
+    ReportFields.shareWithCommunity: shareWithCommunity,
+    ReportFields.publicDisplayName: publicDisplayName,
   };
 
   factory ConditionReport.fromJson(Map<String, dynamic> json) =>
@@ -251,5 +245,26 @@ class ConditionReport {
           json['status'] as String? ?? 'underReview',
         ),
         adminComment: json['adminComment'] as String?,
+        shareWithCommunity: json[ReportFields.shareWithCommunity] == true,
+        publicDisplayName: json[ReportFields.publicDisplayName] as String?,
       );
+}
+
+/// "Submitted today, 9:20 AM" / "Submitted yesterday" / "Submitted 3 days
+/// ago" — shared by "My Reports" and Community Reports.
+String submittedLabelFor(DateTime createdAt) {
+  final now = DateTime.now();
+  bool sameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+  if (sameDay(now, createdAt)) {
+    final hour12 = createdAt.hour % 12 == 0 ? 12 : createdAt.hour % 12;
+    final minute = createdAt.minute.toString().padLeft(2, '0');
+    final period = createdAt.hour >= 12 ? 'PM' : 'AM';
+    return 'Submitted today, $hour12:$minute $period';
+  }
+  if (sameDay(now.subtract(const Duration(days: 1)), createdAt)) {
+    return 'Submitted yesterday';
+  }
+  final days = now.difference(createdAt).inDays;
+  return 'Submitted $days day${days == 1 ? '' : 's'} ago';
 }

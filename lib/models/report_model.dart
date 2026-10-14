@@ -146,6 +146,15 @@ abstract final class ReportFields {
   static const routeId = 'routeId';
 
   static const status = 'status';
+
+  /// The reporter's explicit opt-in (set once, at submission) to have the
+  /// report shown in Community Reports after an admin accepts it. Absent
+  /// on legacy docs, which therefore can never be published.
+  static const shareWithCommunity = 'shareWithCommunity';
+
+  /// The name the reporter chose to show on the community copy (their
+  /// profile name at submission time), or null to appear anonymously.
+  static const publicDisplayName = 'publicDisplayName';
 }
 
 extension ReportSubjectLabel on ReportSubject {
@@ -293,6 +302,14 @@ class ConditionReportDraft {
   String description;
   String? photoPath;
 
+  /// Opt-in to Community Reports once verified. Off unless the user turns
+  /// it on.
+  bool shareWithCommunity;
+
+  /// Name to show publicly (profile name), or null for anonymous. Ignored
+  /// unless [shareWithCommunity] is on.
+  String? publicDisplayName;
+
   ConditionReportDraft({
     this.reportType,
     this.routeNumber = '',
@@ -303,6 +320,8 @@ class ConditionReportDraft {
     this.conditionType,
     this.description = '',
     this.photoPath,
+    this.shareWithCommunity = false,
+    this.publicDisplayName,
   });
 
   /// Short title line used in the summary card, e.g. "Bus NB-1234".

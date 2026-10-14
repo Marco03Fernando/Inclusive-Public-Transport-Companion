@@ -1,19 +1,10 @@
 import '../../models/condition_report.dart';
+import '../../models/report_filters.dart';
 
-/// Admin-side helpers on the shared [ReportStatus] enum.
-///
-/// Kept here (not in `models/report_model.dart`) so the user-side model
-/// stays free of admin concepts.
-extension ReportStatusAdmin on ReportStatus {
-  /// Waiting for an admin decision. Stored in Firestore as "underReview".
-  bool get isPending => this == ReportStatus.underReview;
-
-  /// Accepted. The legacy `verified` value counts as accepted.
-  bool get isAccepted =>
-      this == ReportStatus.accepted || this == ReportStatus.verified;
-
-  bool get isRejected => this == ReportStatus.rejected;
-}
+// isPending / isAccepted / isRejected now live in the shared
+// `models/report_filters.dart`, re-exported so existing admin imports
+// keep working.
+export '../../models/report_filters.dart' show ReportStatusReview;
 
 /// Reads a stored `status` value. Documents store `status.name`
 /// ("underReview"); "under_review" is also accepted in case a document was
@@ -43,11 +34,20 @@ extension ReportFilterX on ReportFilter {
       case ReportFilter.underReview:
         return 'Under review';
       case ReportFilter.accepted:
-        return 'Accepted';
+        return 'Verified / Accepted';
       case ReportFilter.rejected:
         return 'Rejected';
     }
   }
+
+  /// The equivalent shared [StatusFilter] — one definition of what each
+  /// status group contains, for admin and user screens alike.
+  StatusFilter get statusFilter => switch (this) {
+    ReportFilter.all => StatusFilter.all,
+    ReportFilter.underReview => StatusFilter.underReview,
+    ReportFilter.accepted => StatusFilter.verified,
+    ReportFilter.rejected => StatusFilter.rejected,
+  };
 
   /// Text for the "nothing here" state when this filter has no reports.
   String get emptyMessage {
@@ -63,16 +63,5 @@ extension ReportFilterX on ReportFilter {
     }
   }
 
-  bool matches(ConditionReport report) {
-    switch (this) {
-      case ReportFilter.all:
-        return true;
-      case ReportFilter.underReview:
-        return report.status.isPending;
-      case ReportFilter.accepted:
-        return report.status.isAccepted;
-      case ReportFilter.rejected:
-        return report.status.isRejected;
-    }
-  }
+  bool matches(ConditionReport report) => statusFilter.matches(report);
 }

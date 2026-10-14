@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../widgets/screen_header.dart';
+import '../../models/report_filters.dart';
 import '../models/report_filter.dart';
 import '../providers/admin_reports_provider.dart';
 import '../widgets/admin_message_state.dart';
 import '../widgets/admin_report_card.dart';
+import '../widgets/report_filter_panel.dart';
 import '../widgets/status_filter_bar.dart';
 import 'admin_report_details_screen.dart';
 
 /// Report management: every report in `condition_reports`, filterable by
-/// status. Updates live — a report reviewed on another device moves
-/// between filters by itself.
+/// status, subject and report type, and sortable. Filters combine (e.g.
+/// Buses + Accessibility Issue + Under review) and run on the admin's live
+/// list in memory — no extra Firestore reads. Updates live: a report
+/// reviewed on another device moves between filters by itself.
 class AdminReportsScreen extends StatelessWidget {
   const AdminReportsScreen({super.key});
 
@@ -33,9 +37,13 @@ class AdminReportsScreen extends StatelessWidget {
       );
     } else if (reports.isEmpty) {
       body = AdminMessageState(
-        icon: Icons.assignment_outlined,
+        icon: Icons.filter_alt_off_outlined,
         title: 'Nothing here',
-        message: provider.filter.emptyMessage,
+        message: provider.hasExtraFilters
+            ? 'No reports match this combination of filters.'
+            : provider.filter.emptyMessage,
+        actionLabel: provider.hasExtraFilters ? 'Clear filters' : null,
+        onAction: provider.hasExtraFilters ? provider.clearFilters : null,
       );
     } else {
       body = ListView.separated(
@@ -63,12 +71,42 @@ class AdminReportsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-              child: StatusFilterBar(
-                selected: provider.filter,
-                stats: provider.stats,
-                onChanged: provider.setFilter,
+            // Filters stay pinned above the results; on small screens or
+            // with very large text they get at most ~45% of the height and
+            // scroll on their own, so results are always visible.
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.45,
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Counts are within the chosen subject + type.
+                    StatusFilterBar(
+                      selected: provider.filter,
+                      stats: provider.scopedStats,
+                      onChanged: provider.setFilter,
+                    ),
+                    const SizedBox(height: 12),
+                    ReportFilterPanel(
+                      subject: provider.subjectFilter,
+                      type: provider.typeFilter,
+                      sort: provider.sort,
+                      shown: reports.length,
+                      total: provider.allReports.length,
+                      onSubjectChanged: provider.setSubjectFilter,
+                      onTypeChanged: provider.setTypeFilter,
+                      onSortChanged: provider.setSort,
+                      onClear:
+                          provider.query.isFiltered ||
+                              provider.sort != ReportSort.newestFirst
+                          ? provider.clearFilters
+                          : null,
+                    ),
+                  ],
+                ),
               ),
             ),
             Expanded(child: body),

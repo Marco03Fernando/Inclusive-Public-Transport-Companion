@@ -1,0 +1,13 @@
+{
+  "name": "colombopal-firestore-rules-test",
+  "private": true,
+  "description": "Emulator checks for firestore.rules (Community Reports publication, consent, privacy). Never touches the real project.",
+  "type": "module",
+  "scripts": {
+    "test": "cd .. && firebase emulators:exec --only firestore --project demo-colombopal \"node firestore_rules_test/rules.test.mjs firestore.rules\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "firebase": "^13.0.0"
+  }
+}

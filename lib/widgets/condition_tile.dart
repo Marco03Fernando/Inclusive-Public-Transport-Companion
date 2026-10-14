@@ -45,53 +45,57 @@ class ConditionTile extends StatelessWidget {
         : location.isEmpty
         ? date!
         : '$location · $date';
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: palette.shadow,
-            blurRadius: 14,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: palette.text,
+    // Read as one item: title, type/route, location/date, status.
+    return MergeSemantics(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: palette.cardOutline,
+          boxShadow: [
+            BoxShadow(
+              color: palette.shadow,
+              blurRadius: 14,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: palette.text,
+                    ),
                   ),
-                ),
-                if (reportType != null) ...[
-                  const SizedBox(height: 4),
-                  ReportTypeLine(
-                    reportType: reportType!,
-                    routeLabel: routeLabel,
+                  if (reportType != null) ...[
+                    const SizedBox(height: 4),
+                    ReportTypeLine(
+                      reportType: reportType!,
+                      routeLabel: routeLabel,
+                    ),
+                  ],
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 12, color: palette.muted),
                   ),
                 ],
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(fontSize: 12, color: palette.muted),
-                ),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          StatusBadge(status: status),
-        ],
+            const SizedBox(width: 8),
+            StatusBadge(status: status),
+          ],
+        ),
       ),
     );
   }

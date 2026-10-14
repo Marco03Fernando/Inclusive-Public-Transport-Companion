@@ -65,39 +65,55 @@ class AppState extends ChangeNotifier {
   double holdPct = 0;
   Timer? _holdTimer;
 
-  int elapsedSec = 97;
+  /// Journey-sharing elapsed seconds. Ticks on its own notifier so the
+  /// once-a-second update only rebuilds the label that shows it, not every
+  /// widget (and the whole MaterialApp) listening to [AppState].
+  final ValueNotifier<int> elapsed = ValueNotifier<int>(97);
   Timer? _elapsedTimer;
+
+  int get elapsedSec => elapsed.value;
+
+  /// Completes once the saved theme mode has been applied. `AuthGate`
+  /// waits for it so the first real screen never flashes the wrong theme.
+  late final Future<void> ready;
 
   AppState() {
     _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      elapsedSec++;
-      notifyListeners();
+      elapsed.value++;
     });
-    _loadThemeMode();
+    ready = _loadThemeMode();
     _loadVolumeSos();
   }
 
   Future<void> _loadVolumeSos() async {
-    volumeSosEnabled = await SosTriggerService.instance.isVolumeTriggerEnabled();
+    volumeSosEnabled = await SosTriggerService.instance
+        .isVolumeTriggerEnabled();
     notifyListeners();
   }
 
   Future<void> setVolumeSosEnabled(bool enabled) async {
     volumeSosEnabled = enabled;
     notifyListeners();
-    volumeSosEnabled = await SosTriggerService.instance.setVolumeTriggerEnabled(enabled);
+    volumeSosEnabled = await SosTriggerService.instance.setVolumeTriggerEnabled(
+      enabled,
+    );
     notifyListeners();
   }
 
   Future<void> _loadThemeMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString(_themeModePrefKey);
-    for (final mode in ThemeMode.values) {
-      if (mode.name == saved) {
-        themeMode = mode;
-        notifyListeners();
-        break;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString(_themeModePrefKey);
+      for (final mode in ThemeMode.values) {
+        if (mode.name == saved) {
+          themeMode = mode;
+          notifyListeners();
+          break;
+        }
       }
+    } catch (e) {
+      // Keeps following the system theme.
+      if (kDebugMode) debugPrint('[AppState] theme mode load failed: $e');
     }
   }
 
@@ -214,6 +230,7 @@ class AppState extends ChangeNotifier {
   void dispose() {
     _holdTimer?.cancel();
     _elapsedTimer?.cancel();
+    elapsed.dispose();
     super.dispose();
   }
 }

@@ -20,6 +20,8 @@ class AppScaffold extends StatelessWidget {
     this.title,
     this.onBack,
     this.scrollableBody = true,
+    this.actions = const [],
+    this.safeAreaTop = true,
   });
 
   final String routeName;
@@ -30,6 +32,14 @@ class AppScaffold extends StatelessWidget {
   /// Wrap [body] in padding + scroll view. Set false when the screen needs
   /// full control (e.g. a header image that must touch the top edge).
   final bool scrollableBody;
+
+  /// Trailing header buttons (only shown when [title] is set).
+  final List<Widget> actions;
+
+  /// False lets [body] draw behind the status bar — for screens whose top
+  /// element is a full-bleed header (e.g. [GreetingHeader]) that pads
+  /// itself by the status-bar inset. Only applies when there's no [title].
+  final bool safeAreaTop;
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +60,9 @@ class AppScaffold extends StatelessWidget {
 
     return Scaffold(
       appBar: title != null
-          ? ScreenHeader(title: title!, onBack: onBack)
+          ? ScreenHeader(title: title!, onBack: onBack, actions: actions)
           : null,
-      body: SafeArea(child: content),
+      body: SafeArea(top: title != null || safeAreaTop, child: content),
       bottomNavigationBar: showNav
           ? AppBottomNavBar(role: role, currentRoute: routeName)
           : null,

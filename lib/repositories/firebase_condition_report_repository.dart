@@ -4,9 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
-import '../models/condition_report.dart';
+import '../models/public_condition_report.dart';
 import '../models/report_exception.dart';
 import 'condition_report_repository.dart';
+import 'firebase_community_report_repository.dart';
 
 /// Firestore + Firebase Storage implementation of
 /// [ConditionReportRepository].
@@ -130,6 +131,9 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
     String? adminComment,
   }) async {
     final docRef = _collection.doc(reportId);
+    final publicRef = _firestore
+        .collection(PublicReportFields.collection)
+        .doc(reportId);
     final updates = <String, dynamic>{
       'status': status.name,
       'updatedAt': FieldValue.serverTimestamp(),
@@ -139,7 +143,29 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
     }
 
     try {
-      await docRef.update(updates);
+      // Same Community Reports handling as the admin review: accepting an
+      // opted-in report publishes it, any other status takes it down — in
+      // one transaction, so the public copy never disagrees with the report.
+      await _firestore.runTransaction((transaction) async {
+        final snapshot = await transaction.get(docRef);
+        if (!snapshot.exists) {
+          throw ReportException(
+            ReportFailure.firestore,
+            'That report no longer exists.',
+            debugDetail: reportId,
+          );
+        }
+        transaction.update(docRef, updates);
+        final source = {...?snapshot.data(), 'status': status.name};
+        if (isPublishableReport(source)) {
+          transaction.set(
+            publicRef,
+            buildPublicReportProjection(source, status: status),
+          );
+        } else if (sharesWithCommunity(source)) {
+          transaction.delete(publicRef);
+        }
+      });
       final updatedSnapshot = await docRef.get();
       if (!updatedSnapshot.exists) {
         throw ReportException(
@@ -173,7 +199,16 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
           if (e.code != 'object-not-found') throw _storageError(e);
         }
       }
-      await _collection.doc(reportId).delete();
+      // Retracting a report also takes down its Community Reports copy (if
+      // it was published). One batch, so neither outlives the other; the
+      // rules let the owner delete the public copy of their own report.
+      final batch = _firestore.batch()..delete(_collection.doc(reportId));
+      if (sharesWithCommunity(data)) {
+        batch.delete(
+          _firestore.collection(PublicReportFields.collection).doc(reportId),
+        );
+      }
+      await batch.commit();
     } on FirebaseException catch (e) {
       throw _firestoreError(e, action: 'delete the report');
     }
@@ -295,6 +330,8 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
   ///   "photoUrl": "https://firebasestorage.googleapis.com/...",
   ///   "status": "underReview",
   ///   "adminComment": null,
+  ///   "shareWithCommunity": false,      // reporter's opt-in, set once
+  ///   "publicDisplayName": null,        // profile name, or null = anonymous
   ///   "createdAt": Timestamp,
   ///   "updatedAt": Timestamp
   /// }
@@ -320,6 +357,10 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
       'photoUrl': report.photoUrl,
       'status': report.status.name,
       'adminComment': report.adminComment,
+      ReportFields.shareWithCommunity: report.shareWithCommunity,
+      ReportFields.publicDisplayName: report.shareWithCommunity
+          ? report.publicDisplayName
+          : null,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -379,6 +420,8 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
         ReportStatus.underReview,
       ),
       adminComment: data['adminComment'] as String?,
+      shareWithCommunity: data[ReportFields.shareWithCommunity] == true,
+      publicDisplayName: data[ReportFields.publicDisplayName] as String?,
       createdAt: createdAtTimestamp?.toDate() ?? DateTime.now(),
       updatedAt: updatedAtTimestamp?.toDate(),
     );

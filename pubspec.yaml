@@ -52,6 +52,10 @@ dependencies:
   google_maps_flutter: ^2.18.0
   # Camera / gallery picker for condition report photos.
   image_picker: ^1.2.3
+  flutter_tts: ^4.2.5
+  # Native launch screen (config below); also keeps it up until the first
+  # branded Flutter frame is ready, so there is no blank gap between them.
+  flutter_native_splash: ^2.4.8
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +67,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  # App launcher icons (config below).
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -74,6 +80,13 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Only the startup-splash logo is bundled: 1x–4x copies of
+  # colombopal_logo.png pre-sized to how it is drawn (variants in
+  # startup/2.0x … 4.0x are picked up automatically). The original artwork
+  # and the launcher / native-splash images are build-time inputs only.
+  assets:
+    - assets/branding/startup/colombopal_logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -105,3 +118,41 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# ---- Branding ----
+# Regenerate the native files after changing anything below:
+#   dart run flutter_launcher_icons
+#   dart run flutter_native_splash:create
+#
+# `assets/branding/native/colombopal_icon_padded.png` is colombopal_icon.png
+# placed unchanged on a larger white canvas, so the artwork sits inside the
+# circle Android masks adaptive icons and the Android 12+ splash icon to.
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/branding/colombopal_icon.png
+  min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: assets/branding/native/colombopal_icon_padded.png
+  adaptive_icon_foreground_inset: 0
+  remove_alpha_ios: true
+  web:
+    generate: false
+  windows:
+    generate: false
+  macos:
+    generate: false
+
+# Static on purpose: the animated logo lives in the Flutter startup screen
+# (lib/widgets/startup_splash.dart). The logo artwork has a white
+# background, so the splash stays white in dark mode too.
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/branding/native/colombopal_icon_padded.png
+  android_gravity: center
+  ios_content_mode: center
+  web: false
+  android_12:
+    color: "#FFFFFF"
+    image: assets/branding/native/colombopal_icon_padded.png

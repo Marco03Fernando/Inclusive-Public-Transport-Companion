@@ -43,61 +43,105 @@ class AppBottomNavBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: palette.surface,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(22),
-          topRight: Radius.circular(22),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: palette.shadow,
-            blurRadius: 20,
-            offset: const Offset(0, -6),
+        border: Border(
+          top: BorderSide(
+            color: palette.isHighContrast ? palette.cardBorder : palette.border,
+            width: palette.isHighContrast ? 1.5 : 1,
           ),
-        ],
+        ),
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(6, 10, 6, 10),
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
           child: Row(
-            children: tabs.map((tab) {
-              final active = tab.matches.contains(currentRoute);
-              final color = active ? palette.cta : palette.muted;
-              return Expanded(
-                child: InkWell(
-                  onTap: active
-                      ? null
-                      : () =>
-                            Navigator.of(context)
-                                .pushReplacementNamed(tab.target),
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: active ? palette.ctaSoft : Colors.transparent,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(_tabIcons[tab.tab], size: 22, color: color),
-                        const SizedBox(height: 3),
-                        Text(
-                          context.t(_tabLabelKeys[tab.tab]!),
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: active
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                    ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final tab in tabs)
+                Expanded(
+                  child: _NavItem(
+                    icon: _tabIcons[tab.tab]!,
+                    label: context.t(_tabLabelKeys[tab.tab]!),
+                    active: tab.matches.contains(currentRoute),
+                    onTap: () =>
+                        Navigator.of(context).pushReplacementNamed(tab.target),
                   ),
                 ),
-              );
-            }).toList(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One destination: an icon in a pill indicator (filled when selected) and
+/// a label underneath. Announced as "Home, selected, button"; tapping the
+/// current tab does nothing (but stays enabled, so it isn't announced as
+/// "disabled").
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final hc = palette.isHighContrast;
+    final color = active ? (hc ? palette.text : palette.cta) : palette.muted;
+
+    return Semantics(
+      button: true,
+      selected: active,
+      label: label,
+      excludeSemantics: true,
+      onTap: active ? () {} : onTap,
+      child: InkWell(
+        onTap: active ? null : onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 56),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 56,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: active ? palette.ctaSoft : Colors.transparent,
+                    borderRadius: BorderRadius.circular(999),
+                    // Outline as a non-colour selection cue in high contrast.
+                    border: active && hc
+                        ? Border.all(color: palette.text, width: 1.5)
+                        : null,
+                  ),
+                  child: Icon(icon, size: 22, color: color),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    height: 1.15,
+                    fontWeight: active ? FontWeight.w800 : FontWeight.w500,
+                    color: active ? palette.text : palette.muted,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

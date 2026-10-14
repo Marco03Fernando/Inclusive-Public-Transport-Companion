@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../core/localization/locale.dart';
 import '../../core/routes.dart';
 import '../../core/state/app_state.dart';
+import '../../core/state/auth_state.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/condition_report.dart';
 import '../../models/report_exception.dart';
@@ -17,11 +18,13 @@ import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/chip_selector.dart';
 import '../../widgets/labeled_text_field.dart';
+import '../../widgets/toggle_row.dart';
 
 /// "Report Condition": collects report type (positive feedback / issue),
 /// bus route number, subject, vehicle/station number, GPS
-/// location, condition type, description and an optional photo, then
-/// submits through [ReportsProvider] → `ConditionReportService` →
+/// location, condition type, description, an optional photo and the
+/// Community Reports consent (share after verification; show name or stay
+/// anonymous — both off by default), then submits through [ReportsProvider] → `ConditionReportService` →
 /// Firestore `condition_reports` (+ Storage for the photo).
 class ReportFormScreen extends StatefulWidget {
   const ReportFormScreen({super.key});
@@ -48,6 +51,18 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   String? _descriptionError;
   bool _isLocating = false;
   bool _isSubmitting = false;
+
+  /// "Show my name" — only meaningful while sharing is on.
+  bool _showName = false;
+
+  /// The profile name that would be shown publicly, or null when there is
+  /// no real one to show (guest accounts, profile not loaded).
+  String? _publicName(AuthState auth) {
+    final profile = auth.profile;
+    if (profile == null || profile.isAnonymous) return null;
+    final name = profile.name.trim();
+    return name.isEmpty ? null : profile.name;
+  }
 
   @override
   void dispose() {
@@ -177,7 +192,11 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       ..routeNumber = _routeController.text
       ..vehicleOrStationNumber = _vehicleController.text.trim()
       ..location = _locationController.text.trim()
-      ..description = _descriptionController.text.trim();
+      ..description = _descriptionController.text.trim()
+      // Copied exactly from the profile; the rules check it matches.
+      ..publicDisplayName = _draft.shareWithCommunity && _showName
+          ? _publicName(context.read<AuthState>())
+          : null;
 
     setState(() => _isSubmitting = true);
     final provider = context.read<ReportsProvider>();
@@ -219,26 +238,34 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final role = context.watch<AppState>().role;
+    final publicName = _publicName(context.watch<AuthState>());
 
     Widget sectionLabel(String key) => Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        context.t(key),
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: palette.text,
+      child: Semantics(
+        header: true,
+        child: Text(
+          context.t(key),
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: palette.text,
+          ),
         ),
       ),
     );
 
+    // Live region: screen readers announce the error when it appears.
     Widget fieldError(String? message) => message == null
         ? const SizedBox.shrink()
-        : Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(
-              message,
-              style: TextStyle(fontSize: 12, color: palette.danger),
+        : Semantics(
+            liveRegion: true,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                message,
+                style: TextStyle(fontSize: 12, color: palette.danger),
+              ),
             ),
           );
 
@@ -344,6 +371,30 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           const SizedBox(height: 14),
           sectionLabel('photoOptional'),
           _PhotoPicker(photoPath: _draft.photoPath, onTap: _choosePhoto),
+          const SizedBox(height: 18),
+          sectionLabel('communitySharingLabel'),
+          ToggleRow(
+            title: context.t('shareWithCommunity'),
+            subtitle: context.t('shareWithCommunityNote'),
+            value: _draft.shareWithCommunity,
+            onChanged: (value) =>
+                setState(() => _draft.shareWithCommunity = value),
+          ),
+          if (_draft.shareWithCommunity) ...[
+            const SizedBox(height: 10),
+            if (publicName != null)
+              ToggleRow(
+                title: context.t('showMyName'),
+                subtitle: context.tf('showMyNameNote', {'name': publicName}),
+                value: _showName,
+                onChanged: (value) => setState(() => _showName = value),
+              )
+            else
+              Text(
+                context.t('sharedAnonymouslyNote'),
+                style: TextStyle(fontSize: 12.5, color: palette.muted),
+              ),
+          ],
           const SizedBox(height: 28),
           PrimaryButton(
             label: _isSubmitting
@@ -375,45 +426,51 @@ class _ReportTypeField extends StatelessWidget {
     final palette = context.palette;
     final selected = value;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.t('reportType'),
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: palette.text,
-          ),
-        ),
-        const SizedBox(height: 6),
-        DropdownButtonFormField<ReportType>(
-          initialValue: selected,
-          isExpanded: true,
-          dropdownColor: palette.surface,
-          borderRadius: BorderRadius.circular(14),
-          icon: Icon(Icons.keyboard_arrow_down, color: palette.muted),
-          hint: Text(context.t('reportTypeHint')),
-          decoration: InputDecoration(errorText: errorText),
-          style: TextStyle(fontSize: 14, color: palette.text),
-          items: [
-            for (final type in ReportType.selectable)
-              DropdownMenuItem(
-                value: type,
-                child: Text(context.t(type.labelKey)),
-              ),
-          ],
-          onChanged: onChanged,
-        ),
-        if (selected != null && selected.isClassified)
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(
-              context.t(selected.descriptionKey),
-              style: TextStyle(fontSize: 12, color: palette.muted, height: 1.4),
+    return MergeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.t('reportType'),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: palette.text,
             ),
           ),
-      ],
+          const SizedBox(height: 6),
+          DropdownButtonFormField<ReportType>(
+            initialValue: selected,
+            isExpanded: true,
+            dropdownColor: palette.surface,
+            borderRadius: BorderRadius.circular(14),
+            icon: Icon(Icons.keyboard_arrow_down, color: palette.muted),
+            hint: Text(context.t('reportTypeHint')),
+            decoration: InputDecoration(errorText: errorText),
+            style: TextStyle(fontSize: 14, color: palette.text),
+            items: [
+              for (final type in ReportType.selectable)
+                DropdownMenuItem(
+                  value: type,
+                  child: Text(context.t(type.labelKey)),
+                ),
+            ],
+            onChanged: onChanged,
+          ),
+          if (selected != null && selected.isClassified)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                context.t(selected.descriptionKey),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: palette.muted,
+                  height: 1.4,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

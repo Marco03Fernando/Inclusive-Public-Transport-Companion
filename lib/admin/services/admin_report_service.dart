@@ -1,6 +1,7 @@
 import '../../models/condition_report.dart';
 import '../models/admin_exception.dart';
 import '../repositories/admin_report_repository.dart';
+import '../repositories/report_publication_repository.dart';
 
 /// Business-logic layer for the admin review workflow.
 ///
@@ -15,7 +16,23 @@ class AdminReportService {
 
   final AdminReportRepository _repository;
 
-  AdminReportService({required this._repository});
+  /// Community Reports publication controls; null where not wired up.
+  final ReportPublicationRepository? _publication;
+
+  AdminReportService({required this._repository, this._publication});
+
+  /// Whether [reportId] is currently shown in Community Reports.
+  Stream<bool> watchPublished(String reportId) =>
+      _publication?.watchPublished(reportId) ?? Stream.value(false);
+
+  /// Shows (re-publishes) or hides [reportId] in Community Reports.
+  Future<void> setPublished({required String reportId, required bool publish}) {
+    final publication = _publication;
+    if (publication == null) {
+      throw const AdminException('Community publishing is not available.');
+    }
+    return publication.setPublished(reportId: reportId, publish: publish);
+  }
 
   Stream<AdminReportsSnapshot> watchAllReports() =>
       _repository.watchAllReports();

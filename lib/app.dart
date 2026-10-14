@@ -9,13 +9,20 @@ import 'admin/services/admin_auth_service.dart';
 import 'admin/services/admin_report_service.dart';
 import 'core/localization/locale.dart';
 import 'core/routes.dart';
+import 'core/state/accessibility_settings.dart';
 import 'core/state/app_state.dart';
 import 'core/state/auth_state.dart';
 import 'core/theme/app_theme.dart';
 import 'models/google_route.dart';
+import 'models/public_condition_report.dart';
+import 'models/report_filters.dart';
+import 'providers/community_reports_provider.dart';
 import 'providers/reports_provider.dart';
+import 'repositories/community_report_repository.dart';
+import 'repositories/firebase_community_report_repository.dart';
 import 'repositories/firebase_condition_report_repository.dart';
 import 'screens/onboarding/login_screen.dart';
+import 'screens/profile/accessibility_settings_screen.dart';
 import 'screens/onboarding/role_select_screen.dart';
 import 'screens/onboarding/signup_access_screen.dart';
 import 'screens/onboarding/signup_basic_screen.dart';
@@ -36,11 +43,13 @@ import 'screens/reports/report_confirm_screen.dart';
 import 'screens/reports/report_form_screen.dart';
 import 'screens/reports/report_mine_screen.dart';
 import 'screens/volunteer/assistance_requests_screen.dart';
+import 'screens/volunteer/community_report_details_screen.dart';
 import 'screens/volunteer/volunteer_feed_screen.dart';
 import 'screens/volunteer/volunteer_home_screen.dart';
 import 'screens/volunteer/volunteer_profile_screen.dart';
 import 'services/auth_service.dart';
 import 'services/condition_report_service.dart';
+import 'services/read_aloud_service.dart';
 import 'widgets/auth_gate.dart';
 import 'widgets/sos_trigger_host.dart';
 
@@ -52,6 +61,14 @@ class ColomboPalApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AppState>(create: (_) => AppState()),
+
+        // ---- Accessibility: text size, high contrast, Read Aloud ----
+        ChangeNotifierProvider<AccessibilitySettings>(
+          create: (_) => AccessibilitySettings(),
+        ),
+        ChangeNotifierProvider<ReadAloudService>(
+          create: (_) => ReadAloudService(),
+        ),
 
         // One AuthService shared by AuthState (sign-in/up/out) and
         // ReportsProvider (who "the current user" is).
@@ -82,11 +99,21 @@ class ColomboPalApp extends StatelessWidget {
           },
         ),
 
+        // ---- Community Reports: published copies only (read-only) ----
+        Provider<CommunityReportRepository>(
+          create: (_) => FirebaseCommunityReportRepository(),
+        ),
+
         // ---- Admin module (lib/admin/) ----
         Provider<AdminAuthService>(create: (_) => AdminAuthService()),
         Provider<AdminReportService>(
-          create: (_) =>
-              AdminReportService(repository: FirebaseAdminReportRepository()),
+          create: (_) {
+            final repository = FirebaseAdminReportRepository();
+            return AdminReportService(
+              repository: repository,
+              publication: repository,
+            );
+          },
         ),
         // Independently verifies users/{uid}.role == "admin".
         ChangeNotifierProvider<AdminAuthProvider>(
@@ -104,30 +131,52 @@ class ColomboPalApp extends StatelessWidget {
           },
         ),
       ],
-      child: Consumer<AppState>(
-        builder: (context, state, _) {
+      // Rebuilds only when the language, theme mode or accessibility
+      // settings change — not on every AppState notification (SOS hold
+      // progress, signup drafts, ...).
+      child: Builder(
+        builder: (context) {
+          final locale = context.select<AppState, AppLocale>((s) => s.locale);
+          final themeMode = context.select<AppState, ThemeMode>(
+            (s) => s.themeMode,
+          );
+          final a11y = context.watch<AccessibilitySettings>();
           return AppStringsScope(
-            locale: state.locale,
+            locale: locale,
             child: MaterialApp(
               title: 'Colombo Pal',
               debugShowCheckedModeBanner: false,
+              // Lets SosTriggerHost open the SOS dialog from outside the
+              // widget tree (home-screen widget / volume-button triggers).
               navigatorKey: rootNavigatorKey,
-              theme: AppTheme.light,
-              darkTheme: AppTheme.dark,
-              themeMode: state.themeMode,
-              // Large system text scale support for elderly users:
-              // respects the device text-size setting up to a cap so
-              // layouts don't break.
+              // In-app High Contrast Mode swaps the palettes; the
+              // highContrast* themes also apply when the OS asks for high
+              // contrast (e.g. iOS "Increase Contrast").
+              theme: a11y.highContrast
+                  ? AppTheme.highContrastLight
+                  : AppTheme.light,
+              darkTheme: a11y.highContrast
+                  ? AppTheme.highContrastDark
+                  : AppTheme.dark,
+              highContrastTheme: AppTheme.highContrastLight,
+              highContrastDarkTheme: AppTheme.highContrastDark,
+              themeMode: themeMode,
+              navigatorObservers: [
+                context.read<ReadAloudService>().navigatorObserver,
+              ],
+              // App-wide text size: the larger of the OS text size and the
+              // in-app preset (Standard 100% / Large 125% / Extra Large
+              // 150%). Never smaller than the OS setting, and no upper cap,
+              // so users who need very large system text keep it.
               builder: (context, child) {
                 final mq = MediaQuery.of(context);
                 return MediaQuery(
                   data: mq.copyWith(
-                    textScaler: mq.textScaler.clamp(
-                      minScaleFactor: 1.0,
-                      maxScaleFactor: 1.3,
-                    ),
+                    textScaler: a11y.textScalerFor(mq.textScaler),
                   ),
-                  child: SosTriggerHost(child: child ?? const SizedBox.shrink()),
+                  child: SosTriggerHost(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 );
               },
               home: const AuthGate(),
@@ -152,18 +201,43 @@ class ColomboPalApp extends StatelessWidget {
 
                 Routes.reportForm: (_) => const ReportFormScreen(),
                 Routes.reportConfirm: (_) => const ReportConfirmScreen(),
-                Routes.reportMine: (_) => const ReportMineScreen(),
+                // Optional argument: the StatusFilter to open with (e.g.
+                // the dashboard's "Verified by admin" card passes verified).
+                Routes.reportMine: (context) {
+                  final initial = ModalRoute.of(context)?.settings.arguments;
+                  return ReportMineScreen(
+                    initialStatus: initial is StatusFilter
+                        ? initial
+                        : StatusFilter.all,
+                  );
+                },
 
                 Routes.profileHome: (_) => const ProfileHomeScreen(),
                 Routes.profileContacts: (_) => const ProfileContactsScreen(),
                 Routes.profileAccess: (_) => const ProfileAccessScreen(),
                 Routes.profileSharing: (_) => const ProfileSharingScreen(),
+                Routes.accessibilitySettings: (_) =>
+                    const AccessibilitySettingsScreen(),
                 Routes.requestAssistance: (_) =>
                     const RequestAssistanceScreen(),
                 Routes.requestStatus: (_) => const RequestStatusScreen(),
 
                 Routes.volunteerHome: (_) => const VolunteerHomeScreen(),
-                Routes.volunteerFeed: (_) => const VolunteerFeedScreen(),
+                // The feed's listener lives only while the screen is open;
+                // Report Details is pushed on top, so filters survive it.
+                Routes.volunteerFeed: (context) =>
+                    ChangeNotifierProvider<CommunityReportsProvider>(
+                      create: (context) => CommunityReportsProvider(
+                        repository: context.read<CommunityReportRepository>(),
+                      )..refresh(),
+                      child: const VolunteerFeedScreen(),
+                    ),
+                Routes.communityReportDetails: (context) =>
+                    CommunityReportDetailsScreen(
+                      initialReport:
+                          ModalRoute.of(context)!.settings.arguments
+                              as PublicConditionReport,
+                    ),
                 Routes.volunteerProfile: (_) => const VolunteerProfileScreen(),
                 Routes.volunteerAssistanceRequests: (_) =>
                     const AssistanceRequestsScreen(),
