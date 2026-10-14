@@ -51,7 +51,10 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
           children: [
             Align(
               alignment: Alignment.centerRight,
-              child: LanguageToggle(locale: state.locale, onChanged: state.setLocale),
+              child: LanguageToggle(
+                locale: state.locale,
+                onChanged: state.setLocale,
+              ),
             ),
             Expanded(
               child: Center(
@@ -74,7 +77,11 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
                       child: Text(
                         context.t('appTagline'),
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14, color: palette.muted, height: 1.5),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: palette.muted,
+                          height: 1.5,
+                        ),
                       ),
                     ),
                   ],
@@ -87,7 +94,11 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
                 Text(
                   context.t('registeringAs'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.muted),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: palette.muted,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 _RoleCard(
@@ -112,7 +123,10 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
                           TextSpan(text: '${context.t('haveAccount')} '),
                           TextSpan(
                             text: context.t('logIn'),
-                            style: TextStyle(color: palette.accent, fontWeight: FontWeight.w700),
+                            style: TextStyle(
+                              color: palette.accent,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ],
                       ),
@@ -122,10 +136,17 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
                 const SizedBox(height: 10),
                 Center(
                   child: TextButton(
-                    onPressed: _guestLoading ? null : () => _continueAsGuest(context),
+                    onPressed: _guestLoading
+                        ? null
+                        : () => _continueAsGuest(context),
                     child: Text(
-                      _guestLoading ? context.t('loading') : context.t('continueAsGuest'),
-                      style: TextStyle(color: palette.muted, fontWeight: FontWeight.w600),
+                      _guestLoading
+                          ? context.t('loading')
+                          : context.t('continueAsGuest'),
+                      style: TextStyle(
+                        color: palette.muted,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -139,7 +160,11 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
 }
 
 class _RoleCard extends StatelessWidget {
-  const _RoleCard({required this.title, required this.description, required this.onTap});
+  const _RoleCard({
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
 
   final String title;
   final String description;
@@ -157,7 +182,13 @@ class _RoleCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: palette.surface,
           borderRadius: BorderRadius.circular(18),
-          boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [
+            BoxShadow(
+              color: palette.shadow,
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,10 +196,17 @@ class _RoleCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 16, color: palette.text),
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                color: palette.text,
+              ),
             ),
             const SizedBox(height: 3),
-            Text(description, style: TextStyle(fontSize: 13, color: palette.muted)),
+            Text(
+              description,
+              style: TextStyle(fontSize: 13, color: palette.muted),
+            ),
           ],
         ),
       ),

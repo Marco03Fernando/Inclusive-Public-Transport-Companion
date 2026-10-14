@@ -64,7 +64,11 @@ const mockRouteOptions = [
 ];
 
 const mockRouteSteps = [
-  RouteStep(n: 1, text: 'Walk to Nugegoda Bus Stand', detail: '350 m, level pavement'),
+  RouteStep(
+    n: 1,
+    text: 'Walk to Nugegoda Bus Stand',
+    detail: '350 m, level pavement',
+  ),
   RouteStep(
     n: 2,
     text: 'Bus 138 to Fort',
@@ -85,7 +89,12 @@ const mockRouteSteps = [
 /// Display-only row for the still-demo route-condition / community lists
 /// (rendered with `ConditionTile`). Real submitted reports are
 /// [ConditionReport]s.
-typedef DemoCondition = ({String title, String location, ReportStatus status, String? date});
+typedef DemoCondition = ({
+  String title,
+  String location,
+  ReportStatus status,
+  String? date,
+});
 
 const List<DemoCondition> mockRouteConditions = [
   (

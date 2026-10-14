@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart' show User;
 import 'package:flutter/foundation.dart';
 
+import '../models/admin_exception.dart';
 import '../models/admin_profile.dart';
 import '../services/admin_auth_service.dart';
 
@@ -32,7 +33,7 @@ class AdminAuthProvider extends ChangeNotifier {
   /// can't overwrite the state of a newer one.
   int _generation = 0;
 
-  AdminAuthProvider({required AdminAuthService service}) : _service = service {
+  AdminAuthProvider({required this._service}) {
     _subscription = _service.authStateChanges().listen(
       _onUserChanged,
       onError: (_) => _onAdminChanged(null),
@@ -41,12 +42,19 @@ class AdminAuthProvider extends ChangeNotifier {
 
   AdminAuthStatus _status = AdminAuthStatus.checking;
   AdminProfile? _profile;
+  String? _error;
+  User? _lastUser;
 
   AdminAuthStatus get status => _status;
   AdminProfile? get profile => _profile;
   bool get isAdmin => _status == AdminAuthStatus.authenticated;
 
+  /// Set when the role couldn't be CHECKED (network / rules), as opposed
+  /// to the account simply not being an admin. Access stays denied.
+  String? get error => _error;
+
   Future<void> _onUserChanged(User? user) async {
+    _lastUser = user;
     final generation = ++_generation;
 
     // Back to "checking" while the role is verified, so AdminGate shows a
@@ -57,12 +65,27 @@ class AdminAuthProvider extends ChangeNotifier {
       notifyListeners();
     }
 
-    final profile = await _service.verifyAdmin(user);
-    if (generation == _generation) _onAdminChanged(profile);
+    AdminProfile? profile;
+    String? error;
+    try {
+      profile = await _service.verifyAdmin(user);
+    } on AdminException catch (e) {
+      error = e.message;
+    }
+    if (generation == _generation) _onAdminChanged(profile, error: error);
   }
 
-  void _onAdminChanged(AdminProfile? profile) {
+  /// Re-checks the role of the signed-in account (after a failed check).
+  Future<void> retry() {
+    _status = AdminAuthStatus.checking;
+    _error = null;
+    notifyListeners();
+    return _onUserChanged(_lastUser);
+  }
+
+  void _onAdminChanged(AdminProfile? profile, {String? error}) {
     _profile = profile;
+    _error = error;
     _status = profile == null
         ? AdminAuthStatus.unauthenticated
         : AdminAuthStatus.authenticated;

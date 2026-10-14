@@ -63,7 +63,8 @@ class _SignupContactsScreenState extends State<SignupContactsScreen> {
     return AppScaffold(
       routeName: Routes.signupContacts,
       title: context.t('signUp'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.signupAccess),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.signupAccess),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -71,10 +72,17 @@ class _SignupContactsScreenState extends State<SignupContactsScreen> {
           const SizedBox(height: 14),
           Text(
             context.t('contactsTitle'),
-            style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 20, color: palette.text),
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+              color: palette.text,
+            ),
           ),
           const SizedBox(height: 2),
-          Text(context.t('contactsNote'), style: TextStyle(fontSize: 13, color: palette.muted)),
+          Text(
+            context.t('contactsNote'),
+            style: TextStyle(fontSize: 13, color: palette.muted),
+          ),
           const SizedBox(height: 14),
           for (var i = 0; i < _contacts.length; i++) ...[
             ContactCard(
@@ -87,14 +95,22 @@ class _SignupContactsScreenState extends State<SignupContactsScreen> {
             ),
             const SizedBox(height: 10),
           ],
-          DottedAddButton(label: context.t('addAnotherContact'), onTap: _addContact),
+          DottedAddButton(
+            label: context.t('addAnotherContact'),
+            onTap: _addContact,
+          ),
           if (authState.errorMessage != null) ...[
             const SizedBox(height: 10),
-            Text(authState.errorMessage!, style: TextStyle(fontSize: 12, color: palette.danger)),
+            Text(
+              authState.errorMessage!,
+              style: TextStyle(fontSize: 12, color: palette.danger),
+            ),
           ],
           const SizedBox(height: 28),
           PrimaryButton(
-            label: authState.loading ? context.t('loading') : context.t('finishSetup'),
+            label: authState.loading
+                ? context.t('loading')
+                : context.t('finishSetup'),
             onPressed: authState.loading ? null : () => _finish(context),
           ),
         ],

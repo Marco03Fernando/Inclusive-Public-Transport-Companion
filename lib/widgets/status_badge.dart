@@ -18,7 +18,8 @@ class StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final (color, bg) = switch (status) {
-      ReportStatus.verified || ReportStatus.accepted => (palette.success, palette.successSoft),
+      ReportStatus.verified ||
+      ReportStatus.accepted => (palette.success, palette.successSoft),
       ReportStatus.rejected => (palette.danger, palette.dangerSoft),
       ReportStatus.underReview => (palette.warn, palette.warnSoft),
     };
@@ -27,8 +28,18 @@ class StatusBadge extends StatelessWidget {
       label: 'Status $text',
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
-        child: Text(text, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
       ),
     );
   }
@@ -48,8 +59,18 @@ class AccessScoreBadge extends StatelessWidget {
     final bg = high ? palette.accentSoft : palette.surface2;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
-      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
     );
   }
 }

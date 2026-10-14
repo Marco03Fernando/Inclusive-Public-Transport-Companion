@@ -15,6 +15,23 @@ extension ReportStatusAdmin on ReportStatus {
   bool get isRejected => this == ReportStatus.rejected;
 }
 
+/// Reads a stored `status` value. Documents store `status.name`
+/// ("underReview"); "under_review" is also accepted in case a document was
+/// edited by hand. Anything unknown counts as still waiting for review, so
+/// it stays visible to the admin instead of vanishing.
+ReportStatus parseReportStatus(Object? raw) {
+  switch (raw) {
+    case 'accepted':
+      return ReportStatus.accepted;
+    case 'rejected':
+      return ReportStatus.rejected;
+    case 'verified':
+      return ReportStatus.verified;
+    default:
+      return ReportStatus.underReview;
+  }
+}
+
 /// The status tabs on the report management screen.
 enum ReportFilter { all, underReview, accepted, rejected }
 

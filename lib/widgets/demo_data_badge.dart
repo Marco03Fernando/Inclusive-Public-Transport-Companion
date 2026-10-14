@@ -22,7 +22,11 @@ class DemoDataBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: palette.surface2,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: palette.border, width: 1, style: BorderStyle.solid),
+          border: Border.all(
+            color: palette.border,
+            width: 1,
+            style: BorderStyle.solid,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -31,7 +35,12 @@ class DemoDataBadge extends StatelessWidget {
             const SizedBox(width: 5),
             Text(
               context.t('demoDataLabel'),
-              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: palette.muted, letterSpacing: 0.2),
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+                color: palette.muted,
+                letterSpacing: 0.2,
+              ),
             ),
           ],
         ),

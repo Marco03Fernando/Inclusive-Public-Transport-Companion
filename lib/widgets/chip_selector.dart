@@ -31,7 +31,15 @@ class SelectableChip extends StatelessWidget {
             color: selected ? palette.cta : palette.border,
             width: 1.5,
           ),
-          boxShadow: selected ? [BoxShadow(color: palette.cta.withValues(alpha: 0.18), blurRadius: 10, offset: const Offset(0, 3))] : null,
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: palette.cta.withValues(alpha: 0.18),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,

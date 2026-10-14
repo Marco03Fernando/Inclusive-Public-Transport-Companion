@@ -44,6 +44,11 @@ class LocalConditionReportRepository implements ConditionReportRepository {
     return reports.where((r) => r.userId == userId).toList();
   }
 
+  /// No push updates from this backend — emits a single snapshot.
+  @override
+  Stream<List<ConditionReport>> watchUserReports(String userId) =>
+      Stream.fromFuture(getUserReports(userId));
+
   @override
   Future<ConditionReport> updateReportStatus({
     required String reportId,

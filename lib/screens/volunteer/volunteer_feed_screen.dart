@@ -20,11 +20,16 @@ class _VolunteerFeedScreenState extends State<VolunteerFeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final labels = [context.t('allFilter'), context.t('busesFilter'), context.t('stationsFilter')];
+    final labels = [
+      context.t('allFilter'),
+      context.t('busesFilter'),
+      context.t('stationsFilter'),
+    ];
     return AppScaffold(
       routeName: Routes.volunteerFeed,
       title: context.t('communityReports'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.volunteerHome),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.volunteerHome),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -41,7 +46,12 @@ class _VolunteerFeedScreenState extends State<VolunteerFeedScreen> {
           const SizedBox(height: 12),
           const DemoDataBadge(),
           for (final item in mockVolunteerFeed) ...[
-            ConditionTile(title: item.title, location: item.location, status: item.status, date: item.date),
+            ConditionTile(
+              title: item.title,
+              location: item.location,
+              status: item.status,
+              date: item.date,
+            ),
             const SizedBox(height: 10),
           ],
         ],

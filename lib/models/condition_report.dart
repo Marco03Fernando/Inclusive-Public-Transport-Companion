@@ -70,7 +70,8 @@ class ConditionReport {
   /// e.g. "Submitted today, 9:20 AM".
   String get submittedLabel {
     final now = DateTime.now();
-    final isToday = now.year == createdAt.year &&
+    final isToday =
+        now.year == createdAt.year &&
         now.month == createdAt.month &&
         now.day == createdAt.day;
     if (isToday) {
@@ -78,7 +79,8 @@ class ConditionReport {
     }
 
     final yesterday = now.subtract(const Duration(days: 1));
-    final isYesterday = yesterday.year == createdAt.year &&
+    final isYesterday =
+        yesterday.year == createdAt.year &&
         yesterday.month == createdAt.month &&
         yesterday.day == createdAt.day;
     if (isYesterday) return 'Submitted yesterday';
@@ -107,15 +109,24 @@ class ConditionReport {
   /// assigns the real Firestore document ID, and [ReportsProvider] fills
   /// in [userId] from the signed-in user right before submission.
   factory ConditionReport.fromDraft(ConditionReportDraft draft) {
-    assert(draft.subject != null, 'Draft must have a subject before submitting.');
-    assert(draft.conditionType != null, 'Draft must have a condition type before submitting.');
+    assert(
+      draft.subject != null,
+      'Draft must have a subject before submitting.',
+    );
+    assert(
+      draft.conditionType != null,
+      'Draft must have a condition type before submitting.',
+    );
     return ConditionReport(
       id: '',
       subject: draft.subject!,
       vehicleOrStationNumber: draft.vehicleOrStationNumber.trim(),
-      location: draft.reportLocation ??
+      location:
+          draft.reportLocation ??
           ReportLocation(
-            label: draft.location.trim().isEmpty ? 'Not provided' : draft.location.trim(),
+            label: draft.location.trim().isEmpty
+                ? 'Not provided'
+                : draft.location.trim(),
           ),
       conditionType: draft.conditionType!,
       description: draft.description.trim(),
@@ -155,21 +166,22 @@ class ConditionReport {
   /// repositories. Not used by the Firestore repository — see
   /// `firebase_condition_report_repository.dart` for that mapping.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'userId': userId,
-        'subject': subject.name,
-        'vehicleOrStationNumber': vehicleOrStationNumber,
-        'location': location.toJson(),
-        'conditionType': conditionType.name,
-        'description': description,
-        'photoUrl': photoUrl,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt?.toIso8601String(),
-        'status': status.name,
-        'adminComment': adminComment,
-      };
+    'id': id,
+    'userId': userId,
+    'subject': subject.name,
+    'vehicleOrStationNumber': vehicleOrStationNumber,
+    'location': location.toJson(),
+    'conditionType': conditionType.name,
+    'description': description,
+    'photoUrl': photoUrl,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt?.toIso8601String(),
+    'status': status.name,
+    'adminComment': adminComment,
+  };
 
-  factory ConditionReport.fromJson(Map<String, dynamic> json) => ConditionReport(
+  factory ConditionReport.fromJson(Map<String, dynamic> json) =>
+      ConditionReport(
         id: json['id'] as String? ?? '',
         userId: json['userId'] as String? ?? '',
         subject: ReportSubject.values.byName(json['subject'] as String),
@@ -177,12 +189,18 @@ class ConditionReport {
         location: json['location'] == null
             ? ReportLocation.empty
             : ReportLocation.fromJson(json['location'] as Map<String, dynamic>),
-        conditionType: ConditionType.values.byName(json['conditionType'] as String),
+        conditionType: ConditionType.values.byName(
+          json['conditionType'] as String,
+        ),
         description: json['description'] as String? ?? '',
         photoUrl: json['photoUrl'] as String?,
         createdAt: DateTime.parse(json['createdAt'] as String),
-        updatedAt: json['updatedAt'] == null ? null : DateTime.tryParse(json['updatedAt'] as String),
-        status: ReportStatus.values.byName(json['status'] as String? ?? 'underReview'),
+        updatedAt: json['updatedAt'] == null
+            ? null
+            : DateTime.tryParse(json['updatedAt'] as String),
+        status: ReportStatus.values.byName(
+          json['status'] as String? ?? 'underReview',
+        ),
         adminComment: json['adminComment'] as String?,
       );
 }

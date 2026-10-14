@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_theme.dart';
+import '../../core/theme/app_theme.dart';
+import '../services/admin_report_service.dart';
 
 /// Asks the admin to confirm accepting a report, with an OPTIONAL note.
 ///
 /// Returns null if cancelled; otherwise the trimmed note (possibly empty).
-Future<String?> showAcceptReportDialog(BuildContext context) {
+Future<String?> showAcceptReportDialog(
+  BuildContext context, {
+  String? initialNote,
+}) {
   return showDialog<String>(
     context: context,
-    builder: (_) => const _ReviewNoteDialog(
+    builder: (context) => _ReviewNoteDialog(
       title: 'Accept this report?',
-      message: 'The reporter will see it as Accepted.',
-      hint: 'Optional note',
-      confirmLabel: 'ACCEPT',
-      confirmColor: AppColors.success,
+      message: 'The reporter will see it as Accepted in My Reports.',
+      hint: 'Optional note for the reporter',
+      confirmLabel: 'Accept',
+      confirmColor: context.palette.success,
       noteRequired: false,
+      initialNote: initialNote,
     ),
   );
 }
@@ -22,16 +27,41 @@ Future<String?> showAcceptReportDialog(BuildContext context) {
 /// Asks the admin for a MANDATORY rejection reason.
 ///
 /// Returns null if cancelled; otherwise the trimmed, non-empty reason.
-Future<String?> showRejectReportDialog(BuildContext context) {
+Future<String?> showRejectReportDialog(
+  BuildContext context, {
+  String? initialNote,
+}) {
   return showDialog<String>(
     context: context,
-    builder: (_) => const _ReviewNoteDialog(
+    builder: (context) => _ReviewNoteDialog(
       title: 'Reject this report',
       message: 'Please tell the reporter why this report is being rejected.',
       hint: 'Reason for rejection',
-      confirmLabel: 'REJECT',
-      confirmColor: AppColors.danger,
+      confirmLabel: 'Reject',
+      confirmColor: context.palette.danger,
       noteRequired: true,
+      initialNote: initialNote,
+    ),
+  );
+}
+
+/// Adds or edits the admin comment without changing the report status.
+///
+/// Returns null if cancelled; otherwise the trimmed, non-empty comment.
+Future<String?> showEditCommentDialog(
+  BuildContext context, {
+  String? initialNote,
+}) {
+  return showDialog<String>(
+    context: context,
+    builder: (context) => _ReviewNoteDialog(
+      title: (initialNote ?? '').isEmpty ? 'Add comment' : 'Edit comment',
+      message: 'The reporter sees this comment with the report status.',
+      hint: 'Admin comment',
+      confirmLabel: 'Save',
+      confirmColor: context.palette.cta,
+      noteRequired: true,
+      initialNote: initialNote,
     ),
   );
 }
@@ -40,32 +70,25 @@ Future<String?> showRejectReportDialog(BuildContext context) {
 ///
 /// Returns true only if the admin confirmed.
 Future<bool> showDeleteReportDialog(BuildContext context) async {
+  final palette = context.palette;
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
       title: const Text('Delete this report?'),
-      content: const Text(
+      content: Text(
         'The report and its photo will be permanently removed. '
         'This cannot be undone.',
-        style: TextStyle(fontSize: 14, color: AppColors.grey600),
+        style: TextStyle(fontSize: 14, color: palette.muted),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(false),
-          child: const Text('CANCEL'),
+          child: const Text('Cancel'),
         ),
-        // See _ReviewNoteDialog: override the theme's infinite min width.
-        ElevatedButton(
+        _DialogConfirmButton(
+          label: 'Delete',
+          color: palette.danger,
           onPressed: () => Navigator.of(dialogContext).pop(true),
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(120, 48),
-            backgroundColor: AppColors.danger,
-            foregroundColor: AppColors.white,
-          ),
-          child: const Text('DELETE'),
         ),
       ],
     ),
@@ -80,6 +103,7 @@ class _ReviewNoteDialog extends StatefulWidget {
   final String confirmLabel;
   final Color confirmColor;
   final bool noteRequired;
+  final String? initialNote;
 
   const _ReviewNoteDialog({
     required this.title,
@@ -88,6 +112,7 @@ class _ReviewNoteDialog extends StatefulWidget {
     required this.confirmLabel,
     required this.confirmColor,
     required this.noteRequired,
+    this.initialNote,
   });
 
   @override
@@ -96,7 +121,7 @@ class _ReviewNoteDialog extends StatefulWidget {
 
 class _ReviewNoteDialogState extends State<_ReviewNoteDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _controller = TextEditingController();
+  late final _controller = TextEditingController(text: widget.initialNote);
 
   @override
   void dispose() {
@@ -111,10 +136,8 @@ class _ReviewNoteDialogState extends State<_ReviewNoteDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
       title: Text(widget.title),
       content: SingleChildScrollView(
         child: Form(
@@ -125,24 +148,22 @@ class _ReviewNoteDialogState extends State<_ReviewNoteDialog> {
             children: [
               Text(
                 widget.message,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.grey600,
-                ),
+                style: TextStyle(fontSize: 14, color: palette.muted),
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _controller,
                 autofocus: widget.noteRequired,
                 minLines: 3,
                 maxLines: 5,
-                maxLength: 300,
+                maxLength: AdminReportService.maxCommentLength,
                 textCapitalization: TextCapitalization.sentences,
+                style: TextStyle(fontSize: 14, color: palette.text),
                 decoration: InputDecoration(hintText: widget.hint),
                 validator: widget.noteRequired
                     ? (value) => (value == null || value.trim().isEmpty)
-                        ? 'Please enter a reason.'
-                        : null
+                          ? 'This can\'t be empty.'
+                          : null
                     : null,
               ),
             ],
@@ -152,20 +173,40 @@ class _ReviewNoteDialogState extends State<_ReviewNoteDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('CANCEL'),
+          child: const Text('Cancel'),
         ),
-        // The app theme gives ElevatedButton an infinite minimum width;
-        // inside dialog actions that would fail layout, so override it.
-        ElevatedButton(
+        _DialogConfirmButton(
+          label: widget.confirmLabel,
+          color: widget.confirmColor,
           onPressed: _confirm,
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(120, 48),
-            backgroundColor: widget.confirmColor,
-            foregroundColor: AppColors.white,
-          ),
-          child: Text(widget.confirmLabel),
         ),
       ],
+    );
+  }
+}
+
+class _DialogConfirmButton extends StatelessWidget {
+  final String label;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const _DialogConfirmButton({
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
     );
   }
 }

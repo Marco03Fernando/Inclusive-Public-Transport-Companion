@@ -40,37 +40,56 @@ class Routes {
 
   /// The home screen each role lands on after sign-in / sign-up.
   static String homeFor(AppRole role) => switch (role) {
-        AppRole.passenger => home,
-        AppRole.volunteer => volunteerHome,
-        AppRole.admin => admin,
-      };
+    AppRole.passenger => home,
+    AppRole.volunteer => volunteerHome,
+    AppRole.admin => admin,
+  };
 
-  static const onboardingRoutes = {roleSelect, login, signupBasic, signupAccess, signupContacts};
+  static const onboardingRoutes = {
+    roleSelect,
+    login,
+    signupBasic,
+    signupAccess,
+    signupContacts,
+  };
 
   /// Ports the design's `sosEligibleScreens` list: SOS is reachable from any
   /// signed-in screen, except the transient report-confirm success state and
   /// onboarding (no account yet). Volunteers are still people out in transit
   /// on their own, so they get the same safety net as passengers.
   static const _sosEligiblePassenger = {
-    home, planSearch, planResults, planDetail,
-    shareSetup, shareActive,
-    reportForm, reportMine,
-    profileHome, profileContacts, profileAccess, profileSharing,
-    requestAssistance, requestStatus,
+    home,
+    planSearch,
+    planResults,
+    planDetail,
+    shareSetup,
+    shareActive,
+    reportForm,
+    reportMine,
+    profileHome,
+    profileContacts,
+    profileAccess,
+    profileSharing,
+    requestAssistance,
+    requestStatus,
   };
 
   static const _sosEligibleVolunteer = {
-    volunteerHome, volunteerFeed, volunteerProfile, volunteerAssistanceRequests,
+    volunteerHome,
+    volunteerFeed,
+    volunteerProfile,
+    volunteerAssistanceRequests,
     reportForm,
   };
 
-  static bool showsBottomNav(String route) => !onboardingRoutes.contains(route) && route != admin;
+  static bool showsBottomNav(String route) =>
+      !onboardingRoutes.contains(route) && route != admin;
 
   static bool showsSos(String route, AppRole role) => switch (role) {
-        AppRole.passenger => _sosEligiblePassenger.contains(route),
-        AppRole.volunteer => _sosEligibleVolunteer.contains(route),
-        AppRole.admin => false,
-      };
+    AppRole.passenger => _sosEligiblePassenger.contains(route),
+    AppRole.volunteer => _sosEligibleVolunteer.contains(route),
+    AppRole.admin => false,
+  };
 }
 
 enum BottomTab { home, plan, share, report, reports, profile }
@@ -85,19 +104,39 @@ class TabDef {
 
 const passengerTabs = [
   TabDef(BottomTab.home, Routes.home, {Routes.home}),
-  TabDef(BottomTab.plan, Routes.planSearch, {Routes.planSearch, Routes.planResults, Routes.planDetail}),
-  TabDef(BottomTab.share, Routes.shareSetup, {Routes.shareSetup, Routes.shareActive}),
-  TabDef(BottomTab.report, Routes.reportForm, {Routes.reportForm, Routes.reportConfirm, Routes.reportMine}),
+  TabDef(BottomTab.plan, Routes.planSearch, {
+    Routes.planSearch,
+    Routes.planResults,
+    Routes.planDetail,
+  }),
+  TabDef(BottomTab.share, Routes.shareSetup, {
+    Routes.shareSetup,
+    Routes.shareActive,
+  }),
+  TabDef(BottomTab.report, Routes.reportForm, {
+    Routes.reportForm,
+    Routes.reportConfirm,
+    Routes.reportMine,
+  }),
   TabDef(BottomTab.profile, Routes.profileHome, {
-    Routes.profileHome, Routes.profileContacts, Routes.profileAccess, Routes.profileSharing,
-    Routes.requestAssistance, Routes.requestStatus,
+    Routes.profileHome,
+    Routes.profileContacts,
+    Routes.profileAccess,
+    Routes.profileSharing,
+    Routes.requestAssistance,
+    Routes.requestStatus,
   }),
 ];
 
 const volunteerTabs = [
   TabDef(BottomTab.home, Routes.volunteerHome, {Routes.volunteerHome}),
   TabDef(BottomTab.reports, Routes.volunteerFeed, {Routes.volunteerFeed}),
-  TabDef(BottomTab.report, Routes.reportForm, {Routes.reportForm, Routes.reportConfirm}),
-  TabDef(BottomTab.profile, Routes.volunteerProfile,
-      {Routes.volunteerProfile, Routes.volunteerAssistanceRequests}),
+  TabDef(BottomTab.report, Routes.reportForm, {
+    Routes.reportForm,
+    Routes.reportConfirm,
+  }),
+  TabDef(BottomTab.profile, Routes.volunteerProfile, {
+    Routes.volunteerProfile,
+    Routes.volunteerAssistanceRequests,
+  }),
 ];

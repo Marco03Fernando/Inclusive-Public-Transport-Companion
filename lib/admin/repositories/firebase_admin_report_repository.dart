@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../models/condition_report.dart';
 import '../models/admin_exception.dart';
 import '../models/report_filter.dart';
@@ -12,7 +14,10 @@ import 'admin_report_repository.dart';
 /// model mapping mirrors `FirebaseConditionReportRepository._fromDocument`
 /// (flat `locationName` / `latitude` / `longitude`, `vehicleOrStationNumber`
 /// etc.), except that it is TOLERANT: one malformed document is skipped
-/// instead of breaking the whole admin list.
+/// (and counted) instead of breaking the whole admin list.
+///
+/// Writes only ever touch `status`, `adminComment` and `updatedAt` — the
+/// exact fields `firestore.rules` lets an admin change.
 class FirebaseAdminReportRepository implements AdminReportRepository {
   static const _collectionPath = 'condition_reports';
 
@@ -22,29 +27,38 @@ class FirebaseAdminReportRepository implements AdminReportRepository {
   FirebaseAdminReportRepository({
     FirebaseFirestore? firestore,
     FirebaseStorage? storage,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _storage = storage ?? FirebaseStorage.instance;
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _storage = storage ?? FirebaseStorage.instance;
 
   CollectionReference<Map<String, dynamic>> get _collection =>
       _firestore.collection(_collectionPath);
 
   @override
-  Stream<List<ConditionReport>> watchAllReports() {
+  Stream<AdminReportsSnapshot> watchAllReports() {
     // Single-field ordering only: no composite index required. Status
     // filtering is done on the client (see AdminReportsProvider) for the
-    // same reason. Fine for thousands of reports; see the README notes on
-    // pagination if the collection grows much larger.
+    // same reason.
     return _collection
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-      final reports = <ConditionReport>[];
-      for (final doc in snapshot.docs) {
-        final report = _fromDocument(doc);
-        if (report != null) reports.add(report);
-      }
-      return reports;
-    });
+          final reports = <ConditionReport>[];
+          var skipped = 0;
+          for (final doc in snapshot.docs) {
+            final report = _fromDocument(doc);
+            if (report == null) {
+              skipped++;
+            } else {
+              reports.add(report);
+            }
+          }
+          return (reports: reports, skipped: skipped);
+        })
+        .handleError(
+          (Object e) => throw e is FirebaseException
+              ? _mapError(e, action: 'load reports')
+              : e,
+        );
   }
 
   @override
@@ -52,62 +66,131 @@ class FirebaseAdminReportRepository implements AdminReportRepository {
     required String reportId,
     required ReportStatus decision,
     required String adminComment,
+    required ReportStatus expectedStatus,
   }) async {
     final docRef = _collection.doc(reportId);
 
-    // A transaction, so two admins opening the same report can't silently
+    // A transaction, so two admins on the same report can't silently
     // overwrite each other: the second one to save gets a clear message.
-    await _firestore.runTransaction((transaction) async {
-      final snapshot = await transaction.get(docRef);
+    await _guard(
+      action: 'save your decision',
+      () => _firestore.runTransaction((transaction) async {
+        final snapshot = await transaction.get(docRef);
+        if (!snapshot.exists) {
+          throw const AdminException('This report no longer exists.');
+        }
+
+        final current = parseReportStatus(snapshot.data()?['status']);
+        if (current != expectedStatus) {
+          throw const AdminException(
+            'This report was just updated by someone else. '
+            'Please check its new status and try again.',
+          );
+        }
+
+        transaction.update(docRef, {
+          'status': decision.name,
+          'adminComment': adminComment,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }),
+    );
+  }
+
+  @override
+  Future<void> updateComment({
+    required String reportId,
+    required String adminComment,
+  }) {
+    return _guard(
+      action: 'save the comment',
+      () => _collection.doc(reportId).update({
+        'adminComment': adminComment,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }),
+    );
+  }
+
+  @override
+  Future<void> deleteReport(String reportId) {
+    return _guard(action: 'delete the report', () async {
+      final docRef = _collection.doc(reportId);
+      final snapshot = await docRef.get();
 
       if (!snapshot.exists) {
         throw const AdminException('This report no longer exists.');
       }
 
-      final current = _parseStatus(snapshot.data()?['status'] as String?);
-      if (!current.isPending) {
-        throw const AdminException(
-          'This report has already been reviewed.',
-        );
+      // Photos live at condition_reports/{userId}/{reportId}.jpg (see
+      // FirebaseConditionReportRepository). Deleting the Firestore
+      // document doesn't touch Storage, so remove it explicitly.
+      final data = snapshot.data();
+      final userId = data?['userId'] as String?;
+      final photoUrl = data?['photoUrl'] as String?;
+      if (userId != null &&
+          userId.isNotEmpty &&
+          photoUrl != null &&
+          photoUrl.isNotEmpty) {
+        try {
+          await _storage
+              .ref('condition_reports/$userId/$reportId.jpg')
+              .delete();
+        } on FirebaseException catch (e) {
+          if (e.code != 'object-not-found') rethrow;
+        }
       }
 
-      // Only these three fields are touched — the Firestore security
-      // rules allow admins to change exactly these and nothing else.
-      transaction.update(docRef, {
-        'status': decision.name,
-        'adminComment': adminComment,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      await docRef.delete();
     });
   }
 
-  @override
-  Future<void> deleteReport(String reportId) async {
-    final docRef = _collection.doc(reportId);
-    final snapshot = await docRef.get();
-
-    if (!snapshot.exists) {
-      throw const AdminException('This report no longer exists.');
+  /// Runs [body], turning Firebase failures into an [AdminException] whose
+  /// message says whether it was a permission, network or missing-report
+  /// problem.
+  Future<void> _guard(
+    Future<void> Function() body, {
+    required String action,
+  }) async {
+    try {
+      await body();
+    } on AdminException {
+      rethrow;
+    } on FirebaseException catch (e) {
+      throw _mapError(e, action: action);
     }
+  }
 
-    // Photos live at condition_reports/{userId}/{reportId}.jpg (see
-    // FirebaseConditionReportRepository._uploadPhoto). Deleting the
-    // Firestore document doesn't touch Storage, so remove it explicitly.
-    final data = snapshot.data();
-    final userId = data?['userId'] as String?;
-    final photoUrl = data?['photoUrl'] as String?;
-    if (userId != null &&
-        userId.isNotEmpty &&
-        photoUrl != null &&
-        photoUrl.isNotEmpty) {
-      try {
-        await _storage.ref('condition_reports/$userId/$reportId.jpg').delete();
-      } on FirebaseException catch (e) {
-        if (e.code != 'object-not-found') rethrow;
-      }
+  AdminException _mapError(FirebaseException e, {required String action}) {
+    if (kDebugMode) {
+      debugPrint(
+        '[Admin] ${e.plugin}/${e.code} while trying to $action: '
+        '${e.message}',
+      );
     }
-
-    await docRef.delete();
+    switch (e.code) {
+      case 'permission-denied':
+      case 'unauthorized':
+      case 'unauthenticated':
+        return AdminException(
+          'Permission denied: could not $action. Make sure this account has '
+          'role "admin" in users/{uid} and the latest security rules are '
+          'deployed.',
+        );
+      case 'unavailable':
+      case 'deadline-exceeded':
+      case 'network-request-failed':
+      case 'retry-limit-exceeded':
+        return AdminException(
+          'Network problem: could not $action. Check your internet '
+          'connection and try again.',
+        );
+      case 'not-found':
+        return const AdminException('This report no longer exists.');
+      default:
+        return AdminException(
+          'Could not $action (${e.code}). Please try again.',
+        );
+    }
   }
 
   /// Returns null (skips the document) if it can't be parsed.
@@ -137,37 +220,20 @@ class FirebaseAdminReportRepository implements AdminReportRepository {
         conditionType: _enumOr(
           ConditionType.values,
           data['conditionType'] as String?,
-          ConditionType.unsafe,
+          ConditionType.other,
         ),
         description: data['description'] as String? ?? '',
         photoUrl: data['photoUrl'] as String?,
-        status: _parseStatus(data['status'] as String?),
+        status: parseReportStatus(data['status']),
         adminComment: data['adminComment'] as String?,
         createdAt: createdAt?.toDate() ?? DateTime.now(),
         updatedAt: updatedAt?.toDate(),
       );
-    } catch (_) {
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[Admin] Skipping malformed report ${doc.id}: $e');
+      }
       return null;
-    }
-  }
-
-  /// Existing documents store `status.name` ("underReview"). "under_review"
-  /// is also accepted in case a document was ever edited by hand. Anything
-  /// unknown is treated as still waiting for review, so it stays visible
-  /// to the admin instead of vanishing.
-  ReportStatus _parseStatus(String? raw) {
-    switch (raw) {
-      case 'accepted':
-        return ReportStatus.accepted;
-      case 'rejected':
-        return ReportStatus.rejected;
-      case 'verified':
-        return ReportStatus.verified;
-      case 'underReview':
-      case 'under_review':
-        return ReportStatus.underReview;
-      default:
-        return ReportStatus.underReview;
     }
   }
 

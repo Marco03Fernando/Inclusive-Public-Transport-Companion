@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../models/condition_report.dart';
-import '../../theme/app_theme.dart';
+import '../../utils/admin_formatters.dart';
+import '../../widgets/buttons.dart';
+import '../../widgets/screen_header.dart';
 import '../../widgets/status_badge.dart';
 import '../models/report_filter.dart';
 import '../providers/admin_reports_provider.dart';
-import '../../utils/admin_formatters.dart';
 import '../widgets/admin_info_row.dart';
 import '../widgets/admin_section_card.dart';
 import '../widgets/review_dialogs.dart';
 
-/// Full detail of one report, with Accept / Reject for reports that are
-/// still under review, and Delete for any report.
+/// Full detail of one `condition_reports/{reportId}` document, with:
+///  - Accept / Reject while it is under review,
+///  - "Change to accepted / rejected" once it has been reviewed,
+///  - Add / edit admin comment at any time,
+///  - Delete.
 ///
-/// The screen re-reads the report from [AdminReportsProvider] on every
-/// build, so if another admin reviews it while this screen is open, the
-/// status (and the action buttons) update immediately.
+/// Every action writes only `status`, `adminComment` and `updatedAt` on
+/// the SAME document, so the reporter's live "My Reports" list updates by
+/// itself. The screen re-reads the report from [AdminReportsProvider] on
+/// every build, so changes made elsewhere show up immediately too.
 class AdminReportDetailsScreen extends StatelessWidget {
   /// The report as it was when the admin tapped it. Only a fallback —
   /// the live copy from the provider is what gets displayed.
@@ -27,114 +34,119 @@ class AdminReportDetailsScreen extends StatelessWidget {
   Future<void> _accept(BuildContext context, ConditionReport report) async {
     final note = await showAcceptReportDialog(context);
     if (note == null || !context.mounted) return;
-
-    final provider = context.read<AdminReportsProvider>();
-    final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
-
-    final ok = await provider.acceptReport(report.id, comment: note);
-
-    if (ok) {
-      navigator.pop();
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Report accepted.')),
-      );
-    } else {
-      messenger.showSnackBar(
-        SnackBar(content: Text(provider.actionError ?? 'Could not accept.')),
-      );
-    }
+    await _runAction(
+      context,
+      (provider) => provider.acceptReport(report, comment: note),
+      success: 'Report accepted.',
+    );
   }
 
   Future<void> _reject(BuildContext context, ConditionReport report) async {
     final reason = await showRejectReportDialog(context);
     if (reason == null || !context.mounted) return;
+    await _runAction(
+      context,
+      (provider) => provider.rejectReport(report, reason),
+      success: 'Report rejected.',
+    );
+  }
 
-    final provider = context.read<AdminReportsProvider>();
-    final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
-
-    final ok = await provider.rejectReport(report.id, reason);
-
-    if (ok) {
-      navigator.pop();
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Report rejected.')),
-      );
-    } else {
-      messenger.showSnackBar(
-        SnackBar(content: Text(provider.actionError ?? 'Could not reject.')),
-      );
-    }
+  Future<void> _editComment(
+    BuildContext context,
+    ConditionReport report,
+  ) async {
+    final comment = await showEditCommentDialog(
+      context,
+      initialNote: report.adminComment,
+    );
+    if (comment == null || !context.mounted) return;
+    await _runAction(
+      context,
+      (provider) => provider.updateComment(report.id, comment),
+      success: 'Comment saved.',
+    );
   }
 
   Future<void> _delete(BuildContext context, ConditionReport report) async {
     final confirmed = await showDeleteReportDialog(context);
     if (!confirmed || !context.mounted) return;
+    final navigator = Navigator.of(context);
+    final ok = await _runAction(
+      context,
+      (provider) => provider.deleteReport(report.id),
+      success: 'Report deleted.',
+    );
+    if (ok) navigator.pop();
+  }
 
+  /// Runs an update and reports the outcome (or the specific failure —
+  /// permission / network / changed-by-someone-else) in a SnackBar.
+  Future<bool> _runAction(
+    BuildContext context,
+    Future<bool> Function(AdminReportsProvider provider) action, {
+    required String success,
+  }) async {
     final provider = context.read<AdminReportsProvider>();
     final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
-
-    final ok = await provider.deleteReport(report.id);
-
-    if (ok) {
-      navigator.pop();
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Report deleted.')),
-      );
-    } else {
-      messenger.showSnackBar(
-        SnackBar(content: Text(provider.actionError ?? 'Could not delete.')),
-      );
-    }
+    final ok = await action(provider);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          ok ? success : (provider.actionError ?? 'Could not save changes.'),
+        ),
+      ),
+    );
+    return ok;
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final provider = context.watch<AdminReportsProvider>();
-    final report = provider.reportById(initialReport.id) ?? initialReport;
-    final isPending = report.status.isPending;
+    final live = provider.reportById(initialReport.id);
+    // Gone from the live list (deleted elsewhere) once data has loaded.
+    final isDeleted = live == null && !provider.isLoading;
+    final report = live ?? initialReport;
+    final comment = (report.adminComment ?? '').trim();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Report details'),
-        actions: [
-          IconButton(
-            tooltip: 'Delete report',
-            icon: const Icon(Icons.delete_outline),
-            onPressed:
-                provider.isUpdating ? null : () => _delete(context, report),
-          ),
-        ],
-      ),
+      appBar: const ScreenHeader(title: 'Report details'),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                 children: [
+                  if (isDeleted) ...[
+                    _Banner(
+                      text: 'This report no longer exists.',
+                      color: palette.danger,
+                      background: palette.dangerSoft,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Text(
                           report.title,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.black,
+                          style: GoogleFonts.manrope(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: palette.text,
                           ),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.xs),
+                      const SizedBox(width: 8),
                       StatusBadge(status: report.status),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: 14),
                   _PhotoView(url: report.photoUrl),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: 14),
                   AdminSectionCard(
                     title: 'Report information',
                     child: Column(
@@ -153,18 +165,27 @@ class AdminReportDetailsScreen extends StatelessWidget {
                           value: report.conditionType.sentenceCase,
                         ),
                         AdminInfoRow(
-                          label: 'Submitted',
-                          value: AdminFormat.dateTime(report.createdAt),
+                          label: 'Status',
+                          value: _statusText(report.status),
                         ),
-                        if (report.updatedAt != null)
-                          AdminInfoRow(
-                            label: 'Last updated',
-                            value: AdminFormat.dateTime(report.updatedAt!),
-                          ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: 12),
+                  AdminSectionCard(
+                    title: 'Description',
+                    child: SelectableText(
+                      report.description.trim().isEmpty
+                          ? 'No description provided.'
+                          : report.description,
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.45,
+                        color: palette.text,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   AdminSectionCard(
                     title: 'Location',
                     child: Column(
@@ -181,23 +202,9 @@ class AdminReportDetailsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: 12),
                   AdminSectionCard(
-                    title: 'Description',
-                    child: SelectableText(
-                      report.description.trim().isEmpty
-                          ? 'No description provided.'
-                          : report.description,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        height: 1.4,
-                        color: AppColors.black,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  AdminSectionCard(
-                    title: 'Submitted by',
+                    title: 'Submission',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -208,31 +215,56 @@ class AdminReportDetailsScreen extends StatelessWidget {
                               : report.userId,
                         ),
                         AdminInfoRow(label: 'Report ID', value: report.id),
+                        AdminInfoRow(
+                          label: 'Submitted',
+                          value: AdminFormat.dateTime(report.createdAt),
+                        ),
+                        AdminInfoRow(
+                          label: 'Last updated',
+                          value: report.updatedAt == null
+                              ? 'Not updated yet'
+                              : AdminFormat.dateTime(report.updatedAt!),
+                        ),
                       ],
                     ),
                   ),
-                  if (!isPending &&
-                      (report.adminComment ?? '').trim().isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    AdminSectionCard(
-                      title: report.status.isRejected
-                          ? 'Rejection reason'
-                          : 'Admin comment',
-                      child: SelectableText(
-                        report.adminComment!,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          height: 1.4,
-                          color: AppColors.black,
-                        ),
+                  const SizedBox(height: 12),
+                  AdminSectionCard(
+                    title: report.status.isRejected
+                        ? 'Rejection reason'
+                        : 'Admin comment',
+                    trailing: TextButton.icon(
+                      onPressed: provider.isUpdating || isDeleted
+                          ? null
+                          : () => _editComment(context, report),
+                      icon: Icon(
+                        comment.isEmpty ? Icons.add : Icons.edit_outlined,
+                        size: 16,
+                      ),
+                      label: Text(comment.isEmpty ? 'Add' : 'Edit'),
+                    ),
+                    child: Text(
+                      comment.isEmpty ? 'No comment yet.' : comment,
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.45,
+                        color: comment.isEmpty ? palette.muted : palette.text,
                       ),
                     ),
-                  ],
+                  ),
+                  const SizedBox(height: 20),
+                  TextDangerButton(
+                    label: 'Delete report',
+                    onPressed: provider.isUpdating || isDeleted
+                        ? null
+                        : () => _delete(context, report),
+                  ),
                 ],
               ),
             ),
-            if (isPending)
+            if (!isDeleted)
               _ActionBar(
+                status: report.status,
                 isBusy: provider.isUpdating,
                 onAccept: () => _accept(context, report),
                 onReject: () => _reject(context, report),
@@ -242,15 +274,24 @@ class AdminReportDetailsScreen extends StatelessWidget {
       ),
     );
   }
+
+  static String _statusText(ReportStatus status) {
+    if (status.isPending) return 'Under review';
+    if (status.isRejected) return 'Rejected';
+    return 'Accepted';
+  }
 }
 
-/// Bottom bar with the two review actions.
+/// Bottom bar with the review actions. Under review → Reject / Accept;
+/// already reviewed → a single "change decision" button.
 class _ActionBar extends StatelessWidget {
+  final ReportStatus status;
   final bool isBusy;
   final VoidCallback onAccept;
   final VoidCallback onReject;
 
   const _ActionBar({
+    required this.status,
     required this.isBusy,
     required this.onAccept,
     required this.onReject,
@@ -258,66 +299,95 @@ class _ActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
+    final Widget actions;
+    if (status.isPending) {
+      actions = Row(
+        children: [
+          Expanded(
+            child: DangerButton(
+              label: 'Reject',
+              onPressed: isBusy ? null : onReject,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: PrimaryButton(
+              label: 'Accept',
+              onPressed: isBusy ? null : onAccept,
+            ),
+          ),
+        ],
+      );
+    } else if (status.isRejected) {
+      actions = SecondaryButton(
+        label: 'Change to accepted',
+        onPressed: isBusy ? null : onAccept,
+      );
+    } else {
+      actions = SecondaryButton(
+        label: 'Change to rejected',
+        onPressed: isBusy ? null : onReject,
+      );
+    }
+
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.grey300)),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        boxShadow: [
+          BoxShadow(
+            color: palette.shadow,
+            blurRadius: 18,
+            offset: const Offset(0, -6),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Neutral "saving..." indicator — shown for either action.
+          // Neutral "saving..." indicator — shown for any action.
           if (isBusy) const LinearProgressIndicator(minHeight: 3),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: isBusy ? null : onReject,
-                    icon: const Icon(Icons.close),
-                    label: const Text('REJECT'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(0, 56),
-                      foregroundColor: AppColors.danger,
-                      side: const BorderSide(
-                        color: AppColors.danger,
-                        width: 1.5,
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.button),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: isBusy ? null : onAccept,
-                    icon: const Icon(Icons.check),
-                    label: const Text('ACCEPT'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                      foregroundColor: AppColors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          Padding(padding: const EdgeInsets.all(16), child: actions),
         ],
       ),
     );
   }
 }
 
-/// The photo uploaded by the reporter (Firebase Storage download URL).
-/// Tap to open full screen with pinch-to-zoom.
+class _Banner extends StatelessWidget {
+  final String text;
+  final Color color;
+  final Color background;
+
+  const _Banner({
+    required this.text,
+    required this.color,
+    required this.background,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+/// The photo uploaded by the reporter (its stored `photoUrl`, a Firebase
+/// Storage download URL). Tap to open full screen with pinch-to-zoom.
 class _PhotoView extends StatelessWidget {
   final String? url;
 
@@ -325,6 +395,7 @@ class _PhotoView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final photoUrl = url;
 
     if (photoUrl == null || photoUrl.isEmpty) {
@@ -346,7 +417,7 @@ class _PhotoView extends StatelessWidget {
           ),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.card),
+          borderRadius: BorderRadius.circular(16),
           child: AspectRatio(
             aspectRatio: 4 / 3,
             child: Image.network(
@@ -356,7 +427,7 @@ class _PhotoView extends StatelessWidget {
                 if (progress == null) return child;
                 final total = progress.expectedTotalBytes;
                 return Container(
-                  color: AppColors.grey100,
+                  color: palette.surface2,
                   alignment: Alignment.center,
                   child: CircularProgressIndicator(
                     value: total == null
@@ -365,7 +436,7 @@ class _PhotoView extends StatelessWidget {
                   ),
                 );
               },
-              errorBuilder: (_, __, ___) => const _PhotoPlaceholder(
+              errorBuilder: (_, _, _) => const _PhotoPlaceholder(
                 icon: Icons.broken_image_outlined,
                 text: 'Could not load photo',
               ),
@@ -385,25 +456,26 @@ class _PhotoPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
-      height: 160,
+      height: 120,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.grey100,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.grey300),
+        color: palette.surface2,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.border, width: 1.5),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 36, color: AppColors.grey500),
-          const SizedBox(height: AppSpacing.xs),
+          Icon(icon, size: 32, color: palette.muted),
+          const SizedBox(height: 6),
           Text(
             text,
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.grey600,
+              color: palette.muted,
             ),
           ),
         ],
@@ -424,11 +496,7 @@ class _FullScreenPhoto extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Photo',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Photo'),
       ),
       body: Center(
         child: InteractiveViewer(
@@ -437,10 +505,20 @@ class _FullScreenPhoto extends StatelessWidget {
           child: Image.network(
             url,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const Icon(
-              Icons.broken_image_outlined,
-              color: Colors.white54,
-              size: 48,
+            errorBuilder: (_, _, _) => const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.broken_image_outlined,
+                  color: Colors.white54,
+                  size: 48,
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Could not load photo',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
             ),
           ),
         ),

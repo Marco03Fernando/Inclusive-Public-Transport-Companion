@@ -29,11 +29,19 @@ class AuthService {
     return uid;
   }
 
-  Future<User> signUpWithEmail(String email, String password) =>
-      _guard(() => _auth.createUserWithEmailAndPassword(email: email.trim(), password: password));
+  Future<User> signUpWithEmail(String email, String password) => _guard(
+    () => _auth.createUserWithEmailAndPassword(
+      email: email.trim(),
+      password: password,
+    ),
+  );
 
-  Future<User> signInWithEmail(String email, String password) =>
-      _guard(() => _auth.signInWithEmailAndPassword(email: email.trim(), password: password));
+  Future<User> signInWithEmail(String email, String password) => _guard(
+    () => _auth.signInWithEmailAndPassword(
+      email: email.trim(),
+      password: password,
+    ),
+  );
 
   Future<User> signInAnonymously() => _guard(_auth.signInAnonymously);
 

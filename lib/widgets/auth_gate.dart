@@ -20,7 +20,9 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
-  late final Future<AppRole?> _roleFuture = context.read<AuthState>().hydrateFromExistingSession();
+  late final Future<AppRole?> _roleFuture = context
+      .read<AuthState>()
+      .hydrateFromExistingSession();
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,9 @@ class _AuthGateState extends State<AuthGate> {
       future: _roleFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
         switch (snapshot.data) {
           case AppRole.passenger:

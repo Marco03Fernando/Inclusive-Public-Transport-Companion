@@ -40,7 +40,11 @@ class LabeledTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: palette.text,
+          ),
         ),
         const SizedBox(height: 6),
         TextField(
@@ -51,7 +55,11 @@ class LabeledTextField extends StatelessWidget {
           readOnly: readOnly,
           onTap: onTap,
           onChanged: onChanged,
-          decoration: InputDecoration(hintText: initialValue, errorText: errorText, suffixIcon: suffixIcon),
+          decoration: InputDecoration(
+            hintText: initialValue,
+            errorText: errorText,
+            suffixIcon: suffixIcon,
+          ),
           style: TextStyle(fontSize: 14, color: palette.text),
         ),
       ],
@@ -85,14 +93,21 @@ class LabeledTextArea extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: palette.text,
+          ),
         ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
           maxLines: 3,
           onChanged: onChanged,
-          decoration: InputDecoration(hintText: placeholder, errorText: errorText),
+          decoration: InputDecoration(
+            hintText: placeholder,
+            errorText: errorText,
+          ),
           style: TextStyle(fontSize: 14, color: palette.text),
         ),
       ],

@@ -19,8 +19,7 @@ class PolylineDecoder {
         shift += 5;
       } while (byte >= 0x20);
 
-      final latitudeChange =
-          (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      final latitudeChange = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
 
       latitude += latitudeChange;
 
@@ -33,20 +32,15 @@ class PolylineDecoder {
         shift += 5;
       } while (byte >= 0x20);
 
-      final longitudeChange =
-          (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      final longitudeChange = (result & 1) != 0
+          ? ~(result >> 1)
+          : (result >> 1);
 
       longitude += longitudeChange;
 
-      points.add(
-        LatLng(
-          latitude / 100000.0,
-          longitude / 100000.0,
-        ),
-      );
+      points.add(LatLng(latitude / 100000.0, longitude / 100000.0));
     }
 
     return points;
   }
 }
-

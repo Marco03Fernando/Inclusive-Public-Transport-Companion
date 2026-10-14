@@ -34,27 +34,37 @@ class UserProfile {
   /// Up to two initials from [name] (e.g. "Kamala Fernando" -> "KF"),
   /// falling back to "?" for a blank name.
   String get initials {
-    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .toList();
     if (parts.isEmpty) return '?';
     final letters = parts.take(2).map((p) => p[0].toUpperCase());
     return letters.join();
   }
 
   Map<String, dynamic> toMap() => {
-        'role': role.name,
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'dob': dob,
-        'accessNeeds': accessNeeds.map((n) => {'id': n.id, 'checked': n.checked}).toList(),
-        'isAnonymous': isAnonymous,
-        'createdAt': FieldValue.serverTimestamp(),
-      };
+    'role': role.name,
+    'name': name,
+    'email': email,
+    'phone': phone,
+    'dob': dob,
+    'accessNeeds': accessNeeds
+        .map((n) => {'id': n.id, 'checked': n.checked})
+        .toList(),
+    'isAnonymous': isAnonymous,
+    'createdAt': FieldValue.serverTimestamp(),
+  };
 
   /// Rehydrates access needs against [defaults] so labels/order stay defined
   /// client-side (see lib/data/mock_data.dart) — Firestore only stores which
   /// ids are checked, never the label key.
-  factory UserProfile.fromMap(String uid, Map<String, dynamic> map, List<AccessNeed> defaults) {
+  factory UserProfile.fromMap(
+    String uid,
+    Map<String, dynamic> map,
+    List<AccessNeed> defaults,
+  ) {
     final checkedIds = <String>{};
     for (final entry in (map['accessNeeds'] as List<dynamic>? ?? const [])) {
       final entryMap = entry as Map<String, dynamic>;
@@ -67,7 +77,9 @@ class UserProfile {
       email: map['email'] as String? ?? '',
       phone: map['phone'] as String? ?? '',
       dob: map['dob'] as String? ?? '',
-      accessNeeds: defaults.map((n) => n.copyWith(checked: checkedIds.contains(n.id))).toList(),
+      accessNeeds: defaults
+          .map((n) => n.copyWith(checked: checkedIds.contains(n.id)))
+          .toList(),
       isAnonymous: map['isAnonymous'] as bool? ?? false,
       createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
     );

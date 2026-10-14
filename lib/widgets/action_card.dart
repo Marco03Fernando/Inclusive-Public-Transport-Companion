@@ -29,7 +29,13 @@ class ActionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: palette.surface,
           borderRadius: BorderRadius.circular(18),
-          boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 18, offset: const Offset(0, 8))],
+          boxShadow: [
+            BoxShadow(
+              color: palette.shadow,
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +50,10 @@ class ActionCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(description, style: TextStyle(fontSize: 12, color: palette.muted)),
+            Text(
+              description,
+              style: TextStyle(fontSize: 12, color: palette.muted),
+            ),
           ],
         ),
       ),

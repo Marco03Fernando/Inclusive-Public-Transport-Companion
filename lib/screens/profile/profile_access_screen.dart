@@ -19,13 +19,15 @@ class ProfileAccessScreen extends StatelessWidget {
 
     void toggle(String id) {
       state.toggleAccessNeed(id);
-      if (uid != null) UserProfileService().updateAccessNeeds(uid, state.accessNeeds);
+      if (uid != null)
+        UserProfileService().updateAccessNeeds(uid, state.accessNeeds);
     }
 
     return AppScaffold(
       routeName: Routes.profileAccess,
       title: context.t('accessPrefsTitle'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.profileHome),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.profileHome),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

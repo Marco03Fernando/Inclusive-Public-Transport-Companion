@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/app_theme.dart';
+import '../../core/theme/app_theme.dart';
+import '../../widgets/buttons.dart';
 
 /// Centered icon + title + message (+ optional button). Used for the
-/// empty-list and error states on the dashboard and report list, in the
-/// same style as the user side's "No reports yet" state.
+/// loading-failed, permission and empty states on the admin screens, in
+/// the same style as the user side's "No reports yet" state.
 class AdminMessageState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -23,45 +25,38 @@ class AdminMessageState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 40, color: AppColors.grey300),
-            const SizedBox(height: AppSpacing.md),
+            Icon(icon, size: 40, color: palette.muted),
+            const SizedBox(height: 12),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: GoogleFonts.manrope(
                 fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: AppColors.black,
+                fontWeight: FontWeight.w700,
+                color: palette.text,
               ),
             ),
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: 4),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.grey600,
-              ),
+              style: TextStyle(fontSize: 13, color: palette.muted, height: 1.4),
             ),
             if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              OutlinedButton(
-                onPressed: onAction,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.black,
-                  side: const BorderSide(color: AppColors.black, width: 1.5),
-                  minimumSize: const Size(140, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.button),
-                  ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: 200,
+                child: SecondaryButton(
+                  label: actionLabel!,
+                  onPressed: onAction,
                 ),
-                child: Text(actionLabel!),
               ),
             ],
           ],

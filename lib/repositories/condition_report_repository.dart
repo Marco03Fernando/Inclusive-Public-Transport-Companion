@@ -9,7 +9,7 @@ import '../models/condition_report.dart';
 /// - [LocalConditionReportRepository] — on-device storage.
 /// - [RemoteConditionReportRepository] — generic REST API.
 /// - [FirebaseConditionReportRepository] — Firestore + Firebase Storage
-///   (this is what's wired up in `main.dart` now).
+///   (this is what's wired up in `app.dart` now).
 ///
 /// Whichever implementation is active, [updateReportStatus] is the
 /// single entry point admin verification flows use to move a report
@@ -23,6 +23,10 @@ abstract class ConditionReportRepository {
 
   /// Returns all reports submitted by [userId], most recent first.
   Future<List<ConditionReport>> getUserReports(String userId);
+
+  /// Live version of [getUserReports]: emits the user's reports, most
+  /// recent first, every time they change (e.g. an admin reviews one).
+  Stream<List<ConditionReport>> watchUserReports(String userId);
 
   /// Applies a status change (typically an admin review decision) to an
   /// existing report and returns the updated report.

@@ -16,7 +16,9 @@ class ReportConfirmScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final state = context.watch<AppState>();
-    final origin = state.role == AppRole.passenger ? Routes.home : Routes.volunteerHome;
+    final origin = state.role == AppRole.passenger
+        ? Routes.home
+        : Routes.volunteerHome;
 
     return AppScaffold(
       routeName: Routes.reportConfirm,
@@ -30,13 +32,20 @@ class ReportConfirmScreen extends StatelessWidget {
               width: 64,
               height: 64,
               alignment: Alignment.center,
-              decoration: BoxDecoration(color: palette.successSoft, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: palette.successSoft,
+                shape: BoxShape.circle,
+              ),
               child: Icon(Icons.check, size: 28, color: palette.success),
             ),
             const SizedBox(height: 14),
             Text(
               context.t('reportSubmitted'),
-              style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 19, color: palette.text),
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w800,
+                fontSize: 19,
+                color: palette.text,
+              ),
             ),
             const SizedBox(height: 14),
             SizedBox(
@@ -44,27 +53,40 @@ class ReportConfirmScreen extends StatelessWidget {
               child: Text(
                 context.t('reportSubmittedNote'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: palette.muted, height: 1.5),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: palette.muted,
+                  height: 1.5,
+                ),
               ),
             ),
             const SizedBox(height: 14),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(color: palette.warnSoft, borderRadius: BorderRadius.circular(999)),
+              decoration: BoxDecoration(
+                color: palette.warnSoft,
+                borderRadius: BorderRadius.circular(999),
+              ),
               child: Text(
                 context.t('underReview'),
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: palette.warn),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: palette.warn,
+                ),
               ),
             ),
             const SizedBox(height: 14),
             SecondaryButton(
               label: context.t('viewMyReports'),
-              onPressed: () => Navigator.of(context).pushReplacementNamed(Routes.reportMine),
+              onPressed: () =>
+                  Navigator.of(context).pushReplacementNamed(Routes.reportMine),
             ),
             const SizedBox(height: 10),
             SecondaryButton(
               label: context.t('backToHomeLabel'),
-              onPressed: () => Navigator.of(context).pushReplacementNamed(origin),
+              onPressed: () =>
+                  Navigator.of(context).pushReplacementNamed(origin),
             ),
           ],
         ),

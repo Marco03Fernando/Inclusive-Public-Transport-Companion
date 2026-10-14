@@ -38,8 +38,8 @@ class _LoginScreenState extends State<LoginScreen> {
       _localError = !email.contains('@')
           ? 'Please enter a valid email.'
           : _passwordController.text.isEmpty
-              ? 'Please enter your password.'
-              : null;
+          ? 'Please enter your password.'
+          : null;
     });
     if (_localError != null) return;
 
@@ -58,16 +58,24 @@ class _LoginScreenState extends State<LoginScreen> {
     return AppScaffold(
       routeName: Routes.login,
       title: context.t('logIn'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.roleSelect),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.roleSelect),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             context.t('logInTitle'),
-            style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 20, color: palette.text),
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+              color: palette.text,
+            ),
           ),
           const SizedBox(height: 2),
-          Text(context.t('logInNote'), style: TextStyle(fontSize: 13, color: palette.muted)),
+          Text(
+            context.t('logInNote'),
+            style: TextStyle(fontSize: 13, color: palette.muted),
+          ),
           const SizedBox(height: 14),
           LabeledTextField(
             label: context.t('emailLabel'),
@@ -86,7 +94,9 @@ class _LoginScreenState extends State<LoginScreen> {
           ],
           const SizedBox(height: 28),
           PrimaryButton(
-            label: authState.loading ? context.t('loading') : context.t('logIn'),
+            label: authState.loading
+                ? context.t('loading')
+                : context.t('logIn'),
             onPressed: authState.loading ? null : () => _submit(context),
           ),
         ],

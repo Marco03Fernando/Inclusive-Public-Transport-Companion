@@ -33,9 +33,16 @@ class ReportMineScreen extends StatelessWidget {
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(provider.error!, textAlign: TextAlign.center, style: TextStyle(fontSize: 13, color: palette.danger)),
+          Text(
+            provider.error!,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: palette.danger),
+          ),
           const SizedBox(height: 14),
-          SecondaryButton(label: context.t('tryAgain'), onPressed: provider.loadReports),
+          SecondaryButton(
+            label: context.t('tryAgain'),
+            onPressed: provider.loadReports,
+          ),
         ],
       );
     } else if (reports.isEmpty) {
@@ -47,7 +54,11 @@ class ReportMineScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               context.t('noReportsYet'),
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: palette.text),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: palette.text,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -79,7 +90,8 @@ class ReportMineScreen extends StatelessWidget {
     return AppScaffold(
       routeName: Routes.reportMine,
       title: context.t('myReportsTitle'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.homeFor(role)),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.homeFor(role)),
       scrollableBody: false,
       body: RefreshIndicator(
         onRefresh: provider.loadReports,

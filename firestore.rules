@@ -53,15 +53,21 @@ service cloud.firestore {
       allow read: if isAdmin()
         || (signedIn() && resource.data.userId == request.auth.uid);
 
-      // New reports belong to the submitter and start under review.
+      // New reports belong to the submitter, start under review, and can't
+      // arrive with an admin comment already filled in.
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
-        && request.resource.data.status == 'underReview';
+        && request.resource.data.status == 'underReview'
+        && request.resource.data.get('adminComment', null) == null;
 
-      // Only admins review, and only these three fields.
+      // Only admins review, only these three fields, and only to a known
+      // status. Reporters have no update rule, so they can never change
+      // status / adminComment themselves.
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['status', 'adminComment', 'updatedAt']);
+             .hasOnly(['status', 'adminComment', 'updatedAt'])
+        && request.resource.data.status
+             in ['underReview', 'verified', 'accepted', 'rejected'];
 
       // Admins may delete any report; owners may retract their own.
       allow delete: if isAdmin()

@@ -8,6 +8,7 @@ import '../../core/routes.dart';
 import '../../core/state/app_state.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/condition_report.dart';
+import '../../models/report_exception.dart';
 import '../../providers/reports_provider.dart';
 import '../../services/location_service.dart';
 import '../../services/photo_service.dart';
@@ -73,7 +74,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       if (e.permanentlyDenied) await _offerAppSettings();
     } catch (_) {
       if (!mounted) return;
-      setState(() => _locationError = 'Could not get your location. Please try again.');
+      setState(
+        () => _locationError = 'Could not get your location. Please try again.',
+      );
     } finally {
       if (mounted) setState(() => _isLocating = false);
     }
@@ -89,8 +92,14 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           'Please enable location permission from the app settings.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('CANCEL')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('OPEN SETTINGS')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('OPEN SETTINGS'),
+          ),
         ],
       ),
     );
@@ -126,17 +135,23 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       setState(() => _draft.photoPath = path);
     } on PhotoServiceException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
     }
   }
 
   bool _validate() {
     setState(() {
       _subjectError = ReportValidators.subject(_draft.subject);
-      _vehicleError = ReportValidators.vehicleOrStationNumber(_vehicleController.text, _draft.subject);
+      _vehicleError = ReportValidators.vehicleOrStationNumber(
+        _vehicleController.text,
+        _draft.subject,
+      );
       _locationError = ReportValidators.location(_locationController.text);
       _conditionError = ReportValidators.conditionType(_draft.conditionType);
-      _descriptionError = ReportValidators.description(_descriptionController.text);
+      _descriptionError = ReportValidators.description(
+        _descriptionController.text,
+      );
     });
     return _subjectError == null &&
         _vehicleError == null &&
@@ -156,13 +171,34 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
     setState(() => _isSubmitting = true);
     final provider = context.read<ReportsProvider>();
-    final success = await provider.submitReport(ConditionReport.fromDraft(_draft));
+    final success = await provider.submitReport(
+      ConditionReport.fromDraft(_draft),
+    );
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 
     if (!success) {
+      // The photo is optional: if only the upload failed, offer to send the
+      // report without it rather than losing what the user typed.
+      final photoFailed =
+          provider.submitFailure == ReportFailure.storage &&
+          _draft.photoPath != null;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(provider.error ?? 'Could not submit your report.')),
+        SnackBar(
+          content: Text(
+            provider.submitError ?? 'Could not submit your report.',
+          ),
+          duration: const Duration(seconds: 8),
+          action: photoFailed
+              ? SnackBarAction(
+                  label: context.t('submitWithoutPhoto'),
+                  onPressed: () {
+                    setState(() => _draft.photoPath = null);
+                    _submit();
+                  },
+                )
+              : null,
+        ),
       );
       return;
     }
@@ -175,24 +211,32 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
     final role = context.watch<AppState>().role;
 
     Widget sectionLabel(String key) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Text(
-            context.t(key),
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
-          ),
-        );
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Text(
+        context.t(key),
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: palette.text,
+        ),
+      ),
+    );
 
     Widget fieldError(String? message) => message == null
         ? const SizedBox.shrink()
         : Padding(
             padding: const EdgeInsets.only(top: 6),
-            child: Text(message, style: TextStyle(fontSize: 12, color: palette.danger)),
+            child: Text(
+              message,
+              style: TextStyle(fontSize: 12, color: palette.danger),
+            ),
           );
 
     return AppScaffold(
       routeName: Routes.reportForm,
       title: context.t('reportCondition'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.homeFor(role)),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.homeFor(role)),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -231,7 +275,11 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             suffixIcon: _isLocating
                 ? const Padding(
                     padding: EdgeInsets.all(14),
-                    child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                    child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
                   )
                 : IconButton(
                     tooltip: context.t('useCurrentLocation'),
@@ -268,7 +316,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           _PhotoPicker(photoPath: _draft.photoPath, onTap: _choosePhoto),
           const SizedBox(height: 28),
           PrimaryButton(
-            label: _isSubmitting ? context.t('loading') : context.t('submitReport'),
+            label: _isSubmitting
+                ? context.t('loading')
+                : context.t('submitReport'),
             onPressed: _isSubmitting ? null : _submit,
           ),
         ],
@@ -313,11 +363,21 @@ class _PhotoPicker extends StatelessWidget {
                       right: 8,
                       bottom: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(color: palette.surface, borderRadius: BorderRadius.circular(999)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: palette.surface,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
                         child: Text(
                           context.t('tapToReplacePhoto'),
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: palette.text),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: palette.text,
+                          ),
                         ),
                       ),
                     ),
@@ -325,7 +385,11 @@ class _PhotoPicker extends StatelessWidget {
                 )
               : Text(
                   context.t('attachPhoto'),
-                  style: TextStyle(fontSize: 11, color: palette.muted, fontFamily: 'monospace'),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: palette.muted,
+                    fontFamily: 'monospace',
+                  ),
                 ),
         ),
       ),

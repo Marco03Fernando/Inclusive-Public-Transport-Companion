@@ -18,13 +18,22 @@ class AlertBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: palette.warnSoft,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: palette.warn.withValues(alpha: 0.16), blurRadius: 14, offset: const Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(
+            color: palette.warn.withValues(alpha: 0.16),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: RichText(
         text: TextSpan(
           style: TextStyle(fontSize: 13, color: palette.text),
           children: [
-            TextSpan(text: '$label ', style: const TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(
+              text: '$label ',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             TextSpan(text: message),
           ],
         ),
@@ -48,9 +57,18 @@ class SuccessBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: palette.successSoft,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: palette.success.withValues(alpha: 0.16), blurRadius: 14, offset: const Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(
+            color: palette.success.withValues(alpha: 0.16),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
-      child: DefaultTextStyle(style: TextStyle(fontSize: 13, color: palette.text), child: child),
+      child: DefaultTextStyle(
+        style: TextStyle(fontSize: 13, color: palette.text),
+        child: child,
+      ),
     );
   }
 }
@@ -72,9 +90,20 @@ class NoteCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: tint ?? palette.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: tint == null ? [BoxShadow(color: palette.shadow, blurRadius: 12, offset: const Offset(0, 5))] : null,
+        boxShadow: tint == null
+            ? [
+                BoxShadow(
+                  color: palette.shadow,
+                  blurRadius: 12,
+                  offset: const Offset(0, 5),
+                ),
+              ]
+            : null,
       ),
-      child: DefaultTextStyle(style: TextStyle(fontSize: 13, color: palette.text), child: child),
+      child: DefaultTextStyle(
+        style: TextStyle(fontSize: 13, color: palette.text),
+        child: child,
+      ),
     );
   }
 }

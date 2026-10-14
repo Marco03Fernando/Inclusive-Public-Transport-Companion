@@ -38,9 +38,9 @@ class RemoteConditionReportRepository implements ConditionReportRepository {
   Uri _uri(String path) => Uri.parse('$baseUrl$path');
 
   Map<String, String> get _headers => {
-        'Content-Type': 'application/json',
-        ...?authHeaders?.call(),
-      };
+    'Content-Type': 'application/json',
+    ...?authHeaders?.call(),
+  };
 
   @override
   Future<ConditionReport> createReport(ConditionReport report) async {
@@ -50,19 +50,28 @@ class RemoteConditionReportRepository implements ConditionReportRepository {
       body: jsonEncode(report.toJson()),
     );
     _throwIfError(response);
-    return ConditionReport.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return ConditionReport.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   @override
   Future<List<ConditionReport>> getUserReports(String userId) async {
-    final response =
-        await _client.get(_uri('/users/$userId/reports'), headers: _headers);
+    final response = await _client.get(
+      _uri('/users/$userId/reports'),
+      headers: _headers,
+    );
     _throwIfError(response);
     final list = jsonDecode(response.body) as List<dynamic>;
     return list
         .map((e) => ConditionReport.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
+  /// No push updates from this backend — emits a single snapshot.
+  @override
+  Stream<List<ConditionReport>> watchUserReports(String userId) =>
+      Stream.fromFuture(getUserReports(userId));
 
   @override
   Future<ConditionReport> updateReportStatus({
@@ -73,19 +82,20 @@ class RemoteConditionReportRepository implements ConditionReportRepository {
     final response = await _client.patch(
       _uri('/reports/$reportId/status'),
       headers: _headers,
-      body: jsonEncode({
-        'status': status.name,
-        'adminComment': adminComment,
-      }),
+      body: jsonEncode({'status': status.name, 'adminComment': adminComment}),
     );
     _throwIfError(response);
-    return ConditionReport.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return ConditionReport.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   @override
   Future<void> deleteReport(String reportId) async {
-    final response =
-        await _client.delete(_uri('/reports/$reportId'), headers: _headers);
+    final response = await _client.delete(
+      _uri('/reports/$reportId'),
+      headers: _headers,
+    );
     _throwIfError(response);
   }
 

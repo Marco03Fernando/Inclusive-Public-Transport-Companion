@@ -8,29 +8,32 @@ import '../repositories/admin_report_repository.dart';
 /// the same layering as `ConditionReportService` on the user side.
 class AdminReportService {
   /// Written to `adminComment` when an admin accepts without typing a note,
-  /// so an accepted report always has a comment (as the spec requires).
+  /// so an accepted report always has a comment.
   static const String defaultAcceptComment = 'Report accepted.';
+
+  static const int maxCommentLength = 300;
 
   final AdminReportRepository _repository;
 
-  AdminReportService({required AdminReportRepository repository})
-      : _repository = repository;
+  AdminReportService({required this._repository});
 
-  Stream<List<ConditionReport>> watchAllReports() =>
+  Stream<AdminReportsSnapshot> watchAllReports() =>
       _repository.watchAllReports();
 
   /// status = accepted, adminComment = [comment] (or a default),
   /// updatedAt = server time.
   Future<void> acceptReport({
     required String reportId,
+    required ReportStatus currentStatus,
     String? comment,
   }) async {
-    final trimmed = comment?.trim() ?? '';
+    final trimmed = _checkLength(comment?.trim() ?? '');
 
     await _repository.reviewReport(
       reportId: reportId,
       decision: ReportStatus.accepted,
       adminComment: trimmed.isEmpty ? defaultAcceptComment : trimmed,
+      expectedStatus: currentStatus,
     );
   }
 
@@ -38,9 +41,10 @@ class AdminReportService {
   /// A reason is mandatory.
   Future<void> rejectReport({
     required String reportId,
+    required ReportStatus currentStatus,
     required String reason,
   }) async {
-    final trimmed = reason.trim();
+    final trimmed = _checkLength(reason.trim());
 
     if (trimmed.isEmpty) {
       throw const AdminException(
@@ -52,10 +56,32 @@ class AdminReportService {
       reportId: reportId,
       decision: ReportStatus.rejected,
       adminComment: trimmed,
+      expectedStatus: currentStatus,
     );
+  }
+
+  /// adminComment = [comment], updatedAt = server time. Status unchanged.
+  Future<void> updateComment({
+    required String reportId,
+    required String comment,
+  }) async {
+    final trimmed = _checkLength(comment.trim());
+    if (trimmed.isEmpty) {
+      throw const AdminException('Please enter a comment.');
+    }
+    await _repository.updateComment(reportId: reportId, adminComment: trimmed);
   }
 
   /// Permanently removes the report document and its photo.
   Future<void> deleteReport(String reportId) =>
       _repository.deleteReport(reportId);
+
+  String _checkLength(String value) {
+    if (value.length > maxCommentLength) {
+      throw const AdminException(
+        'Comments can be at most $maxCommentLength characters.',
+      );
+    }
+    return value;
+  }
 }

@@ -156,7 +156,12 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                   const DemoDataBadge(),
 
                   for (final c in mockRouteConditions) ...[
-                    ConditionTile(title: c.title, location: c.location, status: c.status, date: c.date),
+                    ConditionTile(
+                      title: c.title,
+                      location: c.location,
+                      status: c.status,
+                      date: c.date,
+                    ),
                     const SizedBox(height: 10),
                   ],
                 ],

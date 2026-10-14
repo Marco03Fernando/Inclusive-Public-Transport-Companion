@@ -132,16 +132,16 @@ class ReportLocation {
   bool get hasCoordinates => latitude != null && longitude != null;
 
   Map<String, dynamic> toJson() => {
-        'latitude': latitude,
-        'longitude': longitude,
-        'label': label,
-      };
+    'latitude': latitude,
+    'longitude': longitude,
+    'label': label,
+  };
 
   factory ReportLocation.fromJson(Map<String, dynamic> json) => ReportLocation(
-        latitude: (json['latitude'] as num?)?.toDouble(),
-        longitude: (json['longitude'] as num?)?.toDouble(),
-        label: json['label'] as String? ?? '',
-      );
+    latitude: (json['latitude'] as num?)?.toDouble(),
+    longitude: (json['longitude'] as num?)?.toDouble(),
+    label: json['label'] as String? ?? '',
+  );
 
   static const empty = ReportLocation();
 }

@@ -1,4 +1,5 @@
 import '../models/condition_report.dart';
+import '../models/report_exception.dart';
 import '../repositories/condition_report_repository.dart';
 
 /// Business-logic layer for condition reports.
@@ -7,12 +8,12 @@ import '../repositories/condition_report_repository.dart';
 /// a [ConditionReportRepository] implementation. That keeps validation
 /// and orchestration in one place regardless of which repository is
 /// injected underneath — currently [FirebaseConditionReportRepository]
-/// (see `main.dart`), previously local/REST.
+/// (see `app.dart`), previously local/REST.
 class ConditionReportService {
   final ConditionReportRepository _repository;
 
   ConditionReportService({required ConditionReportRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   /// Submits a new report (uploading its photo first, if any — handled
   /// inside the repository). Every submitted report starts as
@@ -25,6 +26,12 @@ class ConditionReportService {
   /// Fetches every report [userId] has submitted, most recent first.
   Future<List<ConditionReport>> getUserReports(String userId) {
     return _repository.getUserReports(userId);
+  }
+
+  /// Live stream of [userId]'s reports, most recent first — "My Reports"
+  /// updates as soon as an admin reviews one.
+  Stream<List<ConditionReport>> watchUserReports(String userId) {
+    return _repository.watchUserReports(userId);
   }
 
   /// Applies an admin's review decision to an existing report.
@@ -45,17 +52,24 @@ class ConditionReportService {
     );
   }
 
-  Future<void> deleteReport(String reportId) => _repository.deleteReport(reportId);
+  Future<void> deleteReport(String reportId) =>
+      _repository.deleteReport(reportId);
 
   /// Defensive second check before a report reaches persistence — the UI
   /// (see `utils/validators.dart`) should already prevent invalid
   /// submissions, but the service shouldn't rely solely on that.
   void _validate(ConditionReport report) {
-    if (report.description.trim().isEmpty) {
-      throw ArgumentError('Report description cannot be empty.');
-    }
     if (report.userId.isEmpty) {
-      throw ArgumentError('Report must have a userId before it can be submitted.');
+      throw const ReportException(
+        ReportFailure.auth,
+        'Please sign in again to submit a report.',
+      );
+    }
+    if (report.description.trim().isEmpty) {
+      throw const ReportException(
+        ReportFailure.validation,
+        'Please describe what you saw.',
+      );
     }
   }
 }

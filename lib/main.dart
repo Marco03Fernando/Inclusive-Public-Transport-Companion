@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'app.dart';
@@ -20,10 +21,21 @@ import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } on FirebaseException catch (e) {
     // Hot restart on Android can find the native default app already set up.
     if (e.code != 'duplicate-app') rethrow;
+  }
+  if (kDebugMode) {
+    // TEMP DEBUG (condition-report Storage 404): which Firebase project /
+    // bucket the running app really uses. Remove once uploads are verified.
+    final options = Firebase.app().options;
+    debugPrint(
+      '[Firebase] projectId=${options.projectId} storageBucket=${options.storageBucket} '
+      'appId=${options.appId}',
+    );
   }
   runApp(const ColomboPalApp());
 }

@@ -18,7 +18,10 @@ class SosButton extends StatelessWidget {
       backgroundColor: palette.danger,
       foregroundColor: Colors.white,
       shape: const CircleBorder(),
-      child: Text('SOS', style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 13)),
+      child: Text(
+        'SOS',
+        style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 13),
+      ),
     );
   }
 }

@@ -22,11 +22,17 @@ void main() {
     });
 
     test('profile round-trips the role through Firestore', () {
-      final profile = UserProfile.fromMap('uid1', {'role': 'admin', 'name': 'A', 'email': 'a@b.c'}, defaultAccessNeeds);
+      final profile = UserProfile.fromMap('uid1', {
+        'role': 'admin',
+        'name': 'A',
+        'email': 'a@b.c',
+      }, defaultAccessNeeds);
       expect(profile.isAdmin, isTrue);
       expect(profile.email, 'a@b.c');
 
-      final volunteer = UserProfile.fromMap('uid2', {'role': 'volunteer'}, defaultAccessNeeds);
+      final volunteer = UserProfile.fromMap('uid2', {
+        'role': 'volunteer',
+      }, defaultAccessNeeds);
       expect(volunteer.toMap()['role'], 'volunteer');
       expect(volunteer.isAdmin, isFalse);
     });
@@ -59,7 +65,11 @@ void main() {
       final draft = ConditionReportDraft(
         subject: ReportSubject.bus,
         vehicleOrStationNumber: ' nb-1234 ',
-        reportLocation: const ReportLocation(latitude: 6.9, longitude: 79.8, label: 'Current location attached'),
+        reportLocation: const ReportLocation(
+          latitude: 6.9,
+          longitude: 79.8,
+          label: 'Current location attached',
+        ),
         conditionType: ConditionType.brokenRamp,
         description: 'Ramp is bent and will not lower.',
       );
@@ -73,8 +83,14 @@ void main() {
     test('validators guard the report form', () {
       expect(ReportValidators.subject(null), isNotNull);
       expect(ReportValidators.conditionType(null), isNotNull);
-      expect(ReportValidators.vehicleOrStationNumber('', ReportSubject.other), isNull);
-      expect(ReportValidators.vehicleOrStationNumber('', ReportSubject.bus), isNotNull);
+      expect(
+        ReportValidators.vehicleOrStationNumber('', ReportSubject.other),
+        isNull,
+      );
+      expect(
+        ReportValidators.vehicleOrStationNumber('', ReportSubject.bus),
+        isNotNull,
+      );
       expect(ReportValidators.location(''), isNotNull);
       expect(ReportValidators.description('too short'), isNotNull);
       expect(ReportValidators.description('Long enough description'), isNull);

@@ -13,19 +13,28 @@ class Contact {
 
   String get initial => name.isNotEmpty ? name[0] : '?';
 
-  Contact copyWith({String? id, String? name, String? relation, String? phone}) => Contact(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        relation: relation ?? this.relation,
-        phone: phone ?? this.phone,
-      );
+  Contact copyWith({
+    String? id,
+    String? name,
+    String? relation,
+    String? phone,
+  }) => Contact(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    relation: relation ?? this.relation,
+    phone: phone ?? this.phone,
+  );
 
-  Map<String, dynamic> toMap() => {'name': name, 'relation': relation, 'phone': phone};
+  Map<String, dynamic> toMap() => {
+    'name': name,
+    'relation': relation,
+    'phone': phone,
+  };
 
   factory Contact.fromMap(String id, Map<String, dynamic> map) => Contact(
-        id: id,
-        name: map['name'] as String? ?? '',
-        relation: map['relation'] as String? ?? '',
-        phone: map['phone'] as String? ?? '',
-      );
+    id: id,
+    name: map['name'] as String? ?? '',
+    relation: map['relation'] as String? ?? '',
+    phone: map['phone'] as String? ?? '',
+  );
 }

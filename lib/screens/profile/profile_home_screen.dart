@@ -19,7 +19,8 @@ class ProfileHomeScreen extends StatelessWidget {
   Future<void> _logOut(BuildContext context) async {
     await context.read<AuthState>().signOut();
     if (!context.mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil(Routes.roleSelect, (route) => false);
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil(Routes.roleSelect, (route) => false);
   }
 
   @override
@@ -48,37 +49,61 @@ class ProfileHomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (!hasRealName) ...[const DemoDataBadge(), const SizedBox(height: 4)],
+                  if (!hasRealName) ...[
+                    const DemoDataBadge(),
+                    const SizedBox(height: 4),
+                  ],
                   SettingsLinkRow(
                     label: context.t('emergencyContactsTitle'),
-                    onTap: () => Navigator.of(context).pushReplacementNamed(Routes.profileContacts),
+                    onTap: () =>
+                        Navigator.of(context)
+                            .pushReplacementNamed(Routes.profileContacts),
                   ),
                   const SizedBox(height: 10),
                   SettingsLinkRow(
                     label: context.t('accessPrefsTitle'),
-                    onTap: () => Navigator.of(context).pushReplacementNamed(Routes.profileAccess),
+                    onTap: () =>
+                        Navigator.of(context)
+                            .pushReplacementNamed(Routes.profileAccess),
                   ),
                   const SizedBox(height: 10),
                   SettingsLinkRow(
                     label: context.t('locationSharingTitle'),
-                    onTap: () => Navigator.of(context).pushReplacementNamed(Routes.profileSharing),
+                    onTap: () =>
+                        Navigator.of(context)
+                            .pushReplacementNamed(Routes.profileSharing),
                   ),
                   const SizedBox(height: 10),
                   SettingsLinkRow(
                     label: context.t('requestAssistanceTitle'),
-                    onTap: () => Navigator.of(context).pushReplacementNamed(Routes.requestAssistance),
+                    onTap: () =>
+                        Navigator.of(context)
+                            .pushReplacementNamed(Routes.requestAssistance),
                   ),
                   const SizedBox(height: 10),
-                  SettingsLinkRow(label: languageLabel, onTap: state.toggleLocale),
+                  SettingsLinkRow(
+                    label: languageLabel,
+                    onTap: state.toggleLocale,
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     context.t('appearanceTitle'),
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: palette.text,
+                    ),
                   ),
                   const SizedBox(height: 10),
-                  ThemeModeSelector(mode: state.themeMode, onChanged: state.setThemeMode),
+                  ThemeModeSelector(
+                    mode: state.themeMode,
+                    onChanged: state.setThemeMode,
+                  ),
                   const SizedBox(height: 18),
-                  TextDangerButton(label: context.t('logOut'), onPressed: () => _logOut(context)),
+                  TextDangerButton(
+                    label: context.t('logOut'),
+                    onPressed: () => _logOut(context),
+                  ),
                 ],
               ),
             ),

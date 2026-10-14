@@ -22,8 +22,8 @@ class AuthState extends ChangeNotifier {
     required this._appState,
     AuthService? authService,
     UserProfileService? userProfileService,
-  })  : _authService = authService ?? AuthService(),
-        _userProfileService = userProfileService ?? UserProfileService();
+  }) : _authService = authService ?? AuthService(),
+       _userProfileService = userProfileService ?? UserProfileService();
 
   final AppState _appState;
   final AuthService _authService;
@@ -71,37 +71,39 @@ class AuthState extends ChangeNotifier {
   }
 
   Future<bool> signIn(String email, String password) => _run(() async {
-        final user = await _authService.signInWithEmail(email, password);
-        final AppRole role;
-        try {
-          role = await _userProfileService.getOrCreateRole(
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-          );
-        } on FirebaseException {
-          await _authService.signOut();
-          throw AuthServiceException('Could not load your account. Check your connection and try again.');
-        }
-        firebaseUser = user;
-        _appState.setRole(role);
-        _watchProfile(user.uid);
-      });
+    final user = await _authService.signInWithEmail(email, password);
+    final AppRole role;
+    try {
+      role = await _userProfileService.getOrCreateRole(
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+      );
+    } on FirebaseException {
+      await _authService.signOut();
+      throw AuthServiceException(
+        'Could not load your account. Check your connection and try again.',
+      );
+    }
+    firebaseUser = user;
+    _appState.setRole(role);
+    _watchProfile(user.uid);
+  });
 
   Future<bool> continueAsGuest() => _run(() async {
-        firebaseUser = await _authService.signInAnonymously();
-        await _userProfileService.createProfile(
-          uid: firebaseUser!.uid,
-          role: AppRole.volunteer,
-          name: 'Guest Volunteer',
-          phone: '',
-          dob: '',
-          accessNeeds: const [],
-          isAnonymous: true,
-        );
-        _appState.setRole(AppRole.volunteer);
-        _watchProfile(firebaseUser!.uid);
-      });
+    firebaseUser = await _authService.signInAnonymously();
+    await _userProfileService.createProfile(
+      uid: firebaseUser!.uid,
+      role: AppRole.volunteer,
+      name: 'Guest Volunteer',
+      phone: '',
+      dob: '',
+      accessNeeds: const [],
+      isAnonymous: true,
+    );
+    _appState.setRole(AppRole.volunteer);
+    _watchProfile(firebaseUser!.uid);
+  });
 
   /// Registers a passenger or volunteer. If the profile can't be written,
   /// the new Auth account is deleted again so the email address isn't left
@@ -114,30 +116,31 @@ class AuthState extends ChangeNotifier {
     required String dob,
     required AppRole role,
     required List<AccessNeed> accessNeeds,
-  }) =>
-      _run(() async {
-        final user = await _authService.signUpWithEmail(email, password);
-        try {
-          await _userProfileService.createProfile(
-            uid: user.uid,
-            role: role,
-            name: name.trim(),
-            email: user.email ?? email.trim(),
-            phone: phone,
-            dob: dob,
-            accessNeeds: accessNeeds,
-            isAnonymous: false,
-          );
-        } catch (_) {
-          await _authService.deleteCurrentUser();
-          throw AuthServiceException('Could not create your profile. Check your connection and try again.');
-        }
-        await user.updateDisplayName(name.trim()).catchError((_) {});
-        firebaseUser = user;
-        _appState.setRole(role);
-        _appState.setAccessNeeds(accessNeeds);
-        _watchProfile(user.uid);
-      });
+  }) => _run(() async {
+    final user = await _authService.signUpWithEmail(email, password);
+    try {
+      await _userProfileService.createProfile(
+        uid: user.uid,
+        role: role,
+        name: name.trim(),
+        email: user.email ?? email.trim(),
+        phone: phone,
+        dob: dob,
+        accessNeeds: accessNeeds,
+        isAnonymous: false,
+      );
+    } catch (_) {
+      await _authService.deleteCurrentUser();
+      throw AuthServiceException(
+        'Could not create your profile. Check your connection and try again.',
+      );
+    }
+    await user.updateDisplayName(name.trim()).catchError((_) {});
+    firebaseUser = user;
+    _appState.setRole(role);
+    _appState.setAccessNeeds(accessNeeds);
+    _watchProfile(user.uid);
+  });
 
   Future<void> signOut() async {
     await _authService.signOut();

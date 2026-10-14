@@ -22,10 +22,10 @@ enum AppRole {
   /// "user" value and a missing field) is a passenger, so a missing or
   /// mistyped role can never grant admin access.
   static AppRole fromName(Object? value) => switch (value) {
-        'admin' => AppRole.admin,
-        'volunteer' => AppRole.volunteer,
-        _ => AppRole.passenger,
-      };
+    'admin' => AppRole.admin,
+    'volunteer' => AppRole.volunteer,
+    _ => AppRole.passenger,
+  };
 }
 
 enum SosStage { hidden, confirm, holding, activated }

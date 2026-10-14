@@ -8,7 +8,12 @@ import '../models/contact.dart';
 /// a "Contact 1" relation pill during sign-up, or an "Edit" link in the
 /// profile's contacts list.
 class ContactCard extends StatelessWidget {
-  const ContactCard({super.key, required this.contact, this.heading, this.trailing});
+  const ContactCard({
+    super.key,
+    required this.contact,
+    this.heading,
+    this.trailing,
+  });
 
   final Contact contact;
   final String? heading;
@@ -22,7 +27,13 @@ class ContactCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: palette.surface,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 16, offset: const Offset(0, 6))],
+        boxShadow: [
+          BoxShadow(
+            color: palette.shadow,
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,17 +44,31 @@ class ContactCard extends StatelessWidget {
             children: [
               Text(
                 heading ?? contact.name,
-                style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 14, color: palette.text),
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: palette.text,
+                ),
               ),
               ?trailing,
             ],
           ),
           if (heading != null) ...[
             const SizedBox(height: 8),
-            Text(contact.name, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: palette.text)),
+            Text(
+              contact.name,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: palette.text,
+              ),
+            ),
           ],
           SizedBox(height: heading != null ? 4 : 6),
-          Text(contact.phone, style: TextStyle(fontSize: 13, color: palette.muted)),
+          Text(
+            contact.phone,
+            style: TextStyle(fontSize: 13, color: palette.muted),
+          ),
         ],
       ),
     );
@@ -75,7 +100,13 @@ class ContactPickerRow extends StatelessWidget {
           color: palette.surface,
           borderRadius: BorderRadius.circular(16),
           border: selected ? Border.all(color: palette.cta, width: 1.5) : null,
-          boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 14, offset: const Offset(0, 5))],
+          boxShadow: [
+            BoxShadow(
+              color: palette.shadow,
+              blurRadius: 14,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -83,10 +114,16 @@ class ContactPickerRow extends StatelessWidget {
               width: 36,
               height: 36,
               alignment: Alignment.center,
-              decoration: BoxDecoration(color: palette.accentSoft, borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(
+                color: palette.accentSoft,
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Text(
                 contact.initial,
-                style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: palette.accent),
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.w700,
+                  color: palette.accent,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -94,8 +131,18 @@ class ContactPickerRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(contact.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: palette.text)),
-                  Text('${contact.relation} · ${contact.phone}', style: TextStyle(fontSize: 12, color: palette.muted)),
+                  Text(
+                    contact.name,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: palette.text,
+                    ),
+                  ),
+                  Text(
+                    '${contact.relation} · ${contact.phone}',
+                    style: TextStyle(fontSize: 12, color: palette.muted),
+                  ),
                 ],
               ),
             ),
@@ -106,9 +153,14 @@ class ContactPickerRow extends StatelessWidget {
               decoration: BoxDecoration(
                 color: selected ? palette.cta : Colors.transparent,
                 shape: BoxShape.circle,
-                border: Border.all(color: selected ? palette.cta : palette.border, width: 1.5),
+                border: Border.all(
+                  color: selected ? palette.cta : palette.border,
+                  width: 1.5,
+                ),
               ),
-              child: selected ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
+              child: selected
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : null,
             ),
           ],
         ),

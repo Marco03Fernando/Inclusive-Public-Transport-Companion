@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/condition_report.dart';
+import '../models/report_exception.dart';
 import 'condition_report_repository.dart';
 
 /// Firestore + Firebase Storage implementation of
@@ -11,16 +13,18 @@ import 'condition_report_repository.dart';
 ///
 /// - Reports live in the `condition_reports` collection, one document per
 ///   report, with the document ID doubling as `reportId` inside the
-///   document (handy for exports/admin tools that only have the map).
+///   document (handy for exports/admin tools that only have the map). The
+///   admin module (`lib/admin/`) reads the same collection and shape.
 /// - Photos are uploaded to Firebase Storage at
 ///   `condition_reports/{userId}/{reportId}.jpg` and only the resulting
 ///   download URL is stored in Firestore — the actual image bytes never
 ///   touch Firestore.
+/// - The bucket is never hardcoded: [FirebaseStorage.instance] uses the
+///   default app's `storageBucket` from `firebase_options.dart` /
+///   `google-services.json`.
 ///
-/// This is the only file in the app that imports `cloud_firestore` /
-/// `firebase_storage`; [ConditionReport] itself stays backend-agnostic,
-/// and all the Firestore ⇄ model mapping happens right here in
-/// [_toDocument] / [_fromDocument].
+/// Every Firebase failure is rethrown as a [ReportException] whose
+/// [ReportFailure] says which layer failed.
 class FirebaseConditionReportRepository implements ConditionReportRepository {
   static const _collectionPath = 'condition_reports';
 
@@ -30,88 +34,94 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
   FirebaseConditionReportRepository({
     FirebaseFirestore? firestore,
     FirebaseStorage? storage,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _storage = storage ?? FirebaseStorage.instance;
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _storage = storage ?? FirebaseStorage.instance;
 
   CollectionReference<Map<String, dynamic>> get _collection =>
       _firestore.collection(_collectionPath);
 
-@override
-Future<ConditionReport> createReport(ConditionReport report) async {
-  try {
-    print("===== START REPORT SUBMISSION =====");
+  static String _photoPath(String userId, String reportId) =>
+      'condition_reports/$userId/$reportId.jpg';
 
-    print("User ID: ${report.userId}");
-    print("Photo path: ${report.photoPath}");
-
+  @override
+  Future<ConditionReport> createReport(ConditionReport report) async {
     if (report.userId.isEmpty) {
-      throw ArgumentError(
-          'Report must have a userId before it can be submitted.');
+      throw const ReportException(
+        ReportFailure.auth,
+        'Please sign in again to submit a report.',
+      );
     }
 
+    // 1. Generate the report ID up front so the photo path can use it.
     final docRef = _collection.doc();
     final reportId = docRef.id;
+    _log(
+      'createReport reportId=$reportId userId=${report.userId} '
+      'photo=${report.photoPath ?? '(none)'}',
+    );
 
-    print("Generated Report ID: $reportId");
-
+    // 2–4. Optional photo: Storage ref → putFile → getDownloadURL.
     String? photoUrl;
-
-    if (report.photoPath != null &&
-        report.photoPath!.isNotEmpty) {
-
-      print("Uploading image...");
-
+    final localPhoto = report.photoPath;
+    if (localPhoto != null && localPhoto.isNotEmpty) {
       photoUrl = await _uploadPhoto(
         userId: report.userId,
         reportId: reportId,
-        localPath: report.photoPath!,
+        localPath: localPhoto,
       );
-
-      print("Image uploaded: $photoUrl");
     }
 
+    // 5. Only now write the Firestore document.
     final now = DateTime.now();
-
     final toSave = report.copyWith(
       id: reportId,
       photoUrl: photoUrl,
       updatedAt: now,
     );
-
-    print("Saving to Firestore...");
-
-    await docRef.set(
-      _toDocument(
-        toSave,
-        createdAt: now,
-        updatedAt: now,
-      ),
-    );
-
-    print("===== REPORT SAVED SUCCESSFULLY =====");
-
+    try {
+      await docRef.set(_toDocument(toSave, createdAt: now, updatedAt: now));
+    } on FirebaseException catch (e) {
+      // Don't leave an orphaned photo behind for a report that doesn't exist.
+      if (photoUrl != null) {
+        await _storage
+            .ref(_photoPath(report.userId, reportId))
+            .delete()
+            .catchError((_) {});
+      }
+      throw _firestoreError(e, action: 'save your report');
+    }
+    _log('report $reportId saved to $_collectionPath');
     return toSave;
-
-  } catch (e, stack) {
-
-    print("🔥 FIREBASE ERROR:");
-    print(e);
-
-    print(stack);
-
-    rethrow;
   }
-}
 
   @override
   Future<List<ConditionReport>> getUserReports(String userId) async {
-    final snapshot = await _collection
-        .where('userId', isEqualTo: userId)
-        .orderBy('createdAt', descending: true)
-        .get();
-
-    return snapshot.docs.map(_fromDocument).toList();
+    try {
+      final snapshot = await _userReportsQuery(userId).get();
+      return _parseAll(snapshot.docs);
+    } on FirebaseException catch (e) {
+      throw _firestoreError(e, action: 'load your reports');
+    }
   }
+
+  @override
+  Stream<List<ConditionReport>> watchUserReports(String userId) {
+    return _userReportsQuery(userId)
+        .snapshots()
+        .map((s) => _parseAll(s.docs))
+        .handleError(
+          (Object e) => throw e is FirebaseException
+              ? _firestoreError(e, action: 'load your reports')
+              : e,
+        );
+  }
+
+  /// Requires the composite index `userId ASC, createdAt DESC` on
+  /// `condition_reports` (Firestore reports `failed-precondition` with a
+  /// create-index link until it exists).
+  Query<Map<String, dynamic>> _userReportsQuery(String userId) => _collection
+      .where('userId', isEqualTo: userId)
+      .orderBy('createdAt', descending: true);
 
   @override
   Future<ConditionReport> updateReportStatus({
@@ -128,37 +138,45 @@ Future<ConditionReport> createReport(ConditionReport report) async {
       updates['adminComment'] = adminComment;
     }
 
-    await docRef.update(updates);
-
-    final updatedSnapshot = await docRef.get();
-    if (!updatedSnapshot.exists) {
-      throw StateError('Report $reportId was not found in Firestore.');
+    try {
+      await docRef.update(updates);
+      final updatedSnapshot = await docRef.get();
+      if (!updatedSnapshot.exists) {
+        throw ReportException(
+          ReportFailure.firestore,
+          'That report no longer exists.',
+          debugDetail: reportId,
+        );
+      }
+      return _fromDocument(updatedSnapshot);
+    } on FirebaseException catch (e) {
+      throw _firestoreError(e, action: 'update the report');
     }
-    return _fromDocument(updatedSnapshot);
   }
 
   @override
   Future<void> deleteReport(String reportId) async {
-    // Look up the report first so we know which Storage object (if any)
-    // to remove — deleting the Firestore doc doesn't touch Storage.
-    final snapshot = await _collection.doc(reportId).get();
-    if (snapshot.exists) {
+    try {
+      // Look up the report first so we know which Storage object (if any)
+      // to remove — deleting the Firestore doc doesn't touch Storage.
+      final snapshot = await _collection.doc(reportId).get();
       final data = snapshot.data();
       final userId = data?['userId'] as String?;
-      if (userId != null && userId.isNotEmpty) {
+      final photoUrl = data?['photoUrl'] as String?;
+      if (userId != null &&
+          userId.isNotEmpty &&
+          photoUrl != null &&
+          photoUrl.isNotEmpty) {
         try {
-          await _storage
-              .ref('condition_reports/$userId/$reportId.jpg')
-              .delete();
+          await _storage.ref(_photoPath(userId, reportId)).delete();
         } on FirebaseException catch (e) {
-          // Photo may never have existed for this report — that's fine,
-          // only rethrow unexpected failures.
-          if (e.code != 'object-not-found') rethrow;
+          if (e.code != 'object-not-found') throw _storageError(e);
         }
       }
+      await _collection.doc(reportId).delete();
+    } on FirebaseException catch (e) {
+      throw _firestoreError(e, action: 'delete the report');
     }
-
-    await _collection.doc(reportId).delete();
   }
 
   Future<String> _uploadPhoto({
@@ -167,12 +185,96 @@ Future<ConditionReport> createReport(ConditionReport report) async {
     required String localPath,
   }) async {
     final file = File(localPath);
-    final ref = _storage.ref('condition_reports/$userId/$reportId.jpg');
-    final uploadTask = await ref.putFile(
-      file,
-      SettableMetadata(contentType: 'image/jpeg'),
+    if (!await file.exists()) {
+      throw ReportException(
+        ReportFailure.validation,
+        'The selected photo is no longer available. Please choose it again.',
+        debugDetail: localPath,
+      );
+    }
+
+    final ref = _storage.ref(_photoPath(userId, reportId));
+    // TEMP DEBUG (condition-report Storage 404): confirms which project and
+    // bucket the upload actually targets. Remove once uploads are verified.
+    _log(
+      'Uploading image… project=${_storage.app.options.projectId} '
+      'optionsBucket=${_storage.app.options.storageBucket} '
+      'storageBucket=${_storage.bucket} path=${ref.fullPath}',
     );
-    return uploadTask.ref.getDownloadURL();
+
+    try {
+      await ref.putFile(file, SettableMetadata(contentType: 'image/jpeg'));
+      final url = await ref.getDownloadURL();
+      _log('Image uploaded: ${ref.fullPath}');
+      return url;
+    } on FirebaseException catch (e) {
+      throw _storageError(e);
+    }
+  }
+
+  ReportException _storageError(FirebaseException e) {
+    final bucket = _storage.bucket;
+    _log('Storage error code=${e.code} bucket=$bucket message=${e.message}');
+    final message = switch (e.code) {
+      // A 404 while UPLOADING means the bucket itself doesn't exist, i.e.
+      // Firebase Storage was never set up for this project.
+      'object-not-found' || 'bucket-not-found' || 'project-not-found' =>
+        'Photo storage is not set up for this app yet (bucket "$bucket"). '
+            'Submit without a photo, or ask an admin to enable Firebase Storage.',
+      'unauthorized' || 'unauthenticated' =>
+        'You are not allowed to upload this photo. Please sign in again; if it keeps '
+            'happening the Storage security rules need to be deployed.',
+      'quota-exceeded' =>
+        'Photo storage is full right now. Please try again later.',
+      'retry-limit-exceeded' || 'canceled' =>
+        'The photo upload did not finish. Check your connection and try again.',
+      _ => 'Could not upload your photo. Please try again.',
+    };
+    return ReportException(
+      ReportFailure.storage,
+      message,
+      debugDetail: '${e.code}: ${e.message}',
+    );
+  }
+
+  ReportException _firestoreError(
+    FirebaseException e, {
+    required String action,
+  }) {
+    _log('Firestore error code=${e.code} message=${e.message}');
+    final detail = '${e.code}: ${e.message}';
+    return switch (e.code) {
+      'failed-precondition' when (e.message ?? '').contains('index') =>
+        ReportException(
+          ReportFailure.missingIndex,
+          'Could not $action: the database index for reports is still being set up.',
+          debugDetail: detail,
+        ),
+      'permission-denied' => ReportException(
+        ReportFailure.firestore,
+        'Could not $action: permission denied. The Firestore security rules may need to be deployed.',
+        debugDetail: detail,
+      ),
+      'unauthenticated' => ReportException(
+        ReportFailure.auth,
+        'Please sign in again to $action.',
+        debugDetail: detail,
+      ),
+      'unavailable' || 'deadline-exceeded' => ReportException(
+        ReportFailure.network,
+        'Could not $action. Check your internet connection and try again.',
+        debugDetail: detail,
+      ),
+      _ => ReportException(
+        ReportFailure.firestore,
+        'Could not $action. Please try again.',
+        debugDetail: detail,
+      ),
+    };
+  }
+
+  void _log(String message) {
+    if (kDebugMode) debugPrint('[ConditionReports] $message');
   }
 
   /// Maps a [ConditionReport] onto the exact Firestore document shape:
@@ -217,6 +319,22 @@ Future<ConditionReport> createReport(ConditionReport report) async {
     };
   }
 
+  /// Skips (and logs) documents that can't be parsed, so one malformed
+  /// report never hides the rest of the user's list.
+  List<ConditionReport> _parseAll(
+    List<DocumentSnapshot<Map<String, dynamic>>> docs,
+  ) {
+    final reports = <ConditionReport>[];
+    for (final doc in docs) {
+      try {
+        reports.add(_fromDocument(doc));
+      } catch (e) {
+        _log('Skipping unreadable report ${doc.id}: $e');
+      }
+    }
+    return reports;
+  }
+
   ConditionReport _fromDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? <String, dynamic>{};
 
@@ -226,21 +344,39 @@ Future<ConditionReport> createReport(ConditionReport report) async {
     return ConditionReport(
       id: (data['reportId'] as String?) ?? doc.id,
       userId: data['userId'] as String? ?? '',
-      subject: ReportSubject.values.byName(data['subject'] as String? ?? 'other'),
+      subject: _enumOr(
+        ReportSubject.values,
+        data['subject'],
+        ReportSubject.other,
+      ),
       vehicleOrStationNumber: data['vehicleOrStationNumber'] as String? ?? '',
       location: ReportLocation(
         label: data['locationName'] as String? ?? '',
         latitude: (data['latitude'] as num?)?.toDouble(),
         longitude: (data['longitude'] as num?)?.toDouble(),
       ),
-      conditionType:
-          ConditionType.values.byName(data['conditionType'] as String? ?? 'unsafe'),
+      conditionType: _enumOr(
+        ConditionType.values,
+        data['conditionType'],
+        ConditionType.other,
+      ),
       description: data['description'] as String? ?? '',
       photoUrl: data['photoUrl'] as String?,
-      status: ReportStatus.values.byName(data['status'] as String? ?? 'underReview'),
+      status: _enumOr(
+        ReportStatus.values,
+        data['status'],
+        ReportStatus.underReview,
+      ),
       adminComment: data['adminComment'] as String?,
       createdAt: createdAtTimestamp?.toDate() ?? DateTime.now(),
       updatedAt: updatedAtTimestamp?.toDate(),
     );
+  }
+
+  static T _enumOr<T extends Enum>(List<T> values, Object? name, T fallback) {
+    for (final value in values) {
+      if (value.name == name) return value;
+    }
+    return fallback;
   }
 }
