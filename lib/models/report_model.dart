@@ -17,6 +17,137 @@ enum ConditionType { brokenRamp, noSeat, overcrowded, unsafe, unclean, other }
 /// verification handling.
 enum ReportStatus { underReview, verified, accepted, rejected }
 
+/// Whether a report confirms an accessibility feature is present and
+/// working ([positive]) or reports it missing/damaged/broken ([issue]).
+/// Stored in Firestore by [Enum.name] (`"positive"` / `"issue"`), so
+/// existing values must never be renamed.
+///
+/// [unknown] is never written by the app — it is what reports submitted
+/// before this field existed (or with an unrecognised value) read back
+/// as, so legacy data is never guessed into a real classification.
+enum ReportType {
+  positive,
+  issue,
+  unknown;
+
+  /// Reads a stored `reportType` value; anything missing or unrecognised
+  /// becomes [unknown].
+  static ReportType parse(Object? raw) {
+    if (raw == positive.name) return positive;
+    if (raw == issue.name) return issue;
+    return unknown;
+  }
+
+  /// The values a user can choose on the report form.
+  static const selectable = [positive, issue];
+}
+
+extension ReportTypeLabel on ReportType {
+  /// Professional label shown wherever a report is displayed.
+  String get label {
+    switch (this) {
+      case ReportType.positive:
+        return 'Positive Accessibility Feedback';
+      case ReportType.issue:
+        return 'Accessibility Issue';
+      case ReportType.unknown:
+        return 'Unclassified';
+    }
+  }
+
+  /// `context.t` key for the report form's "Report Type" dropdown.
+  String get labelKey {
+    switch (this) {
+      case ReportType.positive:
+        return 'reportTypePositive';
+      case ReportType.issue:
+        return 'reportTypeIssue';
+      case ReportType.unknown:
+        return 'reportTypeUnknown';
+    }
+  }
+
+  /// `context.t` key for the one-line explanation under the dropdown.
+  String get descriptionKey {
+    switch (this) {
+      case ReportType.positive:
+        return 'reportTypePositiveDesc';
+      case ReportType.issue:
+        return 'reportTypeIssueDesc';
+      case ReportType.unknown:
+        return 'reportTypeUnknownDesc';
+    }
+  }
+
+  bool get isClassified => this != ReportType.unknown;
+}
+
+/// Bus route identifiers as entered by users ("138", "177", "138A",
+/// "EX1-1") and their normalized form used for grouping.
+///
+/// - `routeNumber` keeps what the user typed (trimmed, inner whitespace
+///   collapsed) for display.
+/// - `routeId` is [normalize]d — upper-case, no whitespace — so "138a",
+///   " 138 A " and "138A" all group under `"138A"`.
+class BusRoute {
+  BusRoute._();
+
+  static const int maxLength = 12;
+
+  /// Shown wherever a report has no route (legacy reports).
+  static const String unassignedLabel = 'Unassigned';
+
+  static final _whitespace = RegExp(r'\s+');
+
+  /// Letters/digits, optionally split by single "-" or "/" separators.
+  static final _validId = RegExp(r'^[A-Z0-9]+([/-][A-Z0-9]+)*$');
+  static final _digit = RegExp(r'[0-9]');
+
+  /// User-facing value: trimmed, inner whitespace collapsed to one space.
+  static String displayValue(String raw) =>
+      raw.trim().replaceAll(_whitespace, ' ');
+
+  /// Grouping key: all whitespace removed, upper-cased.
+  static String normalize(String raw) =>
+      raw.replaceAll(_whitespace, '').toUpperCase();
+
+  /// Null when [raw] is a usable route number, otherwise why it isn't.
+  static String? validate(String? raw) {
+    if (raw == null || raw.trim().isEmpty) {
+      return 'Enter the bus route number (e.g. 138 or 138A).';
+    }
+    final id = normalize(raw);
+    if (id.length > maxLength) {
+      return 'That route number is too long — please check it.';
+    }
+    if (!_validId.hasMatch(id)) {
+      return 'Use only letters, numbers, "-" or "/" (e.g. 138 or 138A).';
+    }
+    if (!_digit.hasMatch(id)) {
+      return 'A bus route number must include a number (e.g. 138).';
+    }
+    return null;
+  }
+
+  static bool isValid(String? raw) => validate(raw) == null;
+}
+
+/// Firestore field names in `condition_reports` for the route-based
+/// accessibility data, shared by every repository (and by the future
+/// points system) so the names can never drift apart.
+abstract final class ReportFields {
+  /// `"positive"` | `"issue"` ([ReportType.name]). Absent on legacy docs.
+  static const reportType = 'reportType';
+
+  /// Route as entered, e.g. `"138A"`. Absent on legacy docs.
+  static const routeNumber = 'routeNumber';
+
+  /// [BusRoute.normalize]d route, e.g. `"138A"`. Group/query by this.
+  static const routeId = 'routeId';
+
+  static const status = 'status';
+}
+
 extension ReportSubjectLabel on ReportSubject {
   String get label {
     switch (this) {
@@ -149,6 +280,11 @@ class ReportLocation {
 /// Everything collected across Step 1 and Step 2 of the report flow,
 /// before it becomes a submitted [ConditionReport].
 class ConditionReportDraft {
+  /// Null until the user picks one — the form never preselects a type.
+  ReportType? reportType;
+
+  /// Bus route as typed; normalized when the report is built.
+  String routeNumber;
   ReportSubject? subject;
   String vehicleOrStationNumber;
   String location;
@@ -158,6 +294,8 @@ class ConditionReportDraft {
   String? photoPath;
 
   ConditionReportDraft({
+    this.reportType,
+    this.routeNumber = '',
     this.subject,
     this.vehicleOrStationNumber = '',
     this.location = '',

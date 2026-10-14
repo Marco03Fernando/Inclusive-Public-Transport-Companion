@@ -153,6 +153,18 @@ class AdminReportDetailsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         AdminInfoRow(
+                          label: 'Report type',
+                          value: report.reportType.label,
+                        ),
+                        AdminInfoRow(
+                          label: 'Bus route',
+                          value: report.routeLabel,
+                        ),
+                        AdminInfoRow(
+                          label: 'Route ID (normalized)',
+                          value: AdminFormat.routeId(report),
+                        ),
+                        AdminInfoRow(
                           label: 'Subject',
                           value: AdminFormat.subject(report.subject),
                         ),

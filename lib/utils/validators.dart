@@ -5,6 +5,16 @@ import '../models/report_model.dart';
 class ReportValidators {
   ReportValidators._();
 
+  static String? reportType(ReportType? value) {
+    if (value == null || !value.isClassified) {
+      return 'Choose a report type.';
+    }
+    return null;
+  }
+
+  /// Bus route identifier, e.g. "138" or "138A" — see [BusRoute.validate].
+  static String? routeNumber(String? value) => BusRoute.validate(value);
+
   static String? subject(ReportSubject? value) {
     if (value == null) return 'Choose what you are reporting.';
     return null;

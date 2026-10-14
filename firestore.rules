@@ -53,12 +53,22 @@ service cloud.firestore {
       allow read: if isAdmin()
         || (signedIn() && resource.data.userId == request.auth.uid);
 
-      // New reports belong to the submitter, start under review, and can't
-      // arrive with an admin comment already filled in.
+      // New reports belong to the submitter, start under review, can't
+      // arrive with an admin comment already filled in, and must be
+      // classified and tied to a bus route (route-based accessibility
+      // data). routeId mirrors BusRoute.normalize in report_model.dart.
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == 'underReview'
-        && request.resource.data.get('adminComment', null) == null;
+        && request.resource.data.get('adminComment', null) == null
+        && request.resource.data.reportType in ['positive', 'issue']
+        && request.resource.data.routeNumber is string
+        && request.resource.data.routeNumber.trim().size() > 0
+        && request.resource.data.routeNumber.size() <= 40
+        && request.resource.data.routeId is string
+        && request.resource.data.routeId.size() <= 12
+        && request.resource.data.routeId.matches('^[A-Z0-9]+([/-][A-Z0-9]+)*$')
+        && request.resource.data.routeId.matches('.*[0-9].*');
 
       // Only admins review, only these three fields, and only to a known
       // status. Reporters have no update rule, so they can never change

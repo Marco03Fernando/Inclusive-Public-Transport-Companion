@@ -49,6 +49,11 @@ class AdminFormat {
     return value.isEmpty ? 'Not provided' : value;
   }
 
+  /// Normalized route ID used for grouping, or "Unassigned" for legacy
+  /// reports without route information.
+  static String routeId(ConditionReport report) =>
+      report.routeId.isEmpty ? BusRoute.unassignedLabel : report.routeId;
+
   /// Free-text location name, or a placeholder.
   static String locationName(ConditionReport report) {
     final value = report.location.label.trim();

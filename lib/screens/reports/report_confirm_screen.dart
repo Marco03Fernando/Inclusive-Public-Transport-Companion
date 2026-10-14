@@ -6,6 +6,8 @@ import '../../core/localization/locale.dart';
 import '../../core/routes.dart';
 import '../../core/state/app_state.dart';
 import '../../core/theme/app_theme.dart';
+import '../../models/condition_report.dart';
+import '../../providers/reports_provider.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
 
@@ -16,6 +18,7 @@ class ReportConfirmScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final state = context.watch<AppState>();
+    final submitted = context.watch<ReportsProvider>().lastSubmitted;
     final origin = state.role == AppRole.passenger
         ? Routes.home
         : Routes.volunteerHome;
@@ -76,6 +79,10 @@ class ReportConfirmScreen extends StatelessWidget {
                 ),
               ),
             ),
+            if (submitted != null) ...[
+              const SizedBox(height: 14),
+              _SubmittedSummary(report: submitted),
+            ],
             const SizedBox(height: 14),
             SecondaryButton(
               label: context.t('viewMyReports'),
@@ -90,6 +97,55 @@ class ReportConfirmScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Report type and bus route of the report that was just submitted.
+class _SubmittedSummary extends StatelessWidget {
+  const _SubmittedSummary({required this.report});
+
+  final ConditionReport report;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+
+    Widget row(String label, String value) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '$label: ',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: palette.text,
+              ),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
+        style: TextStyle(fontSize: 13, color: palette.muted, height: 1.4),
+      ),
+    );
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.border, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          row(context.t('reportType'), report.reportType.label),
+          row(context.t('busRouteShort'), report.routeLabel),
+          row(context.t('conditionType'), report.conditionType.sentenceCase),
+        ],
       ),
     );
   }

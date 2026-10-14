@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/condition_report.dart';
 import '../../utils/admin_formatters.dart';
+import '../../widgets/condition_tile.dart';
 import '../../widgets/status_badge.dart';
 
-/// One report in the admin list: subject + vehicle/station number,
-/// condition type, location, submitted date, and current status.
+/// One report in the admin list: subject + vehicle/station number, report
+/// type, bus route, condition type, location, submitted date, and current
+/// status.
 ///
 /// Same surface/shadow style as the app's `ConditionTile`, and reuses the
 /// shared `StatusBadge`.
@@ -26,7 +28,9 @@ class AdminReportCard extends StatelessWidget {
     return Semantics(
       button: true,
       label:
-          '${report.title}, ${report.conditionType.sentenceCase}, '
+          '${report.title}, ${report.reportType.label}, '
+          'bus route ${report.routeLabel}, '
+          '${report.conditionType.sentenceCase}, '
           'location $location, submitted $submitted, '
           'status ${report.status.label}',
       excludeSemantics: true,
@@ -71,8 +75,13 @@ class AdminReportCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
+                  ReportTypeLine(
+                    reportType: report.reportType,
+                    routeLabel: report.routeLabel,
+                  ),
+                  const SizedBox(height: 4),
                   _MetaRow(
-                    icon: Icons.report_problem_outlined,
+                    icon: Icons.category_outlined,
                     text: report.conditionType.sentenceCase,
                   ),
                   const SizedBox(height: 4),

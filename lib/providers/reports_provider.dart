@@ -32,6 +32,7 @@ class ReportsProvider extends ChangeNotifier {
   ReportFailure? _submitFailure;
   String? _sessionUserId;
   StreamSubscription<List<ConditionReport>>? _subscription;
+  ConditionReport? _lastSubmitted;
 
   /// Newest-first list of the current user's reports (live from Firestore).
   List<ConditionReport> get reports => List.unmodifiable(_reports);
@@ -44,6 +45,10 @@ class ReportsProvider extends ChangeNotifier {
   String? get submitError => _submitError;
   ReportFailure? get submitFailure => _submitFailure;
 
+  /// The report most recently saved by [submitReport] in this session —
+  /// summarised on the confirmation screen.
+  ConditionReport? get lastSubmitted => _lastSubmitted;
+
   /// Starts or stops the live subscription to match the signed-in user.
   /// Called from `ChangeNotifierProxyProvider.update` in `app.dart`, i.e.
   /// DURING a build — so the actual work is deferred to a microtask.
@@ -55,6 +60,7 @@ class ReportsProvider extends ChangeNotifier {
       _subscription?.cancel();
       _subscription = null;
       _reports = [];
+      _lastSubmitted = null;
       _isLoading = false;
       _error = null;
       _submitError = null;
@@ -121,6 +127,7 @@ class ReportsProvider extends ChangeNotifier {
       final saved = await _service.createReport(
         report.copyWith(userId: userId),
       );
+      _lastSubmitted = saved;
       // The live subscription normally delivers it first; avoid duplicates.
       if (!_reports.any((r) => r.id == saved.id)) {
         _reports = [saved, ..._reports];

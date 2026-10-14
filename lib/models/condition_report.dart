@@ -21,6 +21,19 @@ class ConditionReport {
   /// reaches the repository — screens never need to know about it.
   final String userId;
 
+  /// Positive feedback or an accessibility issue. [ReportType.unknown]
+  /// only for legacy reports submitted before this field existed.
+  final ReportType reportType;
+
+  /// Bus route as the user entered it, e.g. "138A". Empty for legacy
+  /// reports — see [routeLabel] for display.
+  final String routeNumber;
+
+  /// Normalized [routeNumber] (see [BusRoute.normalize]) used to group and
+  /// query reports by route. Empty for legacy reports, which therefore
+  /// never belong to a real route.
+  final String routeId;
+
   final ReportSubject subject;
   final String vehicleOrStationNumber;
   final ReportLocation location;
@@ -46,6 +59,9 @@ class ConditionReport {
   const ConditionReport({
     required this.id,
     this.userId = '',
+    this.reportType = ReportType.unknown,
+    this.routeNumber = '',
+    this.routeId = '',
     required this.subject,
     required this.vehicleOrStationNumber,
     required this.location,
@@ -58,6 +74,22 @@ class ConditionReport {
     this.status = ReportStatus.underReview,
     this.adminComment,
   });
+
+  /// True when the report is tied to a valid bus route.
+  bool get hasRoute => routeId.isNotEmpty && BusRoute.isValid(routeId);
+
+  /// Route for display: the entered number, or "Unassigned".
+  String get routeLabel =>
+      routeNumber.trim().isEmpty ? BusRoute.unassignedLabel : routeNumber;
+
+  /// Whether this report may count as verified evidence for its bus route
+  /// (consumed by the route-based points system): classified, on a valid
+  /// route, and accepted by an admin. Pending, rejected and legacy
+  /// (unclassified / unassigned) reports never qualify.
+  bool get isRouteScoringEligible =>
+      reportType.isClassified &&
+      hasRoute &&
+      (status == ReportStatus.accepted || status == ReportStatus.verified);
 
   /// Short title line used on the "My Reports" cards, e.g. "Bus NB-1234".
   String get title {
@@ -102,13 +134,18 @@ class ConditionReport {
   }
 
   /// Builds a submittable [ConditionReport] from a completed
-  /// [ConditionReportDraft]. Assumes Step 1 already guaranteed [subject]
-  /// and [conditionType] are set (form validation enforces this).
+  /// [ConditionReportDraft]. Assumes the form already guaranteed
+  /// [reportType], [subject] and [conditionType] are set and the route
+  /// number is valid (form validation enforces this).
   ///
   /// [id] and [userId] are left empty/blank here — the repository
   /// assigns the real Firestore document ID, and [ReportsProvider] fills
   /// in [userId] from the signed-in user right before submission.
   factory ConditionReport.fromDraft(ConditionReportDraft draft) {
+    assert(
+      draft.reportType != null,
+      'Draft must have a report type before submitting.',
+    );
     assert(
       draft.subject != null,
       'Draft must have a subject before submitting.',
@@ -119,6 +156,9 @@ class ConditionReport {
     );
     return ConditionReport(
       id: '',
+      reportType: draft.reportType ?? ReportType.unknown,
+      routeNumber: BusRoute.displayValue(draft.routeNumber),
+      routeId: BusRoute.normalize(draft.routeNumber),
       subject: draft.subject!,
       vehicleOrStationNumber: draft.vehicleOrStationNumber.trim(),
       location:
@@ -148,6 +188,9 @@ class ConditionReport {
     return ConditionReport(
       id: id ?? this.id,
       userId: userId ?? this.userId,
+      reportType: reportType,
+      routeNumber: routeNumber,
+      routeId: routeId,
       subject: subject,
       vehicleOrStationNumber: vehicleOrStationNumber,
       location: location,
@@ -168,6 +211,9 @@ class ConditionReport {
   Map<String, dynamic> toJson() => {
     'id': id,
     'userId': userId,
+    ReportFields.reportType: reportType.name,
+    ReportFields.routeNumber: routeNumber,
+    ReportFields.routeId: routeId,
     'subject': subject.name,
     'vehicleOrStationNumber': vehicleOrStationNumber,
     'location': location.toJson(),
@@ -184,6 +230,9 @@ class ConditionReport {
       ConditionReport(
         id: json['id'] as String? ?? '',
         userId: json['userId'] as String? ?? '',
+        reportType: ReportType.parse(json[ReportFields.reportType]),
+        routeNumber: json[ReportFields.routeNumber] as String? ?? '',
+        routeId: json[ReportFields.routeId] as String? ?? '',
         subject: ReportSubject.values.byName(json['subject'] as String),
         vehicleOrStationNumber: json['vehicleOrStationNumber'] as String? ?? '',
         location: json['location'] == null

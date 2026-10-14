@@ -206,6 +206,9 @@ class FirebaseAdminReportRepository implements AdminReportRepository {
       return ConditionReport(
         id: (data['reportId'] as String?) ?? doc.id,
         userId: data['userId'] as String? ?? '',
+        reportType: ReportType.parse(data[ReportFields.reportType]),
+        routeNumber: data[ReportFields.routeNumber] as String? ?? '',
+        routeId: data[ReportFields.routeId] as String? ?? '',
         subject: _enumOr(
           ReportSubject.values,
           data['subject'] as String?,

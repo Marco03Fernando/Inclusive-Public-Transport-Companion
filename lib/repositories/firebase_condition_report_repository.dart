@@ -282,6 +282,9 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
   /// {
   ///   "reportId": "abc123",
   ///   "userId": "uid_xyz",
+  ///   "reportType": "issue",            // "positive" | "issue"
+  ///   "routeNumber": "138A",            // as entered, for display
+  ///   "routeId": "138A",                // normalized, for grouping
   ///   "subject": "bus",
   ///   "vehicleOrStationNumber": "NB-1234",
   ///   "conditionType": "brokenRamp",
@@ -304,6 +307,9 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
     return {
       'reportId': report.id,
       'userId': report.userId,
+      ReportFields.reportType: report.reportType.name,
+      ReportFields.routeNumber: report.routeNumber,
+      ReportFields.routeId: report.routeId,
       'subject': report.subject.name,
       'vehicleOrStationNumber': report.vehicleOrStationNumber,
       'conditionType': report.conditionType.name,
@@ -344,6 +350,11 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
     return ConditionReport(
       id: (data['reportId'] as String?) ?? doc.id,
       userId: data['userId'] as String? ?? '',
+      // Legacy documents have none of these: they read back as
+      // unclassified / unassigned instead of being guessed.
+      reportType: ReportType.parse(data[ReportFields.reportType]),
+      routeNumber: data[ReportFields.routeNumber] as String? ?? '',
+      routeId: data[ReportFields.routeId] as String? ?? '',
       subject: _enumOr(
         ReportSubject.values,
         data['subject'],

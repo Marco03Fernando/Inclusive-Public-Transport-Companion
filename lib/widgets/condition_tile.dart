@@ -13,19 +13,29 @@ class ConditionTile extends StatelessWidget {
     required this.location,
     required this.status,
     this.date,
+    this.reportType,
+    this.routeLabel,
   });
 
-  /// A real submitted report (title, location, "Submitted …" line, status).
+  /// A real submitted report (title, report type, bus route, location,
+  /// "Submitted …" line, status).
   ConditionTile.fromReport(ConditionReport report, {super.key})
     : title = '${report.title} · ${report.conditionType.sentenceCase}',
       location = report.location.label,
       status = report.status,
-      date = report.submittedLabel;
+      date = report.submittedLabel,
+      reportType = report.reportType,
+      routeLabel = report.routeLabel;
 
   final String title;
   final String location;
   final ReportStatus status;
   final String? date;
+
+  /// Shown (with [routeLabel]) only for real reports — null for tiles
+  /// built from other data sources.
+  final ReportType? reportType;
+  final String? routeLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +74,13 @@ class ConditionTile extends StatelessWidget {
                     color: palette.text,
                   ),
                 ),
+                if (reportType != null) ...[
+                  const SizedBox(height: 4),
+                  ReportTypeLine(
+                    reportType: reportType!,
+                    routeLabel: routeLabel,
+                  ),
+                ],
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
@@ -76,6 +93,48 @@ class ConditionTile extends StatelessWidget {
           StatusBadge(status: status),
         ],
       ),
+    );
+  }
+}
+
+/// "Positive Accessibility Feedback · Bus route 138" with a matching icon:
+/// green thumbs-up for positive, red warning for issues, muted for legacy
+/// (unclassified) reports.
+class ReportTypeLine extends StatelessWidget {
+  const ReportTypeLine({super.key, required this.reportType, this.routeLabel});
+
+  final ReportType reportType;
+  final String? routeLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final (IconData icon, Color color) = switch (reportType) {
+      ReportType.positive => (Icons.thumb_up_alt_outlined, palette.success),
+      ReportType.issue => (Icons.report_problem_outlined, palette.danger),
+      ReportType.unknown => (Icons.help_outline, palette.muted),
+    };
+    final route = routeLabel;
+    final text = route == null
+        ? reportType.label
+        : '${reportType.label} · Bus route $route';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 15, color: color),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

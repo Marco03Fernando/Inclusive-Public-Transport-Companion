@@ -18,7 +18,8 @@ import '../../widgets/buttons.dart';
 import '../../widgets/chip_selector.dart';
 import '../../widgets/labeled_text_field.dart';
 
-/// "Report Condition": collects subject, vehicle/station number, GPS
+/// "Report Condition": collects report type (positive feedback / issue),
+/// bus route number, subject, vehicle/station number, GPS
 /// location, condition type, description and an optional photo, then
 /// submits through [ReportsProvider] → `ConditionReportService` →
 /// Firestore `condition_reports` (+ Storage for the photo).
@@ -31,12 +32,15 @@ class ReportFormScreen extends StatefulWidget {
 
 class _ReportFormScreenState extends State<ReportFormScreen> {
   final _draft = ConditionReportDraft();
+  final _routeController = TextEditingController();
   final _vehicleController = TextEditingController();
   final _locationController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationService = LocationService();
   final _photoService = PhotoService();
 
+  String? _reportTypeError;
+  String? _routeError;
   String? _subjectError;
   String? _vehicleError;
   String? _locationError;
@@ -47,6 +51,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
   @override
   void dispose() {
+    _routeController.dispose();
     _vehicleController.dispose();
     _locationController.dispose();
     _descriptionController.dispose();
@@ -142,6 +147,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
 
   bool _validate() {
     setState(() {
+      _reportTypeError = ReportValidators.reportType(_draft.reportType);
+      _routeError = ReportValidators.routeNumber(_routeController.text);
       _subjectError = ReportValidators.subject(_draft.subject);
       _vehicleError = ReportValidators.vehicleOrStationNumber(
         _vehicleController.text,
@@ -153,7 +160,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         _descriptionController.text,
       );
     });
-    return _subjectError == null &&
+    return _reportTypeError == null &&
+        _routeError == null &&
+        _subjectError == null &&
         _vehicleError == null &&
         _locationError == null &&
         _conditionError == null &&
@@ -165,6 +174,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
     if (!_validate()) return;
 
     _draft
+      ..routeNumber = _routeController.text
       ..vehicleOrStationNumber = _vehicleController.text.trim()
       ..location = _locationController.text.trim()
       ..description = _descriptionController.text.trim();
@@ -240,6 +250,26 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _ReportTypeField(
+            value: _draft.reportType,
+            errorText: _reportTypeError,
+            onChanged: (type) => setState(() {
+              _draft.reportType = type;
+              _reportTypeError = null;
+            }),
+          ),
+          const SizedBox(height: 14),
+          LabeledTextField(
+            label: context.t('busRouteNumber'),
+            initialValue: context.t('busRoutePlaceholder'),
+            controller: _routeController,
+            textCapitalization: TextCapitalization.characters,
+            errorText: _routeError,
+            onChanged: (_) {
+              if (_routeError != null) setState(() => _routeError = null);
+            },
+          ),
+          const SizedBox(height: 14),
           sectionLabel('whatReporting'),
           Wrap(
             spacing: 8,
@@ -323,6 +353,67 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Required "Report Type" dropdown. Starts empty (no preselection) and
+/// explains the chosen type underneath.
+class _ReportTypeField extends StatelessWidget {
+  const _ReportTypeField({
+    required this.value,
+    required this.errorText,
+    required this.onChanged,
+  });
+
+  final ReportType? value;
+  final String? errorText;
+  final ValueChanged<ReportType?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final selected = value;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.t('reportType'),
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: palette.text,
+          ),
+        ),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<ReportType>(
+          initialValue: selected,
+          isExpanded: true,
+          dropdownColor: palette.surface,
+          borderRadius: BorderRadius.circular(14),
+          icon: Icon(Icons.keyboard_arrow_down, color: palette.muted),
+          hint: Text(context.t('reportTypeHint')),
+          decoration: InputDecoration(errorText: errorText),
+          style: TextStyle(fontSize: 14, color: palette.text),
+          items: [
+            for (final type in ReportType.selectable)
+              DropdownMenuItem(
+                value: type,
+                child: Text(context.t(type.labelKey)),
+              ),
+          ],
+          onChanged: onChanged,
+        ),
+        if (selected != null && selected.isClassified)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              context.t(selected.descriptionKey),
+              style: TextStyle(fontSize: 12, color: palette.muted, height: 1.4),
+            ),
+          ),
+      ],
     );
   }
 }

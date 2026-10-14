@@ -65,6 +65,20 @@ class ConditionReportService {
         'Please sign in again to submit a report.',
       );
     }
+    if (!report.reportType.isClassified) {
+      throw const ReportException(
+        ReportFailure.validation,
+        'Please choose a report type.',
+      );
+    }
+    final routeError = BusRoute.validate(report.routeNumber);
+    if (routeError != null ||
+        report.routeId != BusRoute.normalize(report.routeNumber)) {
+      throw ReportException(
+        ReportFailure.validation,
+        routeError ?? 'Please check the bus route number.',
+      );
+    }
     if (report.description.trim().isEmpty) {
       throw const ReportException(
         ReportFailure.validation,
