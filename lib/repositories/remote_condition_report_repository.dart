@@ -68,6 +68,24 @@ class RemoteConditionReportRepository implements ConditionReportRepository {
         .toList();
   }
 
+  
+  @override
+  Future<List<ConditionReport>> getRouteEligibleReports() async {
+    final response = await _client.get(
+      _uri('/reports/route-eligible'),
+      headers: _headers,
+    );
+
+    _throwIfError(response);
+
+    final list = jsonDecode(response.body) as List<dynamic>;
+
+    return list
+        .map((e) => ConditionReport.fromJson(e as Map<String, dynamic>))
+        .where((report) => report.isRouteScoringEligible)
+        .toList();
+  }
+
   /// No push updates from this backend — emits a single snapshot.
   @override
   Stream<List<ConditionReport>> watchUserReports(String userId) =>

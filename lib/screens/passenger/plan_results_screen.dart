@@ -5,6 +5,8 @@ import '../../models/route_request.dart';
 import '../../services/route_service.dart';
 import '../../widgets/route_option_card.dart';
 import '../../core/routes.dart';
+import '../../repositories/firebase_condition_report_repository.dart';
+import '../../services/route_scoring_service.dart';
 
 class PlanResultsScreen extends StatefulWidget {
   const PlanResultsScreen({super.key});
@@ -28,7 +30,11 @@ class _PlanResultsScreenState extends State<PlanResultsScreen> {
 
     final request = ModalRoute.of(context)!.settings.arguments as RouteRequest;
 
-    _routesFuture = RouteService.getRoutes(request);
+    _routesFuture = RouteService.getRoutes(request).then(
+      (routes) =>
+          RouteScoringService(repository: FirebaseConditionReportRepository())
+              .rankRoutes(routes),
+    );
 
     _loaded = true;
   }
@@ -70,6 +76,7 @@ class _PlanResultsScreenState extends State<PlanResultsScreen> {
 
               return RouteOptionCard(
                 route: route,
+                isRecommended: index == 0,
                 onTap: () {
                   Navigator.pushNamed(
                     context,
