@@ -27,7 +27,12 @@ import '../../widgets/toggle_row.dart';
 /// anonymous — both off by default), then submits through [ReportsProvider] → `ConditionReportService` →
 /// Firestore `condition_reports` (+ Storage for the photo).
 class ReportFormScreen extends StatefulWidget {
-  const ReportFormScreen({super.key});
+  const ReportFormScreen({super.key, this.locationService, this.photoService});
+
+  /// GPS and camera/gallery access. Default to the real services; tests
+  /// pass fakes so the form can be exercised without device hardware.
+  final LocationService? locationService;
+  final PhotoService? photoService;
 
   @override
   State<ReportFormScreen> createState() => _ReportFormScreenState();
@@ -39,8 +44,9 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
   final _vehicleController = TextEditingController();
   final _locationController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _locationService = LocationService();
-  final _photoService = PhotoService();
+  late final LocationService _locationService =
+      widget.locationService ?? LocationService();
+  late final PhotoService _photoService = widget.photoService ?? PhotoService();
 
   String? _reportTypeError;
   String? _routeError;
@@ -90,7 +96,12 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       });
     } on LocationServiceException catch (e) {
       if (!mounted) return;
-      setState(() => _locationError = e.message);
+      // Stop the spinner before the settings dialog: the lookup is over,
+      // so the field shouldn't keep "searching" behind the dialog.
+      setState(() {
+        _locationError = e.message;
+        _isLocating = false;
+      });
       if (e.permanentlyDenied) await _offerAppSettings();
     } catch (_) {
       if (!mounted) return;
@@ -486,9 +497,12 @@ class _PhotoPicker extends StatelessWidget {
     final palette = context.palette;
     final hasPhoto = photoPath != null;
 
+    // One announcement for the control; the visible "+ attach photo" /
+    // "Tap to replace" text would otherwise be read out as well.
     return Semantics(
       button: true,
       label: hasPhoto ? 'Photo added, tap to replace' : 'Tap to add photo',
+      excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),

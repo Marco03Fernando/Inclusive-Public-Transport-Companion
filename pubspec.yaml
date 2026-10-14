@@ -87,6 +87,9 @@ flutter:
   # and the launcher / native-splash images are build-time inputs only.
   assets:
     - assets/branding/startup/colombopal_logo.png
+    # Brand symbol for the landing hero and Home header (1x–4x copies of
+    # colombopal_icon.png sized for ≤168 dp).
+    - assets/branding/app/colombopal_icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
