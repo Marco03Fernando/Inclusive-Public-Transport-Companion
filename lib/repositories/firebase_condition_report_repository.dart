@@ -105,6 +105,36 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
   }
 
   @override
+  Future<List<ConditionReport>> getRouteEligibleReports() async {
+    try {
+      final snapshot = await _collection
+          .where(
+            ReportFields.status,
+            whereIn: [ReportStatus.accepted.name, ReportStatus.verified.name],
+          )
+          .get();
+
+      final reports = <ConditionReport>[];
+
+      for (final doc in snapshot.docs) {
+        try {
+          final report = _fromDocument(doc);
+
+          if (report.isRouteScoringEligible) {
+            reports.add(report);
+          }
+        } catch (e) {
+          _log('Skipping unreadable route report ${doc.id}: $e');
+        }
+      }
+
+      return reports;
+    } on FirebaseException catch (e) {
+      throw _firestoreError(e, action: 'load verified route reports');
+    }
+  }
+
+  @override
   Stream<List<ConditionReport>> watchUserReports(String userId) {
     return _userReportsQuery(userId)
         .snapshots()

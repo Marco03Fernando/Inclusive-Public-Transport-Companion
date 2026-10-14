@@ -44,6 +44,14 @@ class LocalConditionReportRepository implements ConditionReportRepository {
     return reports.where((r) => r.userId == userId).toList();
   }
 
+  
+  @override
+  Future<List<ConditionReport>> getRouteEligibleReports() async {
+    final reports = await _readAll();
+
+    return reports.where((report) => report.isRouteScoringEligible).toList();
+  }
+
   /// No push updates from this backend — emits a single snapshot.
   @override
   Stream<List<ConditionReport>> watchUserReports(String userId) =>

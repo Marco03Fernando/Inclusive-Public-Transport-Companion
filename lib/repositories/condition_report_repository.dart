@@ -38,4 +38,8 @@ abstract class ConditionReportRepository {
 
   /// Removes a report (e.g. user retracts a mistaken report).
   Future<void> deleteReport(String reportId);
+
+  /// Retrieves reports eligible for route scoring and display.
+  /// Only accepted/verified, classified reports with valid bus routes qualify.
+  Future<List<ConditionReport>> getRouteEligibleReports();
 }

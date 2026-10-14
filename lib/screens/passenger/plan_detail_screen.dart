@@ -4,14 +4,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../core/localization/locale.dart';
 import '../../core/routes.dart';
 import '../../core/theme/app_theme.dart';
-import '../../data/mock_data.dart';
 import '../../models/google_route.dart';
 import '../../models/route_option.dart';
 import '../../services/polyline_decoder.dart';
 import '../../widgets/app_scaffold.dart';
-import '../../widgets/condition_tile.dart';
-import '../../widgets/demo_data_badge.dart';
 import '../../widgets/route_step_item.dart';
+import '../../models/condition_report.dart';
+import '../../repositories/firebase_condition_report_repository.dart';
 
 class PlanDetailScreen extends StatefulWidget {
   const PlanDetailScreen({super.key, required this.route});
@@ -23,6 +22,22 @@ class PlanDetailScreen extends StatefulWidget {
 }
 
 class _PlanDetailScreenState extends State<PlanDetailScreen> {
+  late final Future<List<ConditionReport>> _reportsFuture =
+      FirebaseConditionReportRepository().getRouteEligibleReports().then((
+        reports,
+      ) {
+        final routeIds = widget.route.transitSegments
+            .map(
+              (segment) =>
+                  BusRoute.normalize(segment.lineShortName ?? segment.lineName),
+            )
+            .toSet();
+
+        return reports
+            .where((report) => routeIds.contains(report.routeId))
+            .toList();
+      });
+
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
@@ -133,7 +148,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                   if (routeSteps.isEmpty)
                     const Text('No step-by-step instructions available.')
                   else ...[
-                    const DemoDataBadge(),
+                    
 
                     for (var i = 0; i < routeSteps.length; i++)
                       RouteStepItem(
@@ -153,17 +168,101 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const DemoDataBadge(),
 
-                  for (final c in mockRouteConditions) ...[
-                    ConditionTile(
-                      title: c.title,
-                      location: c.location,
-                      status: c.status,
-                      date: c.date,
-                    ),
-                    const SizedBox(height: 10),
-                  ],
+                  FutureBuilder<List<ConditionReport>>(
+                    future: _reportsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      if (snapshot.hasError) {
+                        return const Text(
+                          'Could not load verified reports. Please try again later.',
+                        );
+                      }
+
+                      final reports = snapshot.data ?? [];
+
+                      if (reports.isEmpty) {
+                        return const Text(
+                          'No verified condition reports are available for these buses yet.',
+                        );
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final report in reports) ...[
+                            Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          report.reportType ==
+                                                  ReportType.positive
+                                              ? Icons.thumb_up_alt_outlined
+                                              : Icons.warning_amber_rounded,
+                                          color:
+                                              report.reportType ==
+                                                  ReportType.positive
+                                              ? Colors.green
+                                              : Colors.red,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            '${report.routeLabel} · '
+                                            '${report.reportType.label}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(report.conditionType.sentenceCase),
+                                    if (report.description
+                                        .trim()
+                                        .isNotEmpty) ...[
+                                      const SizedBox(height: 6),
+                                      Text(report.description),
+                                    ],
+                                    if (report.location.label
+                                        .trim()
+                                        .isNotEmpty) ...[
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        'Location: ${report.location.label}',
+                                      ),
+                                    ],
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Status: ${report.status.label}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                        ],
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
