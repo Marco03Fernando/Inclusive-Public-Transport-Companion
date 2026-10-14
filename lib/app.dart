@@ -51,6 +51,7 @@ import 'services/auth_service.dart';
 import 'services/condition_report_service.dart';
 import 'services/read_aloud_service.dart';
 import 'widgets/auth_gate.dart';
+import 'widgets/sos_trigger_host.dart';
 
 class ColomboPalApp extends StatelessWidget {
   const ColomboPalApp({super.key});
@@ -145,6 +146,9 @@ class ColomboPalApp extends StatelessWidget {
             child: MaterialApp(
               title: 'Colombo Pal',
               debugShowCheckedModeBanner: false,
+              // Lets SosTriggerHost open the SOS dialog from outside the
+              // widget tree (home-screen widget / volume-button triggers).
+              navigatorKey: rootNavigatorKey,
               // In-app High Contrast Mode swaps the palettes; the
               // highContrast* themes also apply when the OS asks for high
               // contrast (e.g. iOS "Increase Contrast").
@@ -170,7 +174,9 @@ class ColomboPalApp extends StatelessWidget {
                   data: mq.copyWith(
                     textScaler: a11y.textScalerFor(mq.textScaler),
                   ),
-                  child: child!,
+                  child: SosTriggerHost(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 );
               },
               home: const AuthGate(),

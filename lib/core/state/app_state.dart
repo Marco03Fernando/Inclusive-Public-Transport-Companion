@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/mock_data.dart';
 import '../../models/access_need.dart';
+import '../../services/sos_trigger_service.dart';
 import '../localization/locale.dart';
 
 const _themeModePrefKey = 'themeMode';
@@ -56,6 +57,10 @@ class AppState extends ChangeNotifier {
   Set<String> planFilterIds = {'wheelchair'};
   bool autoShare = false;
 
+  // Android-only "alternate volume up/down 3 times" SOS shortcut; the switch's
+  // source of truth lives natively so it can restart after a reboot.
+  bool volumeSosEnabled = false;
+
   SosStage sosStage = SosStage.hidden;
   double holdPct = 0;
   Timer? _holdTimer;
@@ -77,6 +82,22 @@ class AppState extends ChangeNotifier {
       elapsed.value++;
     });
     ready = _loadThemeMode();
+    _loadVolumeSos();
+  }
+
+  Future<void> _loadVolumeSos() async {
+    volumeSosEnabled = await SosTriggerService.instance
+        .isVolumeTriggerEnabled();
+    notifyListeners();
+  }
+
+  Future<void> setVolumeSosEnabled(bool enabled) async {
+    volumeSosEnabled = enabled;
+    notifyListeners();
+    volumeSosEnabled = await SosTriggerService.instance.setVolumeTriggerEnabled(
+      enabled,
+    );
+    notifyListeners();
   }
 
   Future<void> _loadThemeMode() async {
@@ -164,6 +185,13 @@ class AppState extends ChangeNotifier {
   void openSosConfirm() {
     sosStage = SosStage.confirm;
     holdPct = 0;
+    notifyListeners();
+  }
+
+  void activateSos() {
+    _holdTimer?.cancel();
+    sosStage = SosStage.activated;
+    holdPct = 100;
     notifyListeners();
   }
 

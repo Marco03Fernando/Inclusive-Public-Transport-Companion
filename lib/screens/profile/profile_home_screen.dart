@@ -12,6 +12,7 @@ import '../../widgets/buttons.dart';
 import '../../widgets/demo_data_badge.dart';
 import '../../widgets/greeting_header.dart';
 import '../../widgets/settings_link_row.dart';
+import '../../widgets/sos_shortcuts_card.dart';
 import '../../widgets/theme_mode_selector.dart';
 
 class ProfileHomeScreen extends StatelessWidget {
@@ -103,6 +104,8 @@ class ProfileHomeScreen extends StatelessWidget {
                     mode: state.themeMode,
                     onChanged: state.setThemeMode,
                   ),
+                  // Android-only SOS shortcuts; renders nothing elsewhere.
+                  const SosShortcutsCard(),
                   const SizedBox(height: 24),
                   const AccessibilitySettingsSection(),
                   const SizedBox(height: 24),
