@@ -16,6 +16,25 @@ class AppStrings {
 
   static const Map<String, String> en = {
     'appTagline': 'Travel safely and confidently around Colombo',
+
+    // Landing (get started) + Home redesign
+    'getStarted': 'Get Started',
+    'landingHeadlineTop': 'Travel independently.',
+    'landingHeadlineAccent': 'Feel empowered.',
+    'benefitRoutesTitle': 'Accessible routes',
+    'benefitRoutesDesc': 'Step-free journeys',
+    'benefitHelpTitle': 'Volunteer help',
+    'benefitHelpDesc': 'Support when you need it',
+    'benefitReportsTitle': 'Live reports',
+    'benefitReportsDesc': 'Know before you go',
+    'goodMorning': 'Good morning',
+    'goodEvening': 'Good evening',
+    'homePrompt': 'Where would you like to go today?',
+    'viewAll': 'View all',
+    'recentActivityEmpty':
+        'No activity yet. Reports you submit will appear here.',
+    'recentActivityUnavailable':
+        "Your recent activity isn't available right now.",
     'registeringAs': 'I am registering as a',
     'rolePassenger': 'Passenger',
     'roleVolunteer': 'Volunteer',
@@ -357,6 +376,9 @@ class AppStrings {
 
   static const Map<String, String> si = {
     'appTagline': 'කොළඹ ආරක්ෂිතව හා විශ්වාසයෙන් සංචාරය කරන්න',
+    'getStarted': 'ආරම්භ කරන්න',
+    'goodMorning': 'සුභ උදෑසනක්',
+    'goodEvening': 'සුභ සන්ධ්‍යාවක්',
     'registeringAs': 'මම ලියාපදිංචි වන්නේ',
     'rolePassenger': 'මගියා',
     'roleVolunteer': 'ස්වේච්ඡා සේවක',
@@ -457,7 +479,8 @@ class AppStrings {
     'sosShortcutsTitle': 'SOS කෙටිමං',
     'volumeSosTitle': 'හඬ බොත්තම් SOS',
     'volumeSosNote': 'යෙදුම වසා ඇති විටත් හඬ වැඩි/අඩු බොත්තම් මාරුවෙන් මාරුවට වේගයෙන් 3 වතාවක් ඔබන්න',
-    'sosShortcutsHint': 'එක් ස්පර්ශයකින් ප්‍රවේශ වීමට ඔබට SOS විජට් එක මුල් තිරයට එක් කළ හැක.',
+    'sosShortcutsHint':
+        'එක් ස්පර්ශයකින් ප්‍රවේශ වීමට ඔබට SOS විජට් එක මුල් තිරයට එක් කළ හැක.',
     'demoDataLabel': 'නිදර්ශන දත්ත',
     'appearanceTitle': 'පෙනුම',
     'themeSystem': 'පද්ධතිය',

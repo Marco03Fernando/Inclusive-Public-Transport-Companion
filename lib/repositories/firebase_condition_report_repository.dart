@@ -99,7 +99,7 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
   Future<List<ConditionReport>> getUserReports(String userId) async {
     try {
       final snapshot = await _userReportsQuery(userId).get();
-      return _parseAll(snapshot.docs);
+      return _newestFirst(_parseAll(snapshot.docs));
     } on FirebaseException catch (e) {
       throw _firestoreError(e, action: 'load your reports');
     }
@@ -109,7 +109,7 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
   Stream<List<ConditionReport>> watchUserReports(String userId) {
     return _userReportsQuery(userId)
         .snapshots()
-        .map((s) => _parseAll(s.docs))
+        .map((s) => _newestFirst(_parseAll(s.docs)))
         .handleError(
           (Object e) => throw e is FirebaseException
               ? _firestoreError(e, action: 'load your reports')
@@ -117,12 +117,15 @@ class FirebaseConditionReportRepository implements ConditionReportRepository {
         );
   }
 
-  /// Requires the composite index `userId ASC, createdAt DESC` on
-  /// `condition_reports` (Firestore reports `failed-precondition` with a
-  /// create-index link until it exists).
-  Query<Map<String, dynamic>> _userReportsQuery(String userId) => _collection
-      .where('userId', isEqualTo: userId)
-      .orderBy('createdAt', descending: true);
+  /// A user's own reports. Equality filter only, so Firestore's automatic
+  /// single-field index is enough — no composite index has to be deployed
+  /// for "My Reports" to load. Newest-first ordering is applied on the
+  /// device by [_newestFirst] (a user's own list is small).
+  Query<Map<String, dynamic>> _userReportsQuery(String userId) =>
+      _collection.where('userId', isEqualTo: userId);
+
+  static List<ConditionReport> _newestFirst(List<ConditionReport> reports) =>
+      reports..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
   @override
   Future<ConditionReport> updateReportStatus({
