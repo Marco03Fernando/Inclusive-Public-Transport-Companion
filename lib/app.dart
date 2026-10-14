@@ -31,6 +31,7 @@ import 'screens/volunteer/volunteer_feed_screen.dart';
 import 'screens/volunteer/volunteer_home_screen.dart';
 import 'screens/volunteer/volunteer_profile_screen.dart';
 import 'widgets/auth_gate.dart';
+import 'widgets/sos_trigger_host.dart';
 
 class ColomboPalApp extends StatelessWidget {
   const ColomboPalApp({super.key});
@@ -51,6 +52,8 @@ class ColomboPalApp extends StatelessWidget {
                   child: MaterialApp(
                     title: 'Colombo Pal',
                     debugShowCheckedModeBanner: false,
+                    navigatorKey: rootNavigatorKey,
+                    builder: (context, child) => SosTriggerHost(child: child ?? const SizedBox.shrink()),
                     theme: AppTheme.light,
                     darkTheme: AppTheme.dark,
                     themeMode: state.themeMode,
