@@ -18,7 +18,9 @@ class VolunteerHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final profile = context.watch<AuthState>().profile;
-    final displayName = (profile?.name.isNotEmpty ?? false) ? profile!.name : 'Ruwan Jayasuriya';
+    final displayName = (profile?.name.isNotEmpty ?? false)
+        ? profile!.name
+        : 'Ruwan Jayasuriya';
     return AppScaffold(
       routeName: Routes.volunteerHome,
       scrollableBody: false,
@@ -26,19 +28,30 @@ class VolunteerHomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            GreetingHeader(greeting: context.t('welcomeBack'), name: displayName),
+            GreetingHeader(
+              greeting: context.t('welcomeBack'),
+              name: displayName,
+            ),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (profile == null) ...[const DemoDataBadge(), const SizedBox(height: 4)],
+                  if (profile == null) ...[
+                    const DemoDataBadge(),
+                    const SizedBox(height: 4),
+                  ],
                   const DemoDataBadge(),
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: StatCard(value: '14', label: context.t('reportsSubmitted'))),
+                      Expanded(
+                        child: StatCard(
+                          value: '14',
+                          label: context.t('reportsSubmitted'),
+                        ),
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: StatCard(
@@ -53,13 +66,17 @@ class VolunteerHomeScreen extends StatelessWidget {
                   ActionCard(
                     title: context.t('reportCondition'),
                     description: context.t('volunteerReportDesc'),
-                    onTap: () => Navigator.of(context).pushReplacementNamed(Routes.reportForm),
+                    onTap: () =>
+                        Navigator.of(context)
+                            .pushReplacementNamed(Routes.reportForm),
                   ),
                   const SizedBox(height: 12),
                   ActionCard(
                     title: context.t('communityReports'),
                     description: context.t('communityReportsDesc'),
-                    onTap: () => Navigator.of(context).pushReplacementNamed(Routes.volunteerFeed),
+                    onTap: () =>
+                        Navigator.of(context)
+                            .pushReplacementNamed(Routes.volunteerFeed),
                   ),
                 ],
               ),

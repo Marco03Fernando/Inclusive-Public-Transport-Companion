@@ -21,6 +21,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String? _localError;
 
   @override
   void dispose() {
@@ -30,45 +31,72 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submit(BuildContext context) async {
-    final authState = context.read<AuthState>();
-    final ok = await authState.signIn(_emailController.text.trim(), _passwordController.text);
+    FocusScope.of(context).unfocus();
+    final authState = context.read<AuthState>()..clearError();
+    final email = _emailController.text.trim();
+    setState(() {
+      _localError = !email.contains('@')
+          ? 'Please enter a valid email.'
+          : _passwordController.text.isEmpty
+          ? 'Please enter your password.'
+          : null;
+    });
+    if (_localError != null) return;
+
+    final ok = await authState.signIn(email, _passwordController.text);
     if (!context.mounted || !ok) return;
+    // Routes by users/{uid}.role — admins land on the admin dashboard.
     final role = context.read<AppState>().role;
-    Navigator.of(context).pushReplacementNamed(role == AppRole.passenger ? Routes.home : Routes.volunteerHome);
+    Navigator.of(context).pushReplacementNamed(Routes.homeFor(role));
   }
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final authState = context.watch<AuthState>();
+    final error = _localError ?? authState.errorMessage;
     return AppScaffold(
       routeName: Routes.login,
       title: context.t('logIn'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.roleSelect),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.roleSelect),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             context.t('logInTitle'),
-            style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 20, color: palette.text),
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+              color: palette.text,
+            ),
           ),
           const SizedBox(height: 2),
-          Text(context.t('logInNote'), style: TextStyle(fontSize: 13, color: palette.muted)),
+          Text(
+            context.t('logInNote'),
+            style: TextStyle(fontSize: 13, color: palette.muted),
+          ),
           const SizedBox(height: 14),
-          LabeledTextField(label: context.t('emailLabel'), controller: _emailController),
+          LabeledTextField(
+            label: context.t('emailLabel'),
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+          ),
           const SizedBox(height: 14),
           LabeledTextField(
             label: context.t('passwordLabel'),
             controller: _passwordController,
             obscureText: true,
           ),
-          if (authState.errorMessage != null) ...[
+          if (error != null) ...[
             const SizedBox(height: 10),
-            Text(authState.errorMessage!, style: TextStyle(fontSize: 12, color: palette.danger)),
+            Text(error, style: TextStyle(fontSize: 12, color: palette.danger)),
           ],
           const SizedBox(height: 28),
           PrimaryButton(
-            label: authState.loading ? context.t('loading') : context.t('logIn'),
+            label: authState.loading
+                ? context.t('loading')
+                : context.t('logIn'),
             onPressed: authState.loading ? null : () => _submit(context),
           ),
         ],

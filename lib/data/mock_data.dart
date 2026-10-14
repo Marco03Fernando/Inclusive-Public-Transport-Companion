@@ -5,7 +5,7 @@ import '../models/contact.dart';
 import '../models/route_option.dart';
 
 /// ⚠️ DEMO / PLACEHOLDER DATA — every constant in this file is a static
-/// fixture, not a read from any backend. Route planning, condition reports,
+/// fixture, not a read from any backend. Route planning, route conditions,
 /// the volunteer feed and sharing history have no Firestore collection or
 /// service behind them yet, so these arrays are the only source for those
 /// screens; each screen that renders one shows a debug-only
@@ -32,21 +32,6 @@ const planFilterOptions = [
   ChipOption(id: 'lowfloor', labelKey: 'filterLowfloor'),
   ChipOption(id: 'stairs', labelKey: 'filterStairs'),
   ChipOption(id: 'quiet', labelKey: 'filterQuiet'),
-];
-
-const reportTargetOptions = [
-  ChipOption(id: 'bus', labelKey: 'targetBus'),
-  ChipOption(id: 'station', labelKey: 'targetStation'),
-  ChipOption(id: 'rest', labelKey: 'targetRest'),
-  ChipOption(id: 'other', labelKey: 'targetOther'),
-];
-
-const reportTypeOptions = [
-  ChipOption(id: 'crowded', labelKey: 'condCrowded'),
-  ChipOption(id: 'lift', labelKey: 'condLift'),
-  ChipOption(id: 'unsafe', labelKey: 'condUnsafe'),
-  ChipOption(id: 'clean', labelKey: 'condClean'),
-  ChipOption(id: 'other', labelKey: 'condOther'),
 ];
 
 const mockContacts = [
@@ -79,7 +64,11 @@ const mockRouteOptions = [
 ];
 
 const mockRouteSteps = [
-  RouteStep(n: 1, text: 'Walk to Nugegoda Bus Stand', detail: '350 m, level pavement'),
+  RouteStep(
+    n: 1,
+    text: 'Walk to Nugegoda Bus Stand',
+    detail: '350 m, level pavement',
+  ),
   RouteStep(
     n: 2,
     text: 'Bus 138 to Fort',
@@ -97,60 +86,51 @@ const mockRouteSteps = [
   ),
 ];
 
-const mockRouteConditions = [
-  ConditionReport(
+/// Display-only row for the still-demo route-condition / community lists
+/// (rendered with `ConditionTile`). Real submitted reports are
+/// [ConditionReport]s.
+typedef DemoCondition = ({
+  String title,
+  String location,
+  ReportStatus status,
+  String? date,
+});
+
+const List<DemoCondition> mockRouteConditions = [
+  (
     title: 'Crowded during peak hours',
     location: 'Bus 138, 5–6:30pm',
     status: ReportStatus.verified,
+    date: null,
   ),
-  ConditionReport(
+  (
     title: 'Lift out of service',
     location: 'Fort Station, Platform 2',
     status: ReportStatus.underReview,
+    date: null,
   ),
 ];
 
-const mockMyReports = [
-  ConditionReport(
-    title: 'Broken ramp',
-    location: 'Bus NB-4521',
-    status: ReportStatus.underReview,
-    date: 'Aug 18',
-  ),
-  ConditionReport(
-    title: 'Crowded station',
-    location: 'Maradana Station',
-    status: ReportStatus.verified,
-    date: 'Aug 12',
-  ),
-  ConditionReport(
-    title: 'Unsafe driving',
-    location: 'Bus 177, route 100',
-    status: ReportStatus.verified,
-    date: 'Aug 3',
-  ),
-];
-
-const mockVolunteerFeed = [
-  ConditionReport(
+const List<DemoCondition> mockVolunteerFeed = [
+  (
     title: 'Lift out of service',
     location: 'Fort Station, Platform 2',
     status: ReportStatus.underReview,
     date: 'Today',
   ),
-  ConditionReport(
+  (
     title: 'Crowded during peak hours',
     location: 'Bus 138',
     status: ReportStatus.verified,
     date: 'Yesterday',
   ),
-  ConditionReport(
+  (
     title: 'Rest area unclean',
     location: 'Bambalapitiya Station',
     status: ReportStatus.underReview,
     date: 'Aug 18',
   ),
-  ConditionReport(
+  (
     title: 'Tactile paving damaged',
     location: 'Maradana Station entrance',
     status: ReportStatus.verified,

@@ -17,18 +17,28 @@ class AssistanceRequestsScreen extends StatefulWidget {
   const AssistanceRequestsScreen({super.key});
 
   @override
-  State<AssistanceRequestsScreen> createState() => _AssistanceRequestsScreenState();
+  State<AssistanceRequestsScreen> createState() =>
+      _AssistanceRequestsScreenState();
 }
 
 class _AssistanceRequestsScreenState extends State<AssistanceRequestsScreen> {
   final _requestService = AssistanceRequestService();
   final _locationService = LocationService();
-  late final Future<Position?> _myPositionFuture = _locationService.getCurrentPosition();
+  late final Future<Position?> _myPositionFuture = _locationService
+      .getCurrentPosition();
 
-  List<AssistanceRequest> _sorted(List<AssistanceRequest> requests, Position? myPosition) {
+  List<AssistanceRequest> _sorted(
+    List<AssistanceRequest> requests,
+    Position? myPosition,
+  ) {
     final withDistance = requests.map((r) {
       final distance = (myPosition != null && r.lat != null && r.lng != null)
-          ? LocationService.distanceKm(myPosition.latitude, myPosition.longitude, r.lat!, r.lng!)
+          ? LocationService.distanceKm(
+              myPosition.latitude,
+              myPosition.longitude,
+              r.lat!,
+              r.lng!,
+            )
           : double.infinity;
       return (request: r, distance: distance);
     }).toList();
@@ -45,7 +55,8 @@ class _AssistanceRequestsScreenState extends State<AssistanceRequestsScreen> {
     return AppScaffold(
       routeName: Routes.volunteerAssistanceRequests,
       title: context.t('assistanceRequestsTitle'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.volunteerProfile),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.volunteerProfile),
       body: uid == null
           ? const SizedBox.shrink()
           : Column(
@@ -64,18 +75,25 @@ class _AssistanceRequestsScreenState extends State<AssistanceRequestsScreen> {
                         children: [
                           Text(
                             context.t('myAcceptedRequestTitle'),
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: palette.text,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           ActionCard(
                             title: request.passengerName,
-                            description: context.t(assistanceTypeLabelKeys[request.type]!),
+                            description: context.t(
+                              assistanceTypeLabelKeys[request.type]!,
+                            ),
                             onTap: () {},
                           ),
                           const SizedBox(height: 8),
                           SecondaryButton(
                             label: context.t('markCompleteBtn'),
-                            onPressed: () => _requestService.completeRequest(request.id),
+                            onPressed: () =>
+                                _requestService.completeRequest(request.id),
                           ),
                         ],
                       ),
@@ -84,7 +102,11 @@ class _AssistanceRequestsScreenState extends State<AssistanceRequestsScreen> {
                 ),
                 Text(
                   context.t('openRequestsTitle'),
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: palette.text,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 FutureBuilder<Position?>(
@@ -93,9 +115,18 @@ class _AssistanceRequestsScreenState extends State<AssistanceRequestsScreen> {
                     return StreamBuilder<List<AssistanceRequest>>(
                       stream: _requestService.watchOpenRequests(),
                       builder: (context, snapshot) {
-                        final requests = _sorted(snapshot.data ?? const [], positionSnapshot.data);
+                        final requests = _sorted(
+                          snapshot.data ?? const [],
+                          positionSnapshot.data,
+                        );
                         if (requests.isEmpty) {
-                          return Text(context.t('noOpenRequests'), style: TextStyle(fontSize: 13, color: palette.muted));
+                          return Text(
+                            context.t('noOpenRequests'),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: palette.muted,
+                            ),
+                          );
                         }
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -103,22 +134,33 @@ class _AssistanceRequestsScreenState extends State<AssistanceRequestsScreen> {
                             for (final request in requests) ...[
                               ActionCard(
                                 title: request.passengerName,
-                                description: context.t(assistanceTypeLabelKeys[request.type]!),
+                                description: context.t(
+                                  assistanceTypeLabelKeys[request.type]!,
+                                ),
                                 onTap: () {},
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 10),
+                                padding: const EdgeInsets.only(
+                                  top: 4,
+                                  bottom: 10,
+                                ),
                                 child: PrimaryButton(
                                   label: context.t('acceptBtn'),
-                                  onPressed: () => _requestService.acceptRequest(
-                                    request.id,
-                                    uid,
-                                    authState.profile?.name.isNotEmpty ?? false
-                                        ? authState.profile!.name
-                                        : authState.firebaseUser?.displayName ??
-                                            authState.firebaseUser?.email ??
-                                            'Volunteer',
-                                  ),
+                                  onPressed: () =>
+                                      _requestService.acceptRequest(
+                                        request.id,
+                                        uid,
+                                        authState.profile?.name.isNotEmpty ??
+                                                false
+                                            ? authState.profile!.name
+                                            : authState
+                                                      .firebaseUser
+                                                      ?.displayName ??
+                                                  authState
+                                                      .firebaseUser
+                                                      ?.email ??
+                                                  'Volunteer',
+                                      ),
                                 ),
                               ),
                             ],

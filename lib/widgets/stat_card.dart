@@ -5,7 +5,12 @@ import '../core/theme/app_theme.dart';
 
 /// The "14 / Reports submitted" style stat tile on Volunteer Home.
 class StatCard extends StatelessWidget {
-  const StatCard({super.key, required this.value, required this.label, this.valueColor});
+  const StatCard({
+    super.key,
+    required this.value,
+    required this.label,
+    this.valueColor,
+  });
 
   final String value;
   final String label;
@@ -20,7 +25,13 @@ class StatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: palette.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 14, offset: const Offset(0, 6))],
+        boxShadow: [
+          BoxShadow(
+            color: palette.shadow,
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

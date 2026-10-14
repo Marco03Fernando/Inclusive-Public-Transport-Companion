@@ -21,7 +21,8 @@ class ProfileSharingScreen extends StatelessWidget {
     return AppScaffold(
       routeName: Routes.profileSharing,
       title: context.t('locationSharingTitle'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.profileHome),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.profileHome),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -34,7 +35,11 @@ class ProfileSharingScreen extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             context.t('sharingHistory'),
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: palette.text,
+            ),
           ),
           const SizedBox(height: 10),
           const DemoDataBadge(),

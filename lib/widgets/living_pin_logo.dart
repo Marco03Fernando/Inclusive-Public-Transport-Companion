@@ -19,10 +19,16 @@ class LivingPinLogo extends StatefulWidget {
   State<LivingPinLogo> createState() => LivingPinLogoState();
 }
 
-class LivingPinLogoState extends State<LivingPinLogo> with TickerProviderStateMixin {
-  late final AnimationController _idle = AnimationController(vsync: this, duration: const Duration(seconds: 2))
-    ..repeat(reverse: true);
-  late final AnimationController _confirm = AnimationController(vsync: this, duration: const Duration(milliseconds: 480));
+class LivingPinLogoState extends State<LivingPinLogo>
+    with TickerProviderStateMixin {
+  late final AnimationController _idle = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 2),
+  )..repeat(reverse: true);
+  late final AnimationController _confirm = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 480),
+  );
 
   /// Plays the one-shot "confirm" hop. Call this right before navigating
   /// away so the user sees the mark react to their tap.
@@ -63,7 +69,10 @@ class LivingPinLogoState extends State<LivingPinLogo> with TickerProviderStateMi
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
-                      colors: [palette.heroGradientStart, palette.heroGradientStart.withValues(alpha: 0)],
+                      colors: [
+                        palette.heroGradientStart,
+                        palette.heroGradientStart.withValues(alpha: 0),
+                      ],
                     ),
                   ),
                 ),
@@ -74,7 +83,10 @@ class LivingPinLogoState extends State<LivingPinLogo> with TickerProviderStateMi
                   scale: scale,
                   child: CustomPaint(
                     size: Size(widget.size, widget.size),
-                    painter: _PinPainter(start: palette.heroGradientStart, end: palette.heroGradientEnd),
+                    painter: _PinPainter(
+                      start: palette.heroGradientStart,
+                      end: palette.heroGradientEnd,
+                    ),
                   ),
                 ),
               ),
@@ -121,5 +133,6 @@ class _PinPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _PinPainter oldDelegate) => oldDelegate.start != start || oldDelegate.end != end;
+  bool shouldRepaint(covariant _PinPainter oldDelegate) =>
+      oldDelegate.start != start || oldDelegate.end != end;
 }

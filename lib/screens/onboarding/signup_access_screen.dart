@@ -22,7 +22,8 @@ class SignupAccessScreen extends StatelessWidget {
     return AppScaffold(
       routeName: Routes.signupAccess,
       title: context.t('signUp'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.signupBasic),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.signupBasic),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -30,10 +31,17 @@ class SignupAccessScreen extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             context.t('accessTitle'),
-            style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 20, color: palette.text),
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+              color: palette.text,
+            ),
           ),
           const SizedBox(height: 2),
-          Text(context.t('accessNote'), style: TextStyle(fontSize: 13, color: palette.muted)),
+          Text(
+            context.t('accessNote'),
+            style: TextStyle(fontSize: 13, color: palette.muted),
+          ),
           const SizedBox(height: 14),
           for (final need in state.accessNeeds) ...[
             AccessNeedTile(
@@ -45,14 +53,23 @@ class SignupAccessScreen extends StatelessWidget {
           ],
           Text(
             context.t('medicalNotesLabel'),
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: palette.text,
+            ),
           ),
           const SizedBox(height: 6),
-          LabeledTextArea(placeholder: context.t('medicalPlaceholder'), label: ''),
+          LabeledTextArea(
+            placeholder: context.t('medicalPlaceholder'),
+            label: '',
+          ),
           const SizedBox(height: 28),
           PrimaryButton(
             label: context.t('continueBtn'),
-            onPressed: () => Navigator.of(context).pushReplacementNamed(Routes.signupContacts),
+            onPressed: () =>
+                Navigator.of(context)
+                    .pushReplacementNamed(Routes.signupContacts),
           ),
         ],
       ),

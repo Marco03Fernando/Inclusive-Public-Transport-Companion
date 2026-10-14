@@ -58,11 +58,21 @@ class AppStrings {
     'shareWith': 'Share with',
     'journeyLabel': 'Journey:',
     'startSharing': 'Start sharing',
-    'shareIntro':
-        "Share your live location with a trusted contact for this journey. They'll be notified when it starts and ends.",
+    'shareIntro': "Share your live location with a trusted contact for this journey. They'll be notified when it starts and ends.",
     'journeyInProgress': 'Journey in progress',
     'endJourney': 'End journey',
     'notifiedStarted': 'was notified this journey started · elapsed',
+    'reportType': 'Report Type',
+    'reportTypeHint': 'Select a report type',
+    'reportTypePositive': 'Positive Accessibility Feedback',
+    'reportTypeIssue': 'Accessibility Issue',
+    'reportTypeUnknown': 'Unclassified',
+    'reportTypePositiveDesc': 'An accessibility feature is present and working, e.g. "Wheelchair ramp is available on this bus."',
+    'reportTypeIssueDesc': 'An accessibility feature is missing, damaged, unavailable or not working, e.g. "Wheelchair ramp is not functioning."',
+    'reportTypeUnknownDesc': 'Submitted before report types were introduced.',
+    'busRouteNumber': 'Bus Route Number',
+    'busRoutePlaceholder': 'e.g. 138, 177 or 138A',
+    'busRouteShort': 'Bus route',
     'whatReporting': 'What are you reporting?',
     'vehicleOrLocation': 'Vehicle number or location',
     'vehiclePlaceholder': 'e.g. NB-4521 or Maradana Station',
@@ -73,8 +83,7 @@ class AppStrings {
     'attachPhoto': '+ attach photo',
     'submitReport': 'Submit report',
     'reportSubmitted': 'Report submitted',
-    'reportSubmittedNote':
-        "Thank you. An administrator will review this report before it's marked Verified.",
+    'reportSubmittedNote': "Thank you. An administrator will review this report before it's marked Verified.",
     'underReview': 'Under Review',
     'verified': 'Verified',
     'viewMyReports': 'View my reports',
@@ -106,10 +115,12 @@ class AppStrings {
     'activeArea': 'Active area',
     'notificationPrefs': 'Notification preferences',
     'sosHoldTitle': 'Press and hold for 3 seconds',
-    'sosHoldNote': 'This alerts your emergency contacts with your live location',
+    'sosHoldNote':
+        'This alerts your emergency contacts with your live location',
     'cancel': 'Cancel',
     'helpOnWay': 'Help is on the way',
-    'helpOnWayNote': 'Nimal Perera and Kumari Silva were sent your current location',
+    'helpOnWayNote':
+        'Nimal Perera and Kumari Silva were sent your current location',
     'callAmbulance': 'Call 1990 Suwa Seriya Ambulance',
     'imSafe': "I'm safe now",
     'sosShortcutsTitle': 'SOS shortcuts',
@@ -159,7 +170,8 @@ class AppStrings {
     'contactNameLabel': 'Name',
     'contactRelationLabel': 'Relation',
     'saveWord': 'Save',
-    'noContactsSaved': 'Add emergency contacts in your profile so SOS can reach them.',
+    'noContactsSaved':
+        'Add emergency contacts in your profile so SOS can reach them.',
     'requestAssistanceTitle': 'Request Assistance',
     'assistanceRequestsTitle': 'Assistance Requests',
     'requestAssistanceIntro': 'Ask a nearby volunteer for help — not for emergencies (use SOS for those).',
@@ -182,6 +194,23 @@ class AppStrings {
     'openRequestsTitle': 'Open requests',
     'noOpenRequests': 'No open requests right now.',
     'acceptBtn': 'Accept',
+
+    // Condition reporting (Firestore-backed form + My Reports).
+    // Not yet translated — SI falls back to these (see AppStringsScope).
+    'condNoSeat': 'No priority seat',
+    'locationLabel': 'Location',
+    'useCurrentLocation': 'Use current location',
+    'takePhoto': 'Take photo',
+    'chooseFromGallery': 'Choose from gallery',
+    'tapToReplacePhoto': 'Tap to replace',
+    'accepted': 'Accepted',
+    'rejected': 'Rejected',
+    'noReportsYet': 'No reports yet',
+    'noReportsNote': 'Reports you submit will appear here.',
+    'reportsReviewNote':
+        'Reports are checked by an admin before being marked Verified.',
+    'tryAgain': 'Try again',
+    'submitWithoutPhoto': 'Submit without photo',
   };
 
   static const Map<String, String> si = {
@@ -209,8 +238,7 @@ class AppStrings {
     'medicalPlaceholder':
         'උදා: ශ්‍රවණ උපකරණයක් භාවිතා කරයි, දිගු පඩිපෙළවල කරකැවිල්ල ඇතිවිය හැක',
     'contactsTitle': 'හදිසි සම්බන්ධතා',
-    'contactsNote':
-        'අප දැනුවත් කළ යුතු පුද්ගලයන් දෙදෙනා එක් කරන්න. සැකසුම අවසන් කිරීමට අවශ්‍යයි.',
+    'contactsNote': 'අප දැනුවත් කළ යුතු පුද්ගලයන් දෙදෙනා එක් කරන්න. සැකසුම අවසන් කිරීමට අවශ්‍යයි.',
     'addAnotherContact': '+ තවත් සම්බන්ධතාවක් එක් කරන්න',
     'finishSetup': 'සැකසුම අවසන් කරන්න',
     'contactWord': 'සම්බන්ධතාව',
@@ -232,8 +260,7 @@ class AppStrings {
     'shareWith': 'සමඟ බෙදාගන්න',
     'journeyLabel': 'සංචාරය:',
     'startSharing': 'බෙදාගැනීම අරඹන්න',
-    'shareIntro':
-        'මෙම සංචාරය සඳහා ඔබේ සජීවී ස්ථානය විශ්වාසී සම්බන්ධතාවක් සමඟ බෙදාගන්න. එය ආරම්භ වූ විටත් අවසන් වූ විටත් ඔවුන් දැනුවත් කරනු ලැබේ.',
+    'shareIntro': 'මෙම සංචාරය සඳහා ඔබේ සජීවී ස්ථානය විශ්වාසී සම්බන්ධතාවක් සමඟ බෙදාගන්න. එය ආරම්භ වූ විටත් අවසන් වූ විටත් ඔවුන් දැනුවත් කරනු ලැබේ.',
     'journeyInProgress': 'සංචාරය සිදුවෙමින් පවතී',
     'endJourney': 'සංචාරය අවසන් කරන්න',
     'notifiedStarted': 'මෙම සංචාරය ආරම්භ වූ බව දැනුම් දෙන ලදී · ගතවූ කාලය',
@@ -247,16 +274,14 @@ class AppStrings {
     'attachPhoto': '+ ඡායාරූපයක් අමුණන්න',
     'submitReport': 'වාර්තාව යවන්න',
     'reportSubmitted': 'වාර්තාව යවනු ලදී',
-    'reportSubmittedNote':
-        'ස්තුතියි. මෙය තහවුරු කළ ලෙස සලකුණු කිරීමට පෙර පාලකයෙකු මෙම වාර්තාව සමාලෝචනය කරනු ඇත.',
+    'reportSubmittedNote': 'ස්තුතියි. මෙය තහවුරු කළ ලෙස සලකුණු කිරීමට පෙර පාලකයෙකු මෙම වාර්තාව සමාලෝචනය කරනු ඇත.',
     'underReview': 'සමාලෝචනයේ පවතී',
     'verified': 'තහවුරු කර ඇත',
     'viewMyReports': 'මගේ වාර්තා බලන්න',
     'backToHomeLabel': 'නිවසට ආපසු',
     'myReportsTitle': 'මගේ වාර්තා',
     'emergencyContactsTitle': 'හදිසි සම්බන්ධතා',
-    'emergencyContactsNote':
-        'ඔබ සංචාරය බෙදාගැනීම භාවිතා කරන විට හෝ SOS ඔබන විට මෙම සම්බන්ධතා දැනුවත් කරනු ලැබේ.',
+    'emergencyContactsNote': 'ඔබ සංචාරය බෙදාගැනීම භාවිතා කරන විට හෝ SOS ඔබන විට මෙම සම්බන්ධතා දැනුවත් කරනු ලැබේ.',
     'addContact': '+ සම්බන්ධතාවක් එක් කරන්න',
     'editWord': 'සංස්කරණය',
     'accessPrefsTitle': 'ප්‍රවේශ්‍යතා අභිප්‍රේත',
@@ -334,11 +359,11 @@ class AppStrings {
     'contactNameLabel': 'නම',
     'contactRelationLabel': 'සම්බන්ධතාවය',
     'saveWord': 'සුරකින්න',
-    'noContactsSaved': 'SOS හදිසි සම්බන්ධතාවලට ළඟාවීමට ඔබේ පැතිකඩේ හදිසි සම්බන්ධතා එක් කරන්න.',
+    'noContactsSaved':
+        'SOS හදිසි සම්බන්ධතාවලට ළඟාවීමට ඔබේ පැතිකඩේ හදිසි සම්බන්ධතා එක් කරන්න.',
     'requestAssistanceTitle': 'සහාය ඉල්ලන්න',
     'assistanceRequestsTitle': 'සහාය ඉල්ලීම්',
-    'requestAssistanceIntro':
-        'ආසන්නයේ සිටින ස්වේච්ඡා සේවකයෙකුගෙන් උදව් ඉල්ලන්න — හදිසි අවස්ථා සඳහා SOS භාවිත කරන්න.',
+    'requestAssistanceIntro': 'ආසන්නයේ සිටින ස්වේච්ඡා සේවකයෙකුගෙන් උදව් ඉල්ලන්න — හදිසි අවස්ථා සඳහා SOS භාවිත කරන්න.',
     'requestTypeLabel': 'ඔබට කුමන උදව්වක් අවශ්‍යද?',
     'requestTypeBoarding': 'නැගීමට උදව්',
     'requestTypeGuidance': 'ස්ථානයේ මගපෙන්වීම',
@@ -382,7 +407,9 @@ class AppStringsScope extends InheritedWidget {
     return scope!;
   }
 
-  String call(String key) => AppStrings.forLocale(locale)[key] ?? key;
+  /// Falls back to English for keys not translated yet, then to the key.
+  String call(String key) =>
+      AppStrings.forLocale(locale)[key] ?? AppStrings.en[key] ?? key;
 
   @override
   bool updateShouldNotify(AppStringsScope oldWidget) =>

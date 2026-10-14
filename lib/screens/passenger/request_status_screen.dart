@@ -22,7 +22,8 @@ class RequestStatusScreen extends StatelessWidget {
     return AppScaffold(
       routeName: Routes.requestStatus,
       title: context.t('requestAssistanceTitle'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.profileHome),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.profileHome),
       body: uid == null
           ? const SizedBox.shrink()
           : StreamBuilder<List<AssistanceRequest>>(
@@ -30,31 +31,51 @@ class RequestStatusScreen extends StatelessWidget {
               builder: (context, snapshot) {
                 final requests = snapshot.data ?? const [];
                 if (requests.isEmpty) {
-                  return Text(context.t('noActiveRequest'), style: TextStyle(fontSize: 13, color: palette.muted));
+                  return Text(
+                    context.t('noActiveRequest'),
+                    style: TextStyle(fontSize: 13, color: palette.muted),
+                  );
                 }
                 final request = requests.first;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
                         color: palette.surface2,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
                         context.t(assistanceStatusLabelKeys[request.status]!),
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: palette.text),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: palette.text,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),
-                    Text(context.t(assistanceTypeLabelKeys[request.type]!),
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: palette.text)),
+                    Text(
+                      context.t(assistanceTypeLabelKeys[request.type]!),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: palette.text,
+                      ),
+                    ),
                     if (request.note != null) ...[
                       const SizedBox(height: 6),
-                      Text(request.note!, style: TextStyle(fontSize: 13, color: palette.muted)),
+                      Text(
+                        request.note!,
+                        style: TextStyle(fontSize: 13, color: palette.muted),
+                      ),
                     ],
-                    if (request.status == AssistanceStatus.accepted && request.volunteerName != null) ...[
+                    if (request.status == AssistanceStatus.accepted &&
+                        request.volunteerName != null) ...[
                       const SizedBox(height: 14),
                       Text(
                         '${request.volunteerName} ${context.t('volunteerOnTheWay')}',
@@ -75,4 +96,3 @@ class RequestStatusScreen extends StatelessWidget {
     );
   }
 }
-

@@ -36,11 +36,18 @@ class _ShareSetupScreenState extends State<ShareSetupScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(context.t('shareIntro'), style: TextStyle(fontSize: 13, color: palette.muted)),
+          Text(
+            context.t('shareIntro'),
+            style: TextStyle(fontSize: 13, color: palette.muted),
+          ),
           const SizedBox(height: 14),
           Text(
             context.t('shareWith'),
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: palette.text,
+            ),
           ),
           const SizedBox(height: 10),
           if (uid == null)
@@ -52,12 +59,17 @@ class _ShareSetupScreenState extends State<ShareSetupScreen> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    child: Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
                   );
                 }
                 final realContacts = snapshot.data ?? const [];
                 final usingDemo = realContacts.isEmpty;
-                return _contactPickerList(usingDemo ? mockContacts : realContacts, isDemo: usingDemo);
+                return _contactPickerList(
+                  usingDemo ? mockContacts : realContacts,
+                  isDemo: usingDemo,
+                );
               },
             ),
           const SizedBox(height: 10),
@@ -68,8 +80,13 @@ class _ShareSetupScreenState extends State<ShareSetupScreen> {
               text: TextSpan(
                 style: TextStyle(fontSize: 13, color: palette.text),
                 children: [
-                  TextSpan(text: '${context.t('journeyLabel')} ', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const TextSpan(text: 'Nugegoda Bus Stand → Bambalapitiya via Bus 138 + Coastal Line'),
+                  TextSpan(
+                    text: '${context.t('journeyLabel')} ',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const TextSpan(
+                    text: 'Nugegoda Bus Stand → Bambalapitiya via Bus 138 + Coastal Line',
+                  ),
                 ],
               ),
             ),
@@ -77,7 +94,8 @@ class _ShareSetupScreenState extends State<ShareSetupScreen> {
           const SizedBox(height: 28),
           PrimaryButton(
             label: context.t('startSharing'),
-            onPressed: () => Navigator.of(context).pushReplacementNamed(Routes.shareActive),
+            onPressed: () =>
+                Navigator.of(context).pushReplacementNamed(Routes.shareActive),
           ),
         ],
       ),

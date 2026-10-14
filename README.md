@@ -8,7 +8,7 @@ A new Flutter project.
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (this project targets Dart `^3.13.1` — see `pubspec.yaml`)
 - [Android Studio](https://developer.android.com/studio) — even if you don't use it as your editor, installing it once gets you the Android SDK, `adb`, and an emulator, all needed to build/run on Android
-- A Firebase project with **Email/Password** + **Anonymous** Authentication enabled and a **Firestore** database created (see [docs/TESTING.md](docs/TESTING.md) for the full walkthrough)
+- A Firebase project with **Email/Password** + **Anonymous** Authentication enabled, a **Firestore** database and **Firebase Storage** created (see [docs/TESTING.md](docs/TESTING.md) for the full walkthrough)
 
 ### Setup
 
@@ -18,7 +18,7 @@ cd colombo_pal
 flutter pub get
 ```
 
-This project uses Firebase (Auth + Firestore) for sign up/login, profile, and the Request Assistance feature, so `lib/firebase_options.dart` must be generated before the app will build. From the repo root:
+This project uses Firebase (Auth + Firestore + Storage) for sign up/login, profile, condition reporting, the admin dashboard, and the Request Assistance feature, so `lib/firebase_options.dart` must be generated before the app will build. From the repo root:
 
 ```bash
 npm install -g firebase-tools
@@ -47,6 +47,17 @@ flutter analyze
 ```
 
 should come back clean once `flutterfire configure` has run. For a full test plan covering sign up/login, profile, SOS, and Request Assistance, see [docs/TESTING.md](docs/TESTING.md); for how those features are implemented, see [docs/MY_FEATURES.md](docs/MY_FEATURES.md).
+
+## Condition reporting & admin
+
+- Passengers and volunteers submit condition reports from the **Report** tab. Reports are stored in the Firestore `condition_reports` collection; optional photos go to Firebase Storage at `condition_reports/{userId}/{reportId}.jpg`. **My Reports** lists the signed-in user's reports with their review status.
+- Roles live in `users/{uid}.role`: `passenger` | `volunteer` (chosen at sign-up) or `admin`. Signing in with an `admin` account opens the **Admin Dashboard** (`lib/admin/`), where reports are reviewed (accept / reject / comment) or deleted.
+- Admin accounts are never created from the app: create the user in Firebase Authentication, then set `role: "admin"` on its `users/{uid}` document in the Firestore console.
+- Deploy the security rules — they are what actually keep normal users out of admin data:
+
+```bash
+firebase deploy --only firestore:rules,storage
+```
 
 ## Getting Started
 

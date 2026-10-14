@@ -10,7 +10,10 @@ import 'labeled_text_field.dart';
 /// [Contact] (preserving `initial.id` when editing) or null if cancelled.
 /// `ContactCard`/`ContactPickerRow` are read-only, so this is the one place
 /// a user actually types a contact's details.
-Future<Contact?> showContactFormSheet(BuildContext context, {Contact? initial}) {
+Future<Contact?> showContactFormSheet(
+  BuildContext context, {
+  Contact? initial,
+}) {
   return showModalBottomSheet<Contact?>(
     context: context,
     isScrollControlled: true,
@@ -66,13 +69,25 @@ class _ContactFormSheetState extends State<_ContactFormSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            widget.initial == null ? context.t('addContact') : context.t('editWord'),
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: palette.text),
+            widget.initial == null
+                ? context.t('addContact')
+                : context.t('editWord'),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: palette.text,
+            ),
           ),
           const SizedBox(height: 14),
-          LabeledTextField(label: context.t('contactNameLabel'), controller: _name),
+          LabeledTextField(
+            label: context.t('contactNameLabel'),
+            controller: _name,
+          ),
           const SizedBox(height: 14),
-          LabeledTextField(label: context.t('contactRelationLabel'), controller: _relation),
+          LabeledTextField(
+            label: context.t('contactRelationLabel'),
+            controller: _relation,
+          ),
           const SizedBox(height: 14),
           LabeledTextField(label: context.t('phoneNumber'), controller: _phone),
           const SizedBox(height: 20),

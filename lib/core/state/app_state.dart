@@ -11,12 +11,28 @@ import '../localization/locale.dart';
 
 const _themeModePrefKey = 'themeMode';
 
-enum AppRole { passenger, volunteer }
+/// Mirrors `users/{uid}.role` 1:1 via [name]. Passenger/volunteer are
+/// chosen at sign-up; [admin] is only ever set by hand in the Firebase
+/// console — the Firestore rules stop anyone from giving themselves a role.
+enum AppRole {
+  passenger,
+  volunteer,
+  admin;
+
+  /// Anything other than exactly "admin"/"volunteer" (including the legacy
+  /// "user" value and a missing field) is a passenger, so a missing or
+  /// mistyped role can never grant admin access.
+  static AppRole fromName(Object? value) => switch (value) {
+    'admin' => AppRole.admin,
+    'volunteer' => AppRole.volunteer,
+    _ => AppRole.passenger,
+  };
+}
 
 enum SosStage { hidden, confirm, holding, activated }
 
 /// App-wide state that the design's single `Component.state` object held:
-/// current role, language, accessibility selections, journey-sharing/report
+/// current role, language, accessibility selections, journey-sharing
 /// picks, and SOS hold progress. Screen-only local state (e.g. text field
 /// contents) stays in each screen's widget instead.
 class AppState extends ChangeNotifier {
@@ -39,8 +55,6 @@ class AppState extends ChangeNotifier {
   String signupPassword = '';
 
   Set<String> planFilterIds = {'wheelchair'};
-  String reportTargetId = 'bus';
-  String reportTypeId = 'crowded';
   bool autoShare = false;
 
   // Android-only "alternate volume up/down 3 times" SOS shortcut; the switch's
@@ -144,16 +158,6 @@ class AppState extends ChangeNotifier {
 
   void togglePlanFilter(String id) {
     if (!planFilterIds.remove(id)) planFilterIds.add(id);
-    notifyListeners();
-  }
-
-  void setReportTarget(String id) {
-    reportTargetId = id;
-    notifyListeners();
-  }
-
-  void setReportType(String id) {
-    reportTypeId = id;
     notifyListeners();
   }
 

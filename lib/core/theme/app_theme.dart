@@ -190,7 +190,11 @@ class AppPalette extends ThemeExtension<AppPalette> {
       cta: Color.lerp(cta, other.cta, t)!,
       ctaSoft: Color.lerp(ctaSoft, other.ctaSoft, t)!,
       onCta: Color.lerp(onCta, other.onCta, t)!,
-      heroGradientStart: Color.lerp(heroGradientStart, other.heroGradientStart, t)!,
+      heroGradientStart: Color.lerp(
+        heroGradientStart,
+        other.heroGradientStart,
+        t,
+      )!,
       heroGradientEnd: Color.lerp(heroGradientEnd, other.heroGradientEnd, t)!,
       shadow: Color.lerp(shadow, other.shadow, t)!,
     );
@@ -216,7 +220,9 @@ class AppTheme {
           headlineMedium: heading.headlineMedium,
           headlineSmall: heading.headlineSmall,
           titleLarge: heading.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-          titleMedium: heading.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          titleMedium: heading.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
           titleSmall: heading.titleSmall?.copyWith(fontWeight: FontWeight.w700),
         )
         .apply(bodyColor: palette.text, displayColor: palette.text);
@@ -259,7 +265,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: palette.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 13,
+        ),
         hintStyle: TextStyle(color: palette.muted, fontSize: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),

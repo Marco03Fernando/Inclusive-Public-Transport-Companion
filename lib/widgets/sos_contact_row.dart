@@ -15,8 +15,12 @@ class SosContactRow extends StatelessWidget {
   Future<void> _call() => launchUrl(Uri(scheme: 'tel', path: contact.phone));
 
   Future<void> _text() => launchUrl(
-        Uri(scheme: 'sms', path: contact.phone, queryParameters: {'body': _distressMessage}),
-      );
+    Uri(
+      scheme: 'sms',
+      path: contact.phone,
+      queryParameters: {'body': _distressMessage},
+    ),
+  );
 
   static const _distressMessage =
       "I need help right now, this is an SOS alert from Colombo Pal. Please call me.";
@@ -37,8 +41,18 @@ class SosContactRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(contact.name, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: palette.text)),
-                Text(contact.phone, style: TextStyle(fontSize: 12, color: palette.muted)),
+                Text(
+                  contact.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: palette.text,
+                  ),
+                ),
+                Text(
+                  contact.phone,
+                  style: TextStyle(fontSize: 12, color: palette.muted),
+                ),
               ],
             ),
           ),

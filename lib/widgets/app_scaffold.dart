@@ -41,15 +41,24 @@ class AppScaffold extends StatelessWidget {
     if (scrollableBody) {
       content = SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [body]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [body],
+        ),
       );
     }
 
     return Scaffold(
-      appBar: title != null ? ScreenHeader(title: title!, onBack: onBack) : null,
+      appBar: title != null
+          ? ScreenHeader(title: title!, onBack: onBack)
+          : null,
       body: SafeArea(child: content),
-      bottomNavigationBar: showNav ? AppBottomNavBar(role: role, currentRoute: routeName) : null,
-      floatingActionButton: showSos ? SosButton(onPressed: () => showSosDialog(context)) : null,
+      bottomNavigationBar: showNav
+          ? AppBottomNavBar(role: role, currentRoute: routeName)
+          : null,
+      floatingActionButton: showSos
+          ? SosButton(onPressed: () => showSosDialog(context))
+          : null,
     );
   }
 }

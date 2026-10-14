@@ -1,5 +1,9 @@
 class AccessNeed {
-  const AccessNeed({required this.id, required this.labelKey, required this.checked});
+  const AccessNeed({
+    required this.id,
+    required this.labelKey,
+    required this.checked,
+  });
 
   final String id;
   final String labelKey;

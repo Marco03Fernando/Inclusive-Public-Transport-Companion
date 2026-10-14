@@ -49,21 +49,22 @@ class AssistanceRequest {
   final DateTime? completedAt;
 
   Map<String, dynamic> toCreateMap() => {
-        'passengerUid': passengerUid,
-        'passengerName': passengerName,
-        'type': type.name,
-        'note': note,
-        'status': AssistanceStatus.pending.name,
-        'volunteerUid': null,
-        'volunteerName': null,
-        'lat': lat,
-        'lng': lng,
-        'createdAt': FieldValue.serverTimestamp(),
-        'acceptedAt': null,
-        'completedAt': null,
-      };
+    'passengerUid': passengerUid,
+    'passengerName': passengerName,
+    'type': type.name,
+    'note': note,
+    'status': AssistanceStatus.pending.name,
+    'volunteerUid': null,
+    'volunteerName': null,
+    'lat': lat,
+    'lng': lng,
+    'createdAt': FieldValue.serverTimestamp(),
+    'acceptedAt': null,
+    'completedAt': null,
+  };
 
-  factory AssistanceRequest.fromMap(String id, Map<String, dynamic> map) => AssistanceRequest(
+  factory AssistanceRequest.fromMap(String id, Map<String, dynamic> map) =>
+      AssistanceRequest(
         id: id,
         passengerUid: map['passengerUid'] as String? ?? '',
         passengerName: map['passengerName'] as String? ?? '',

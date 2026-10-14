@@ -39,9 +39,15 @@ class ShareActiveScreen extends StatelessWidget {
                       text: TextSpan(
                         style: TextStyle(fontSize: 13, color: palette.text),
                         children: [
-                          const TextSpan(text: 'Nimal Perera ', style: TextStyle(fontWeight: FontWeight.bold)),
+                          const TextSpan(
+                            text: 'Nimal Perera ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           TextSpan(text: '${context.t('notifiedStarted')} '),
-                          TextSpan(text: state.elapsedLabel, style: const TextStyle(fontFamily: 'monospace')),
+                          TextSpan(
+                            text: state.elapsedLabel,
+                            style: const TextStyle(fontFamily: 'monospace'),
+                          ),
                         ],
                       ),
                     ),
@@ -54,7 +60,8 @@ class ShareActiveScreen extends StatelessWidget {
                   const SizedBox(height: 28),
                   DangerButton(
                     label: context.t('endJourney'),
-                    onPressed: () => Navigator.of(context).pushReplacementNamed(Routes.home),
+                    onPressed: () =>
+                        Navigator.of(context).pushReplacementNamed(Routes.home),
                   ),
                 ],
               ),
