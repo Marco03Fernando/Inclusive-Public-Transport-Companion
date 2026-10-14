@@ -43,15 +43,17 @@ class GoogleRoute {
     return transitSegments.length - 1;
   }
 
-  String get routeName {
-    if (transitSegments.isEmpty) {
-      return 'Transit route';
-    }
-
-    return transitSegments
-        .map((segment) => segment.lineShortName ?? segment.lineName)
-        .join(' + ');
+  
+String get routeName {
+  if (transitSegments.isEmpty) {
+    return 'Transit route';
   }
+
+  return transitSegments
+      .map((segment) => '🚍 ${segment.lineShortName ?? segment.lineName}')
+      .join(' → ');
+}
+
 
   GoogleRoute copyWith({
     int? conditionScore,

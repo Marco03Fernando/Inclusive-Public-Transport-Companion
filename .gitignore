@@ -47,5 +47,7 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 
+# Local API keys - do not commit
+/api_keys.json
 
 docs/
