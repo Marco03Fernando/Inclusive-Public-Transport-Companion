@@ -26,13 +26,11 @@ class StatusFilterBar extends StatelessWidget {
       runSpacing: 8,
       children: [
         for (final filter in ReportFilter.values)
-          Semantics(
+          // SelectableChip already announces its selected state.
+          SelectableChip(
+            label: '${filter.label} (${stats.countFor(filter)})',
             selected: filter == selected,
-            child: SelectableChip(
-              label: '${filter.label} (${stats.countFor(filter)})',
-              selected: filter == selected,
-              onTap: () => onChanged(filter),
-            ),
+            onTap: () => onChanged(filter),
           ),
       ],
     );

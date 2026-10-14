@@ -18,6 +18,8 @@ import '../widgets/review_dialogs.dart';
 ///  - Accept / Reject while it is under review,
 ///  - "Change to accepted / rejected" once it has been reviewed,
 ///  - Add / edit admin comment at any time,
+///  - Community sharing: the reporter's opt-in, and publish / unpublish
+///    of the public copy shown in Community Reports,
 ///  - Delete.
 ///
 /// Every action writes only `status`, `adminComment` and `updatedAt` on
@@ -241,6 +243,18 @@ class AdminReportDetailsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  _CommunitySharingCard(
+                    report: report,
+                    isBusy: provider.isUpdating || isDeleted,
+                    onSetPublished: (publish) => _runAction(
+                      context,
+                      (p) => p.setPublished(report.id, publish: publish),
+                      success: publish
+                          ? 'Report published to Community Reports.'
+                          : 'Report removed from Community Reports.',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   AdminSectionCard(
                     title: report.status.isRejected
                         ? 'Rejection reason'
@@ -291,6 +305,92 @@ class AdminReportDetailsScreen extends StatelessWidget {
     if (status.isPending) return 'Under review';
     if (status.isRejected) return 'Rejected';
     return 'Accepted';
+  }
+}
+
+/// The reporter's community-sharing choice and whether the report is
+/// currently published. Accepting an opted-in report publishes it
+/// automatically; this lets an admin take it down or put it back.
+class _CommunitySharingCard extends StatefulWidget {
+  final ConditionReport report;
+  final bool isBusy;
+  final ValueChanged<bool> onSetPublished;
+
+  const _CommunitySharingCard({
+    required this.report,
+    required this.isBusy,
+    required this.onSetPublished,
+  });
+
+  @override
+  State<_CommunitySharingCard> createState() => _CommunitySharingCardState();
+}
+
+class _CommunitySharingCardState extends State<_CommunitySharingCard> {
+  late final Stream<bool> _published = context
+      .read<AdminReportsProvider>()
+      .watchPublished(widget.report.id);
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final report = widget.report;
+    final eligible = report.shareWithCommunity && report.status.isAccepted;
+
+    return AdminSectionCard(
+      title: 'Community sharing',
+      child: StreamBuilder<bool>(
+        stream: _published,
+        builder: (context, snapshot) {
+          final published = snapshot.data;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AdminInfoRow(
+                label: 'Reporter consent',
+                value: report.shareWithCommunity
+                    ? 'Agreed to share after verification'
+                    : 'Not shared (visible to the reporter and admins only)',
+              ),
+              if (report.shareWithCommunity)
+                AdminInfoRow(
+                  label: 'Shown as',
+                  value: report.publicDisplayName ?? 'Anonymous Contributor',
+                ),
+              AdminInfoRow(
+                label: 'Community Reports',
+                value: snapshot.hasError
+                    ? 'Could not check'
+                    : published == null
+                    ? 'Checking…'
+                    : published
+                    ? 'Published'
+                    : 'Not published',
+              ),
+              if (report.shareWithCommunity && !report.status.isAccepted)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    'Accepting this report publishes it automatically.',
+                    style: TextStyle(fontSize: 12.5, color: palette.muted),
+                  ),
+                ),
+              if (published == true || (published == false && eligible)) ...[
+                const SizedBox(height: 10),
+                SecondaryButton(
+                  label: published == true
+                      ? 'Remove from Community Reports'
+                      : 'Publish to Community Reports',
+                  onPressed: widget.isBusy
+                      ? null
+                      : () => widget.onSetPublished(published != true),
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
   }
 }
 

@@ -35,20 +35,24 @@ class ShareActiveScreen extends StatelessWidget {
                 children: [
                   const DemoDataBadge(),
                   SuccessBanner(
-                    child: RichText(
-                      text: TextSpan(
-                        style: TextStyle(fontSize: 13, color: palette.text),
-                        children: [
-                          const TextSpan(
-                            text: 'Nimal Perera ',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(text: '${context.t('notifiedStarted')} '),
-                          TextSpan(
-                            text: state.elapsedLabel,
-                            style: const TextStyle(fontFamily: 'monospace'),
-                          ),
-                        ],
+                    // Only this text rebuilds on the once-a-second tick.
+                    child: ValueListenableBuilder<int>(
+                      valueListenable: state.elapsed,
+                      builder: (context, _, _) => RichText(
+                        text: TextSpan(
+                          style: TextStyle(fontSize: 13, color: palette.text),
+                          children: [
+                            const TextSpan(
+                              text: 'Nimal Perera ',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            TextSpan(text: '${context.t('notifiedStarted')} '),
+                            TextSpan(
+                              text: state.elapsedLabel,
+                              style: const TextStyle(fontFamily: 'monospace'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

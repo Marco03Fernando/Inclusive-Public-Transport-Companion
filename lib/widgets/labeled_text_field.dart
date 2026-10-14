@@ -35,34 +35,38 @@ class LabeledTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: palette.text,
+    // Merged so screen readers announce the visible label with the field
+    // ("Bus Route Number, edit box, e.g. 138…") plus any error text.
+    return MergeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: palette.text,
+            ),
           ),
-        ),
-        const SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          textCapitalization: textCapitalization,
-          readOnly: readOnly,
-          onTap: onTap,
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: initialValue,
-            errorText: errorText,
-            suffixIcon: suffixIcon,
+          const SizedBox(height: 6),
+          TextField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            textCapitalization: textCapitalization,
+            readOnly: readOnly,
+            onTap: onTap,
+            onChanged: onChanged,
+            decoration: InputDecoration(
+              hintText: initialValue,
+              errorText: errorText,
+              suffixIcon: suffixIcon,
+            ),
+            style: TextStyle(fontSize: 14, color: palette.text),
           ),
-          style: TextStyle(fontSize: 14, color: palette.text),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -88,29 +92,32 @@ class LabeledTextArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: palette.text,
+    return MergeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: palette.text,
+            ),
           ),
-        ),
-        const SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          maxLines: 3,
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: placeholder,
-            errorText: errorText,
+          const SizedBox(height: 6),
+          TextField(
+            controller: controller,
+            minLines: 3,
+            maxLines: null,
+            onChanged: onChanged,
+            decoration: InputDecoration(
+              hintText: placeholder,
+              errorText: errorText,
+            ),
+            style: TextStyle(fontSize: 14, color: palette.text),
           ),
-          style: TextStyle(fontSize: 14, color: palette.text),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

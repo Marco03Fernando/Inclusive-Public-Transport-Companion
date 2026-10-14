@@ -6,6 +6,7 @@ import '../../core/routes.dart';
 import '../../core/state/app_state.dart';
 import '../../core/state/auth_state.dart';
 import '../../core/theme/app_theme.dart';
+import '../../widgets/accessibility_settings_section.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/demo_data_badge.dart';
@@ -70,12 +71,15 @@ class VolunteerProfileScreen extends StatelessWidget {
                     ).pushReplacementNamed(Routes.volunteerAssistanceRequests),
                   ),
                   const SizedBox(height: 20),
-                  Text(
-                    context.t('appearanceTitle'),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: palette.text,
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      context.t('appearanceTitle'),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: palette.text,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -83,7 +87,9 @@ class VolunteerProfileScreen extends StatelessWidget {
                     mode: state.themeMode,
                     onChanged: state.setThemeMode,
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 24),
+                  const AccessibilitySettingsSection(),
+                  const SizedBox(height: 24),
                   TextDangerButton(
                     label: context.t('logOut'),
                     onPressed: () => _logOut(context),

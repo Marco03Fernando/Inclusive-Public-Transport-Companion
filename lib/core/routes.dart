@@ -27,11 +27,19 @@ class Routes {
   static const profileAccess = '/profile-access';
   static const profileSharing = '/profile-sharing';
 
+  /// Text size, high contrast, Read Aloud and screen-reader guidance.
+  /// Pushed on top of the current screen (not a tab), from either role.
+  static const accessibilitySettings = '/accessibility-settings';
+
   static const requestAssistance = '/request-assistance';
   static const requestStatus = '/request-status';
 
   static const volunteerHome = '/volunteer-home';
   static const volunteerFeed = '/volunteer-feed';
+
+  /// Read-only details of one Community Reports entry; argument: the
+  /// `PublicConditionReport` tapped in the feed.
+  static const communityReportDetails = '/community-report-details';
   static const volunteerProfile = '/volunteer-profile';
   static const volunteerAssistanceRequests = '/volunteer-assistance-requests';
 
@@ -77,13 +85,17 @@ class Routes {
   static const _sosEligibleVolunteer = {
     volunteerHome,
     volunteerFeed,
+    communityReportDetails,
+    reportMine,
     volunteerProfile,
     volunteerAssistanceRequests,
     reportForm,
   };
 
   static bool showsBottomNav(String route) =>
-      !onboardingRoutes.contains(route) && route != admin;
+      !onboardingRoutes.contains(route) &&
+      route != admin &&
+      route != accessibilitySettings;
 
   static bool showsSos(String route, AppRole role) => switch (role) {
     AppRole.passenger => _sosEligiblePassenger.contains(route),
@@ -128,9 +140,16 @@ const passengerTabs = [
   }),
 ];
 
+/// Volunteer "Reports" opens the volunteer's OWN reports (My Reports);
+/// Community Reports is a separate screen reached from the dashboard, so it
+/// sits under Home.
 const volunteerTabs = [
-  TabDef(BottomTab.home, Routes.volunteerHome, {Routes.volunteerHome}),
-  TabDef(BottomTab.reports, Routes.volunteerFeed, {Routes.volunteerFeed}),
+  TabDef(BottomTab.home, Routes.volunteerHome, {
+    Routes.volunteerHome,
+    Routes.volunteerFeed,
+    Routes.communityReportDetails,
+  }),
+  TabDef(BottomTab.reports, Routes.reportMine, {Routes.reportMine}),
   TabDef(BottomTab.report, Routes.reportForm, {
     Routes.reportForm,
     Routes.reportConfirm,

@@ -58,18 +58,27 @@ class _SosHold extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final state = context.watch<AppState>();
+    // With TalkBack/VoiceOver a physical press-and-hold isn't practical, so
+    // a double-tap starts the same 3-second countdown, which then runs on
+    // its own (Cancel still stops it). Two deliberate steps — open SOS,
+    // then activate — plus the countdown keep it from firing by accident.
+    final screenReaderOn = MediaQuery.accessibleNavigationOf(context);
+    final holding = state.sosStage == SosStage.holding;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 26),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            context.t('sosHoldTitle'),
-            textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
-              fontWeight: FontWeight.w800,
-              fontSize: 17,
-              color: palette.text,
+          Semantics(
+            header: true,
+            child: Text(
+              context.t('sosHoldTitle'),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w800,
+                fontSize: 17,
+                color: palette.text,
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -93,30 +102,57 @@ class _SosHold extends StatelessWidget {
                     fill: palette.danger,
                   ),
                 ),
-                GestureDetector(
-                  onTapDown: (_) => state.startHold(),
-                  onTapUp: (_) => state.cancelHold(),
-                  onTapCancel: () => state.cancelHold(),
-                  child: Container(
-                    width: 88,
-                    height: 88,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: palette.danger,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      'SOS',
-                      style: GoogleFonts.manrope(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        color: Colors.white,
+                Semantics(
+                  button: true,
+                  label: context.t('sosHoldA11yLabel'),
+                  hint: context.t('sosHoldA11yHint'),
+                  excludeSemantics: true,
+                  onTap: holding ? null : state.startHold,
+                  child: GestureDetector(
+                    onTapDown: screenReaderOn ? null : (_) => state.startHold(),
+                    onTapUp: screenReaderOn ? null : (_) => state.cancelHold(),
+                    onTapCancel: screenReaderOn ? null : state.cancelHold,
+                    onTap: screenReaderOn && !holding ? state.startHold : null,
+                    child: Container(
+                      width: 88,
+                      height: 88,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: palette.danger,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        'SOS',
+                        style: GoogleFonts.manrope(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          color: palette.onDanger,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ],
             ),
+          ),
+          // Announced as it appears, so a screen-reader user knows the
+          // countdown has started and how to stop it.
+          Semantics(
+            liveRegion: true,
+            child: holding
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      context.t('sosCountingDown'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: palette.danger,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
           const SizedBox(height: 4),
           TextButton(
@@ -171,22 +207,28 @@ class _SosActivatedState extends State<_SosActivated> {
               color: palette.dangerSoft,
               shape: BoxShape.circle,
             ),
-            child: Text(
-              '!',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: palette.danger,
+            child: ExcludeSemantics(
+              child: Text(
+                '!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: palette.danger,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 12),
-          Text(
-            context.t('helpOnWay'),
-            style: GoogleFonts.manrope(
-              fontWeight: FontWeight.w800,
-              fontSize: 17,
-              color: palette.text,
+          Semantics(
+            liveRegion: true,
+            header: true,
+            child: Text(
+              context.t('helpOnWay'),
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w800,
+                fontSize: 17,
+                color: palette.text,
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -230,7 +272,7 @@ class _SosActivatedState extends State<_SosActivated> {
                   launchUrl(Uri(scheme: 'tel', path: _ambulanceNumber)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: palette.danger,
-                foregroundColor: Colors.white,
+                foregroundColor: palette.onDanger,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),

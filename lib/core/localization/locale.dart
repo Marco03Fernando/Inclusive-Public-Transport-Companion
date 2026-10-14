@@ -162,6 +162,12 @@ class AppStrings {
     'emailLabel': 'Email',
     'passwordLabel': 'Password',
     'loading': 'Please wait…',
+
+    // Startup splash
+    'startupLogoLabel': 'ColomboPal. Every Journey, For Everyone.',
+    'startupLoading': 'Getting things ready…',
+    'startupErrorTitle': "ColomboPal couldn't start",
+    'startupErrorBody': 'Check your internet connection and try again.',
     'continueAsGuest': 'Continue as Guest',
     'contactNameLabel': 'Name',
     'contactRelationLabel': 'Relation',
@@ -207,6 +213,142 @@ class AppStrings {
         'Reports are checked by an admin before being marked Verified.',
     'tryAgain': 'Try again',
     'submitWithoutPhoto': 'Submit without photo',
+
+    // ---- Volunteer dashboard ----
+    'volunteerDashboard': 'Volunteer Dashboard',
+    'yourActivity': 'Your activity',
+    'quickActions': 'Quick actions',
+    'statSubmittedA11y': 'Reports submitted: {n}',
+    'statVerifiedA11y': 'Reports verified by an administrator: {n}',
+    'statsLoading': 'Loading your report statistics',
+    'statsUnavailable': 'Statistics unavailable',
+
+    // ---- Accessibility settings ----
+    'accessibilityTitle': 'Accessibility',
+    'accessibilitySettings': 'Accessibility settings',
+    'accessibilityIntro': 'Adjust ColomboPal to make it easier to read and hear. Changes are saved on this device.',
+    'textSize': 'Text size',
+    'textSizeStandard': 'Standard',
+    'textSizeLarge': 'Large',
+    'textSizeExtraLarge': 'Extra Large',
+    'textSizeNote': "Applies across the whole app. If your phone's own text size is larger, the larger size is always kept.",
+    'textSizePreview':
+        'Preview: Bus 138 to Fort has a working wheelchair ramp.',
+    'highContrastMode': 'High Contrast Mode',
+    'highContrastNote':
+        'Stronger text colours, clear outlines and bolder selections.',
+    'readAloudSection': 'Read Aloud',
+    'readAloudToggle': 'Show Read Aloud buttons',
+    'readAloudToggleNote': 'Adds a speaker button to main screens that reads a short summary aloud when you tap it.',
+    'readAloud': 'Read aloud',
+    'readCurrentScreen': 'Read current screen',
+    'stopReading': 'Stop reading',
+    'replayReading': 'Replay',
+    'speechRate': 'Speaking speed',
+    'speechSlow': 'Slow',
+    'speechNormal': 'Normal',
+    'speechFast': 'Fast',
+    'readAloudUnavailable': "Read Aloud isn't available: no text-to-speech voice is installed or enabled on this device. You can add one in your phone's settings.",
+    'readAloudEnglishFallback': 'No Sinhala voice is available on this device, so the summary is being read in English.',
+    'screenReaderSection': 'Screen readers',
+    'screenReaderNote': "ColomboPal works with your phone's built-in screen reader. It is turned on and off in your phone's settings, not inside this app.",
+    'talkbackGuide': 'Android: Settings › Accessibility › TalkBack.',
+    'voiceoverGuide': 'iPhone: Settings › Accessibility › VoiceOver.',
+    'screenReaderActive': 'A screen reader is on. Read Aloud summaries will be spoken by your screen reader.',
+    'onWord': 'On',
+    'offWord': 'Off',
+    'back': 'Back',
+
+    // ---- Read Aloud screen summaries ----
+    'summaryVolunteerHome': 'Welcome back. You are on the Volunteer Dashboard.',
+    'summaryPassengerHome': 'You are on the Home screen.',
+    'summaryMyReports': 'You are on My Reports. Reports listed: {n}.',
+    'summaryStatusCounts':
+        'Under review: {pending}. Accepted: {accepted}. Rejected: {rejected}.',
+    'summaryAccessibility': 'You are on Accessibility settings. Text size: {size}. High Contrast Mode: {contrast}.',
+    'summaryActions': 'Available actions: {actions}.',
+    'summaryStatsLoading': 'Your report statistics are still loading.',
+    'summaryAnd': 'and',
+
+    // ---- My Reports filters / dashboard navigation ----
+    'filterVerified': 'Verified',
+    'filterUnderReview': 'Under review',
+    'filterRejected': 'Rejected',
+    'restAreasFilter': 'Rest areas',
+    'otherFilter': 'Other',
+    'statusFilterLabel': 'Status',
+    'subjectFilterLabel': 'Subject',
+    'groupVerified': 'Verified by admin',
+    'groupUnderReview': 'Under review',
+    'groupRejected': 'Rejected',
+    'groupCount': '{label}, {n} reports',
+    'noMatchingReports': 'No matching reports',
+    'noMatchingReportsNote': 'None of your reports match these filters.',
+    'noVerifiedReportsNote': "None of your reports have been verified yet. Reports appear here once an admin approves them.",
+    'clearFilters': 'Clear filters',
+    'showingReports': 'Showing {shown} of {total} reports',
+    'statOpensMyReports': 'Opens My Reports',
+    'statOpensVerified': 'Opens My Reports showing verified reports only',
+    'summaryFiltered': 'Filters: {status}, {subject}.',
+
+    // ---- Community Reports ----
+    'communityIntro': 'Verified accessibility reports that passengers and volunteers chose to share with the community.',
+    'typeFilterLabel': 'Report type',
+    'allReportsFilter': 'All reports',
+    'positiveFilter': 'Positive feedback',
+    'issuesFilter': 'Accessibility issues',
+    'communityEmptyTitle': 'No community reports yet',
+    'communityEmptyNote':
+        'Verified reports that people choose to share will appear here.',
+    'communityNoMatchNote': 'No shared reports match these filters.',
+    'showOlderReports': 'Show older reports',
+    'communityVerified': 'Verified',
+    'anonymousContributor': 'Anonymous Contributor',
+    'reportedByName': 'Reported by {name}',
+    'opensReportDetails': 'Opens report details',
+    'summaryCommunity': 'Community Reports. Showing {n} verified reports shared by the community.',
+    'summaryCommunityFilters': 'Filters: {subject}, {type}.',
+    'reportDetailsTitle': 'Report Details',
+    'detailReportInfo': 'Report information',
+    'detailReportType': 'Report type',
+    'detailReportedBy': 'Reported by',
+    'detailSubmitted': 'Submitted',
+    'detailBusRoute': 'Bus route',
+    'detailReference': 'Vehicle / station number',
+    'detailSubject': 'Reporting on',
+    'detailCondition': 'Condition',
+    'detailLocation': 'Location',
+    'detailDescription': 'Description',
+    'detailVerification': 'Verification',
+    'communityVerifiedByAdmin': 'Verified by a ColomboPal admin',
+    'noDescriptionProvided': 'No description provided.',
+    'detailPhoto': 'Photo',
+    'reportPhotoA11y': 'Photo attached to this report',
+    'photoLoadFailed': 'Could not load the photo.',
+    'approxLocationNote': 'Approximate location, within about 100 metres.',
+    'viewOnMap': 'View on map',
+    'mapOpenFailed': 'Could not open the map.',
+    'reportUnavailableTitle': 'This report is no longer available',
+    'reportUnavailableNote': 'It has been removed from Community Reports.',
+    'backToCommunity': 'Back to Community Reports',
+    'summaryReportDetails': '{headline}. {type}. Reported by {name}, {date}. Location: {location}. {description}',
+
+    // Report form: community sharing consent
+    'communitySharingLabel': 'Community sharing',
+    'shareWithCommunity': 'Share with the community',
+    'shareWithCommunityNote': 'After an admin verifies it, other ColomboPal users can see the bus route, what you reported, your description and photo, and an approximate location (about 100 m). Your email, phone number and exact location are never shown. This can’t be changed after you submit.',
+    'showMyName': 'Show my name',
+    'showMyNameNote':
+        'Shown as “{name}”. When off, you appear as Anonymous Contributor.',
+    'sharedAnonymouslyNote':
+        'Your report will be shared as Anonymous Contributor.',
+
+    // ---- SOS ----
+    'sosA11yLabel': 'Emergency SOS',
+    'sosA11yHint': 'Opens the emergency alert. You will be asked to confirm before anything is sent.',
+    'sosHoldA11yLabel': 'Send SOS alert',
+    'sosHoldA11yHint': 'Starts a 3 second countdown, then sends the alert. Use Cancel to stop.',
+    'sosCountingDown': 'Sending SOS alert. Tap Cancel to stop.',
   };
 
   static const Map<String, String> si = {
@@ -347,6 +489,12 @@ class AppStrings {
     'emailLabel': 'ඊමේල්',
     'passwordLabel': 'මුරපදය',
     'loading': 'රැඳී සිටින්න...',
+
+    // Startup splash
+    'startupLoading': 'සූදානම් කරමින්...',
+    'startupErrorTitle': 'ColomboPal ආරම්භ කළ නොහැකි විය',
+    'startupErrorBody':
+        'ඔබේ අන්තර්ජාල සම්බන්ධතාවය පරීක්ෂා කර නැවත උත්සාහ කරන්න.',
     'continueAsGuest': 'ආගන්තුකයෙකු ලෙස ඉදිරියට යන්න',
     'contactNameLabel': 'නම',
     'contactRelationLabel': 'සම්බන්ධතාවය',
@@ -375,6 +523,34 @@ class AppStrings {
     'openRequestsTitle': 'විවෘත ඉල්ලීම්',
     'noOpenRequests': 'දැනට විවෘත ඉල්ලීම් නැත.',
     'acceptBtn': 'පිළිගන්න',
+
+    // ---- Community Reports ----
+    'communityIntro': 'මගීන් සහ ස්වේච්ඡා සේවකයන් ප්‍රජාව සමඟ බෙදා ගැනීමට තෝරාගත් තහවුරු කළ ප්‍රවේශ්‍යතා වාර්තා.',
+    'typeFilterLabel': 'වාර්තා වර්ගය',
+    'allReportsFilter': 'සියලු වාර්තා',
+    'positiveFilter': 'ධනාත්මක ප්‍රතිචාර',
+    'issuesFilter': 'ප්‍රවේශ්‍යතා ගැටලු',
+    'communityEmptyTitle': 'තවම ප්‍රජා වාර්තා නැත',
+    'communityEmptyNote': 'බෙදා ගැනීමට තෝරාගත් තහවුරු කළ වාර්තා මෙහි දිස් වේ.',
+    'communityNoMatchNote': 'මෙම පෙරහන්වලට ගැළපෙන බෙදාගත් වාර්තා නැත.',
+    'showOlderReports': 'පැරණි වාර්තා පෙන්වන්න',
+    'communityVerified': 'තහවුරු කර ඇත',
+    'anonymousContributor': 'නිර්නාමික දායකයා',
+    'reportedByName': 'වාර්තා කළේ {name}',
+    'reportDetailsTitle': 'වාර්තා විස්තර',
+    'detailReportType': 'වාර්තා වර්ගය',
+    'detailReportedBy': 'වාර්තා කළේ',
+    'detailSubmitted': 'ඉදිරිපත් කළේ',
+    'detailBusRoute': 'බස් මාර්ගය',
+    'detailLocation': 'ස්ථානය',
+    'detailDescription': 'විස්තරය',
+    'detailVerification': 'තහවුරු කිරීම',
+    'communityVerifiedByAdmin': 'ColomboPal පරිපාලකයෙකු විසින් තහවුරු කර ඇත',
+    'reportUnavailableTitle': 'මෙම වාර්තාව තවදුරටත් ලබා ගත නොහැක',
+    'backToCommunity': 'ප්‍රජා වාර්තා වෙත ආපසු',
+    'communitySharingLabel': 'ප්‍රජාව සමඟ බෙදා ගැනීම',
+    'shareWithCommunity': 'ප්‍රජාව සමඟ බෙදා ගන්න',
+    'showMyName': 'මගේ නම පෙන්වන්න',
   };
 
   static Map<String, String> forLocale(AppLocale locale) =>
@@ -411,4 +587,17 @@ class AppStringsScope extends InheritedWidget {
 extension AppStringsContext on BuildContext {
   /// Usage: `context.t('planJourney')`.
   String t(String key) => AppStringsScope.of(this)(key);
+
+  /// [t] with `{name}` placeholders filled in, e.g.
+  /// `context.tf('statSubmittedA11y', {'n': 14})`.
+  String tf(String key, Map<String, Object> args) => fillTemplate(t(key), args);
+}
+
+/// Replaces each `{name}` in [template] with `args[name]`.
+String fillTemplate(String template, Map<String, Object> args) {
+  var result = template;
+  args.forEach(
+    (name, value) => result = result.replaceAll('{$name}', '$value'),
+  );
+  return result;
 }

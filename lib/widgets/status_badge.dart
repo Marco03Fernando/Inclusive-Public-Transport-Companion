@@ -24,13 +24,18 @@ class StatusBadge extends StatelessWidget {
       ReportStatus.underReview => (palette.warn, palette.warnSoft),
     };
     final text = label ?? context.t(status.labelKey);
+    // One announcement ("Status Under review"), not the label twice.
     return Semantics(
       label: 'Status $text',
+      excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(999),
+          border: palette.isHighContrast
+              ? Border.all(color: color, width: 1.5)
+              : null,
         ),
         child: Text(
           text,

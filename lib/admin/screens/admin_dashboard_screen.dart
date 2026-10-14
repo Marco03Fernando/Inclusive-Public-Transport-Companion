@@ -32,7 +32,10 @@ class AdminDashboardScreen extends StatelessWidget {
   }
 
   void _openReports(BuildContext context, ReportFilter filter) {
-    context.read<AdminReportsProvider>().setFilter(filter);
+    // Start from a clean slate so the list matches the tapped count.
+    context.read<AdminReportsProvider>()
+      ..clearFilters()
+      ..setFilter(filter);
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (_) => const AdminReportsScreen()));
   }
@@ -90,7 +93,7 @@ class AdminDashboardScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: AdminStatCard(
-                  label: 'Accepted',
+                  label: 'Verified / Accepted',
                   count: stats.accepted,
                   color: palette.success,
                   onTap: () => _openReports(context, ReportFilter.accepted),

@@ -30,6 +30,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.heroGradientStart,
     required this.heroGradientEnd,
     required this.shadow,
+    this.onHero = const Color(0xFFFFFFFF),
+    this.onDanger = const Color(0xFFFFFFFF),
+    this.cardBorder = const Color(0x00000000),
   });
 
   final Color rail;
@@ -65,6 +68,23 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// Ambient shadow color for elevated cards — already tuned per-brightness
   /// so callers just do `BoxShadow(color: palette.shadow, ...)`.
   final Color shadow;
+
+  /// Text/icons drawn on the hero surface (dashboard headers).
+  final Color onHero;
+
+  /// Text/icons on a solid [danger] fill (SOS, destructive buttons).
+  final Color onDanger;
+
+  /// Outline for cards. Transparent normally (cards separate by tone and
+  /// shadow); a strong solid line in high-contrast mode — see [cardOutline].
+  final Color cardBorder;
+
+  /// Ready-made card border, or null when cards have no outline.
+  Border? get cardOutline =>
+      cardBorder.a == 0 ? null : Border.all(color: cardBorder, width: 1.5);
+
+  /// Whether this is one of the high-contrast palettes.
+  bool get isHighContrast => cardBorder.a != 0;
 
   static const light = AppPalette(
     rail: Color(0xFFF6F5F2),
@@ -116,6 +136,67 @@ class AppPalette extends ThemeExtension<AppPalette> {
     shadow: Color(0x66000000),
   );
 
+  /// High-contrast light: near-black text on white, dark-teal brand, a
+  /// darkened call-to-action so white button text passes 4.5:1, and solid
+  /// outlines instead of soft shadows. Targets WCAG 2.2 AA (most pairs
+  /// reach AAA).
+  static const highContrastLight = AppPalette(
+    rail: Color(0xFFFFFFFF),
+    bg: Color(0xFFFFFFFF),
+    surface: Color(0xFFFFFFFF),
+    surface2: Color(0xFFEDEDED),
+    text: Color(0xFF000000),
+    muted: Color(0xFF333333),
+    border: Color(0xFF1F1F1F),
+    accent: Color(0xFF00535C),
+    accentSoft: Color(0xFFD5EFEC),
+    success: Color(0xFF145A1E),
+    successSoft: Color(0xFFDDF2DE),
+    danger: Color(0xFFA3001B),
+    dangerSoft: Color(0xFFFDE2E4),
+    warn: Color(0xFF6B4100),
+    warnSoft: Color(0xFFFFEBCC),
+    onAccent: Color(0xFFFFFFFF),
+    cta: Color(0xFFA8341A),
+    ctaSoft: Color(0xFFFFE1D8),
+    onCta: Color(0xFFFFFFFF),
+    heroGradientStart: Color(0xFF00434A),
+    heroGradientEnd: Color(0xFF00434A),
+    shadow: Color(0x00000000),
+    onHero: Color(0xFFFFFFFF),
+    cardBorder: Color(0xFF1F1F1F),
+  );
+
+  /// High-contrast dark: white text on black, bright accents, solid light
+  /// outlines.
+  static const highContrastDark = AppPalette(
+    rail: Color(0xFF000000),
+    bg: Color(0xFF000000),
+    surface: Color(0xFF0A0A0A),
+    surface2: Color(0xFF1C1C1C),
+    text: Color(0xFFFFFFFF),
+    muted: Color(0xFFD6D6D6),
+    border: Color(0xFFE6E6E6),
+    accent: Color(0xFF6FE3F2),
+    accentSoft: Color(0xFF00363D),
+    success: Color(0xFF8BE59A),
+    successSoft: Color(0xFF0E2E14),
+    danger: Color(0xFFFF9C94),
+    dangerSoft: Color(0xFF3D0E0C),
+    warn: Color(0xFFFFCB7A),
+    warnSoft: Color(0xFF3A2600),
+    onAccent: Color(0xFF001F24),
+    cta: Color(0xFFFFAD94),
+    ctaSoft: Color(0xFF3D1A10),
+    onCta: Color(0xFF000000),
+    heroGradientStart: Color(0xFF00434A),
+    heroGradientEnd: Color(0xFF00434A),
+    shadow: Color(0x00000000),
+    onHero: Color(0xFFFFFFFF),
+    onDanger: Color(0xFF000000),
+    cardBorder: Color(0xFFE6E6E6),
+  );
+
   @override
   AppPalette copyWith({
     Color? rail,
@@ -140,6 +221,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? heroGradientStart,
     Color? heroGradientEnd,
     Color? shadow,
+    Color? onHero,
+    Color? onDanger,
+    Color? cardBorder,
   }) {
     return AppPalette(
       rail: rail ?? this.rail,
@@ -164,6 +248,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
       heroGradientStart: heroGradientStart ?? this.heroGradientStart,
       heroGradientEnd: heroGradientEnd ?? this.heroGradientEnd,
       shadow: shadow ?? this.shadow,
+      onHero: onHero ?? this.onHero,
+      onDanger: onDanger ?? this.onDanger,
+      cardBorder: cardBorder ?? this.cardBorder,
     );
   }
 
@@ -197,6 +284,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
       )!,
       heroGradientEnd: Color.lerp(heroGradientEnd, other.heroGradientEnd, t)!,
       shadow: Color.lerp(shadow, other.shadow, t)!,
+      onHero: Color.lerp(onHero, other.onHero, t)!,
+      onDanger: Color.lerp(onDanger, other.onDanger, t)!,
+      cardBorder: Color.lerp(cardBorder, other.cardBorder, t)!,
     );
   }
 }
@@ -229,6 +319,7 @@ class AppTheme {
   }
 
   static ThemeData _build(AppPalette palette, Brightness brightness) {
+    final borderWidth = palette.isHighContrast ? 2.0 : 1.5;
     final colorScheme = ColorScheme(
       brightness: brightness,
       primary: palette.cta,
@@ -236,7 +327,7 @@ class AppTheme {
       secondary: palette.accent,
       onSecondary: palette.onAccent,
       error: palette.danger,
-      onError: Colors.white,
+      onError: palette.onDanger,
       surface: palette.surface,
       onSurface: palette.text,
     );
@@ -270,18 +361,40 @@ class AppTheme {
           vertical: 13,
         ),
         hintStyle: TextStyle(color: palette.muted, fontSize: 14),
+        errorStyle: TextStyle(
+          color: palette.danger,
+          fontSize: 12,
+          fontWeight: palette.isHighContrast
+              ? FontWeight.w700
+              : FontWeight.w400,
+        ),
+        errorMaxLines: 3,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: palette.border, width: 1.5),
+          borderSide: BorderSide(color: palette.border, width: borderWidth),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: palette.border, width: 1.5),
+          borderSide: BorderSide(color: palette.border, width: borderWidth),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: palette.cta, width: 1.8),
+          borderSide: BorderSide(color: palette.cta, width: borderWidth + 1),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: palette.danger, width: borderWidth),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: palette.danger, width: borderWidth + 1),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: palette.text,
+        contentTextStyle: TextStyle(color: palette.bg, fontSize: 14),
+        actionTextColor: palette.isHighContrast ? palette.bg : palette.cta,
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: palette.surface,
@@ -293,6 +406,17 @@ class AppTheme {
     );
   }
 
-  static ThemeData get light => _build(AppPalette.light, Brightness.light);
-  static ThemeData get dark => _build(AppPalette.dark, Brightness.dark);
+  // Built once: these are rebuilt-from-scratch ThemeData objects (with
+  // Google Fonts text themes), so constructing them on every MaterialApp
+  // rebuild was pure waste.
+  static final ThemeData light = _build(AppPalette.light, Brightness.light);
+  static final ThemeData dark = _build(AppPalette.dark, Brightness.dark);
+  static final ThemeData highContrastLight = _build(
+    AppPalette.highContrastLight,
+    Brightness.light,
+  );
+  static final ThemeData highContrastDark = _build(
+    AppPalette.highContrastDark,
+    Brightness.dark,
+  );
 }

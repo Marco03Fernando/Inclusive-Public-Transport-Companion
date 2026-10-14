@@ -2,10 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../models/condition_report.dart';
+import '../../models/public_condition_report.dart';
+import '../../repositories/firebase_community_report_repository.dart';
 import '../models/admin_exception.dart';
 import '../models/report_filter.dart';
 import 'admin_report_repository.dart';
+import 'report_publication_repository.dart';
 
 /// Firestore implementation of [AdminReportRepository].
 ///
@@ -18,7 +20,13 @@ import 'admin_report_repository.dart';
 ///
 /// Writes only ever touch `status`, `adminComment` and `updatedAt` — the
 /// exact fields `firestore.rules` lets an admin change.
-class FirebaseAdminReportRepository implements AdminReportRepository {
+///
+/// It also keeps the Community Reports copy
+/// (`public_condition_reports/{reportId}`) in step, in the same
+/// transaction/batch as each change: accepting an opted-in report publishes
+/// it, any other decision or a deletion removes it.
+class FirebaseAdminReportRepository
+    implements AdminReportRepository, ReportPublicationRepository {
   static const _collectionPath = 'condition_reports';
 
   final FirebaseFirestore _firestore;
@@ -32,6 +40,9 @@ class FirebaseAdminReportRepository implements AdminReportRepository {
 
   CollectionReference<Map<String, dynamic>> get _collection =>
       _firestore.collection(_collectionPath);
+
+  DocumentReference<Map<String, dynamic>> _publicDoc(String reportId) =>
+      _firestore.collection(PublicReportFields.collection).doc(reportId);
 
   @override
   Stream<AdminReportsSnapshot> watchAllReports() {
@@ -93,6 +104,62 @@ class FirebaseAdminReportRepository implements AdminReportRepository {
           'adminComment': adminComment,
           'updatedAt': FieldValue.serverTimestamp(),
         });
+
+        // Publish automatically on acceptance if the reporter opted in;
+        // any other outcome must leave nothing public. Reports without
+        // the opt-in can never have a public copy, so they're left alone.
+        final source = {...?snapshot.data(), 'status': decision.name};
+        if (decision.isAccepted && isPublishableReport(source)) {
+          transaction.set(
+            _publicDoc(reportId),
+            buildPublicReportProjection(source, status: decision),
+          );
+        } else if (sharesWithCommunity(source)) {
+          transaction.delete(_publicDoc(reportId));
+        }
+      }),
+    );
+  }
+
+  @override
+  Stream<bool> watchPublished(String reportId) => _publicDoc(reportId)
+      .snapshots()
+      .map((doc) => doc.exists)
+      .handleError(
+        (Object e) => throw e is FirebaseException
+            ? _mapError(e, action: 'check community sharing')
+            : e,
+      );
+
+  @override
+  Future<void> setPublished({required String reportId, required bool publish}) {
+    if (!publish) {
+      return _guard(
+        action: 'remove the report from Community Reports',
+        () => _publicDoc(reportId).delete(),
+      );
+    }
+    return _guard(
+      action: 'publish the report',
+      () => _firestore.runTransaction((transaction) async {
+        final snapshot = await transaction.get(_collection.doc(reportId));
+        final source = snapshot.data();
+        if (source == null) {
+          throw const AdminException('This report no longer exists.');
+        }
+        if (!isPublishableReport(source)) {
+          throw const AdminException(
+            'Only accepted reports whose reporter agreed to share them can '
+            'be shown in Community Reports.',
+          );
+        }
+        transaction.set(
+          _publicDoc(reportId),
+          buildPublicReportProjection(
+            source,
+            status: parseReportStatus(source['status']),
+          ),
+        );
       }),
     );
   }
@@ -140,7 +207,11 @@ class FirebaseAdminReportRepository implements AdminReportRepository {
         }
       }
 
-      await docRef.delete();
+      // The report and its Community Reports copy (if it could have one)
+      // go together.
+      final batch = _firestore.batch()..delete(docRef);
+      if (sharesWithCommunity(data)) batch.delete(_publicDoc(reportId));
+      await batch.commit();
     });
   }
 
@@ -229,6 +300,8 @@ class FirebaseAdminReportRepository implements AdminReportRepository {
         photoUrl: data['photoUrl'] as String?,
         status: parseReportStatus(data['status']),
         adminComment: data['adminComment'] as String?,
+        shareWithCommunity: data[ReportFields.shareWithCommunity] == true,
+        publicDisplayName: data[ReportFields.publicDisplayName] as String?,
         createdAt: createdAt?.toDate() ?? DateTime.now(),
         updatedAt: updatedAt?.toDate(),
       );

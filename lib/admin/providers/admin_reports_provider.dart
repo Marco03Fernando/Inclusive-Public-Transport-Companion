@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../models/condition_report.dart';
+import '../../models/report_filters.dart';
 import '../models/admin_exception.dart';
 import '../models/report_filter.dart';
 import '../models/report_stats.dart';
@@ -29,6 +30,9 @@ class AdminReportsProvider extends ChangeNotifier {
   List<ConditionReport> _reports = const [];
   int _skipped = 0;
   ReportFilter _filter = ReportFilter.all;
+  SubjectFilter _subject = SubjectFilter.all;
+  TypeFilter _type = TypeFilter.all;
+  ReportSort _sort = ReportSort.newestFirst;
   bool _isLoading = false;
   bool _isUpdating = false;
   String? _error;
@@ -37,12 +41,36 @@ class AdminReportsProvider extends ChangeNotifier {
   /// Every report, newest first.
   List<ConditionReport> get allReports => _reports;
 
-  /// Reports matching the selected status tab.
-  List<ConditionReport> get reports =>
-      _reports.where(_filter.matches).toList(growable: false);
+  /// The active status + subject + type filters and ordering.
+  ReportQuery get query => ReportQuery(
+    status: _filter.statusFilter,
+    subject: _subject,
+    type: _type,
+    sort: _sort,
+  );
+
+  /// Reports matching every selected filter, in the selected order.
+  List<ConditionReport> get reports => List.unmodifiable(query.apply(_reports));
 
   ReportFilter get filter => _filter;
+  SubjectFilter get subjectFilter => _subject;
+  TypeFilter get typeFilter => _type;
+  ReportSort get sort => _sort;
+
+  /// True when subject or type narrow the list (status tabs aside).
+  bool get hasExtraFilters =>
+      _subject != SubjectFilter.all || _type != TypeFilter.all;
+
+  /// Overall counts across every report (dashboard tiles).
   ReportStats get stats => ReportStats.fromReports(_reports);
+
+  /// Counts within the selected subject + type, i.e. how many reports
+  /// each status tab would show right now.
+  ReportStats get scopedStats => ReportStats.fromReports(
+    _reports
+        .where(ReportQuery(subject: _subject, type: _type).matches)
+        .toList(),
+  );
 
   /// How many `condition_reports` documents couldn't be read.
   int get skippedCount => _skipped;
@@ -70,6 +98,33 @@ class AdminReportsProvider extends ChangeNotifier {
   void setFilter(ReportFilter filter) {
     if (_filter == filter) return;
     _filter = filter;
+    notifyListeners();
+  }
+
+  void setSubjectFilter(SubjectFilter value) {
+    if (_subject == value) return;
+    _subject = value;
+    notifyListeners();
+  }
+
+  void setTypeFilter(TypeFilter value) {
+    if (_type == value) return;
+    _type = value;
+    notifyListeners();
+  }
+
+  void setSort(ReportSort value) {
+    if (_sort == value) return;
+    _sort = value;
+    notifyListeners();
+  }
+
+  /// Back to every report, newest first.
+  void clearFilters() {
+    _filter = ReportFilter.all;
+    _subject = SubjectFilter.all;
+    _type = TypeFilter.all;
+    _sort = ReportSort.newestFirst;
     notifyListeners();
   }
 
@@ -117,6 +172,9 @@ class AdminReportsProvider extends ChangeNotifier {
     _reports = const [];
     _skipped = 0;
     _filter = ReportFilter.all;
+    _subject = SubjectFilter.all;
+    _type = TypeFilter.all;
+    _sort = ReportSort.newestFirst;
     _isLoading = false;
     _isUpdating = false;
     _error = null;
@@ -162,6 +220,19 @@ class AdminReportsProvider extends ChangeNotifier {
     return _run(
       () => _service.updateComment(reportId: reportId, comment: comment),
       fallbackError: 'Could not save the comment. Please try again.',
+    );
+  }
+
+  /// Live "is this report shown in Community Reports?" for the details
+  /// screen.
+  Stream<bool> watchPublished(String reportId) =>
+      _service.watchPublished(reportId);
+
+  /// Takes a report out of Community Reports, or puts it back.
+  Future<bool> setPublished(String reportId, {required bool publish}) {
+    return _run(
+      () => _service.setPublished(reportId: reportId, publish: publish),
+      fallbackError: 'Could not change community sharing. Please try again.',
     );
   }
 

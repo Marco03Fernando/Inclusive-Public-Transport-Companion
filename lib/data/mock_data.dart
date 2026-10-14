@@ -86,7 +86,7 @@ const mockRouteSteps = [
   ),
 ];
 
-/// Display-only row for the still-demo route-condition / community lists
+/// Display-only row for the still-demo route-condition list
 /// (rendered with `ConditionTile`). Real submitted reports are
 /// [ConditionReport]s.
 typedef DemoCondition = ({
@@ -108,33 +108,6 @@ const List<DemoCondition> mockRouteConditions = [
     location: 'Fort Station, Platform 2',
     status: ReportStatus.underReview,
     date: null,
-  ),
-];
-
-const List<DemoCondition> mockVolunteerFeed = [
-  (
-    title: 'Lift out of service',
-    location: 'Fort Station, Platform 2',
-    status: ReportStatus.underReview,
-    date: 'Today',
-  ),
-  (
-    title: 'Crowded during peak hours',
-    location: 'Bus 138',
-    status: ReportStatus.verified,
-    date: 'Yesterday',
-  ),
-  (
-    title: 'Rest area unclean',
-    location: 'Bambalapitiya Station',
-    status: ReportStatus.underReview,
-    date: 'Aug 18',
-  ),
-  (
-    title: 'Tactile paving damaged',
-    location: 'Maradana Station entrance',
-    status: ReportStatus.verified,
-    date: 'Aug 14',
   ),
 ];
 
