@@ -27,7 +27,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Colombo Pal uses your location to match your assistance request with nearby volunteers.</string>
+	<string>Colombo Pal uses your location to match your assistance request with nearby volunteers and to attach it to condition reports you submit.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Colombo Pal uses the camera so you can attach a photo to a condition report.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Colombo Pal lets you choose a photo from your library to attach to a condition report.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

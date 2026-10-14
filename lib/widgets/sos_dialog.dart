@@ -66,7 +66,11 @@ class _SosHold extends StatelessWidget {
           Text(
             context.t('sosHoldTitle'),
             textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 17, color: palette.text),
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w800,
+              fontSize: 17,
+              color: palette.text,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -97,10 +101,17 @@ class _SosHold extends StatelessWidget {
                     width: 88,
                     height: 88,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(color: palette.danger, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                      color: palette.danger,
+                      shape: BoxShape.circle,
+                    ),
                     child: Text(
                       'SOS',
-                      style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 16, color: Colors.white),
+                      style: GoogleFonts.manrope(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -110,7 +121,13 @@ class _SosHold extends StatelessWidget {
           const SizedBox(height: 4),
           TextButton(
             onPressed: () => Navigator.of(context).maybePop(),
-            child: Text(context.t('cancel'), style: TextStyle(color: palette.muted, fontWeight: FontWeight.w600)),
+            child: Text(
+              context.t('cancel'),
+              style: TextStyle(
+                color: palette.muted,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -150,13 +167,27 @@ class _SosActivatedState extends State<_SosActivated> {
             width: 56,
             height: 56,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: palette.dangerSoft, shape: BoxShape.circle),
-            child: Text('!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: palette.danger)),
+            decoration: BoxDecoration(
+              color: palette.dangerSoft,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '!',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: palette.danger,
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             context.t('helpOnWay'),
-            style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 17, color: palette.text),
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w800,
+              fontSize: 17,
+              color: palette.text,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -171,7 +202,11 @@ class _SosActivatedState extends State<_SosActivated> {
               if (snapshot.connectionState != ConnectionState.done) {
                 return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
-                  child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2)),
+                  child: SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 );
               }
               final contacts = snapshot.data ?? const [];
@@ -182,21 +217,32 @@ class _SosActivatedState extends State<_SosActivated> {
                   style: TextStyle(fontSize: 12, color: palette.muted),
                 );
               }
-              return Column(children: [for (final c in contacts) SosContactRow(contact: c)]);
+              return Column(
+                children: [for (final c in contacts) SosContactRow(contact: c)],
+              );
             },
           ),
           const SizedBox(height: 4),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => launchUrl(Uri(scheme: 'tel', path: _ambulanceNumber)),
+              onPressed: () =>
+                  launchUrl(Uri(scheme: 'tel', path: _ambulanceNumber)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: palette.danger,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
-              child: Text(context.t('callAmbulance'), style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 14)),
+              child: Text(
+                context.t('callAmbulance'),
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -208,9 +254,17 @@ class _SosActivatedState extends State<_SosActivated> {
                 foregroundColor: palette.text,
                 side: BorderSide(color: palette.border, width: 1.5),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
-              child: Text(context.t('imSafe'), style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 14)),
+              child: Text(
+                context.t('imSafe'),
+                style: GoogleFonts.manrope(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
             ),
           ),
         ],
@@ -220,7 +274,11 @@ class _SosActivatedState extends State<_SosActivated> {
 }
 
 class _RingPainter extends CustomPainter {
-  _RingPainter({required this.progress, required this.track, required this.fill});
+  _RingPainter({
+    required this.progress,
+    required this.track,
+    required this.fill,
+  });
 
   final double progress;
   final Color track;
@@ -251,5 +309,6 @@ class _RingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _RingPainter oldDelegate) => oldDelegate.progress != progress;
+  bool shouldRepaint(covariant _RingPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }

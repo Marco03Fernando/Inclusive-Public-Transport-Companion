@@ -1,0 +1,108 @@
+rules_version = '2';
+
+// ColomboPal — Firestore security rules.
+//
+// Roles come from users/{uid}.role ("passenger" | "volunteer" | "admin").
+// Users can create their own profile ONLY as passenger/volunteer and can
+// never change a role, so admin accounts can only be made in the Firebase
+// console.
+//
+// Deploy: firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ---- User profiles ----
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+
+      // Sign-up wizard / guest volunteer / missing-profile fallback
+      // (UserProfileService.createProfile).
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.role in ['passenger', 'volunteer']
+        && request.resource.data.keys().hasOnly([
+             'role', 'name', 'email', 'phone', 'dob',
+             'accessNeeds', 'isAnonymous', 'createdAt']);
+
+      // Own details (e.g. access needs) may change; the role never can
+      // from the client.
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.role == resource.data.role;
+
+      allow delete: if false;
+
+      // Emergency contacts (UserProfileService) — owner only.
+      match /contacts/{contactId} {
+        allow read, write: if signedIn() && request.auth.uid == uid;
+      }
+    }
+
+    // ---- Condition reports ----
+    match /condition_reports/{reportId} {
+      // Owners see their own reports; admins see everything.
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+
+      // New reports belong to the submitter, start under review, can't
+      // arrive with an admin comment already filled in, and must be
+      // classified and tied to a bus route (route-based accessibility
+      // data). routeId mirrors BusRoute.normalize in report_model.dart.
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'underReview'
+        && request.resource.data.get('adminComment', null) == null
+        && request.resource.data.reportType in ['positive', 'issue']
+        && request.resource.data.routeNumber is string
+        && request.resource.data.routeNumber.trim().size() > 0
+        && request.resource.data.routeNumber.size() <= 40
+        && request.resource.data.routeId is string
+        && request.resource.data.routeId.size() <= 12
+        && request.resource.data.routeId.matches('^[A-Z0-9]+([/-][A-Z0-9]+)*$')
+        && request.resource.data.routeId.matches('.*[0-9].*');
+
+      // Only admins review, only these three fields, and only to a known
+      // status. Reporters have no update rule, so they can never change
+      // status / adminComment themselves.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'adminComment', 'updatedAt'])
+        && request.resource.data.status
+             in ['underReview', 'verified', 'accepted', 'rejected'];
+
+      // Admins may delete any report; owners may retract their own.
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    // ---- Request Assistance (AssistanceRequestService) ----
+    match /assistance_requests/{requestId} {
+      // Volunteers browse open requests; passengers watch their own.
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.resource.data.passengerUid == request.auth.uid
+        && request.resource.data.status == 'pending';
+
+      // The passenger may cancel; a volunteer may accept a pending request
+      // (claiming it for themselves) and then complete it.
+      allow update: if isAdmin()
+        || (signedIn() && (
+             resource.data.passengerUid == request.auth.uid
+             || resource.data.volunteerUid == request.auth.uid
+             || (resource.data.status == 'pending'
+                 && request.resource.data.volunteerUid == request.auth.uid)));
+
+      allow delete: if isAdmin();
+    }
+  }
+}

@@ -29,7 +29,13 @@ class ToggleRow extends StatelessWidget {
         decoration: BoxDecoration(
           color: palette.surface,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 12, offset: const Offset(0, 5))],
+          boxShadow: [
+            BoxShadow(
+              color: palette.shadow,
+              blurRadius: 12,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -37,9 +43,19 @@ class ToggleRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: palette.text)),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: palette.text,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: TextStyle(fontSize: 12, color: palette.muted)),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 12, color: palette.muted),
+                  ),
                 ],
               ),
             ),

@@ -25,7 +25,13 @@ class ScreenHeader extends StatelessWidget implements PreferredSizeWidget {
             DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                    color: palette.shadow,
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: SizedBox(
                 width: 34,
@@ -36,9 +42,15 @@ class ScreenHeader extends StatelessWidget implements PreferredSizeWidget {
                     padding: EdgeInsets.zero,
                     backgroundColor: palette.surface,
                     side: BorderSide.none,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: Icon(Icons.chevron_left, size: 20, color: palette.text),
+                  child: Icon(
+                    Icons.chevron_left,
+                    size: 20,
+                    color: palette.text,
+                  ),
                 ),
               ),
             ),

@@ -39,11 +39,15 @@ class _ProfileContactsScreenState extends State<ProfileContactsScreen> {
     return AppScaffold(
       routeName: Routes.profileContacts,
       title: context.t('emergencyContactsTitle'),
-      onBack: () => Navigator.of(context).pushReplacementNamed(Routes.profileHome),
+      onBack: () =>
+          Navigator.of(context).pushReplacementNamed(Routes.profileHome),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(context.t('emergencyContactsNote'), style: TextStyle(fontSize: 13, color: palette.muted)),
+          Text(
+            context.t('emergencyContactsNote'),
+            style: TextStyle(fontSize: 13, color: palette.muted),
+          ),
           const SizedBox(height: 12),
           if (uid == null)
             const SizedBox.shrink()
@@ -65,19 +69,31 @@ class _ProfileContactsScreenState extends State<ProfileContactsScreen> {
                               onPressed: () => _edit(uid, contact),
                               child: Text(
                                 context.t('editWord'),
-                                style: TextStyle(fontSize: 12, color: palette.accent, fontWeight: FontWeight.w700),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: palette.accent,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                             IconButton(
-                              icon: Icon(Icons.delete_outline, size: 18, color: palette.muted),
-                              onPressed: () => _service.deleteContact(uid, contact.id!),
+                              icon: Icon(
+                                Icons.delete_outline,
+                                size: 18,
+                                color: palette.muted,
+                              ),
+                              onPressed: () =>
+                                  _service.deleteContact(uid, contact.id!),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 10),
                     ],
-                    DottedAddButton(label: context.t('addContact'), onTap: () => _add(uid)),
+                    DottedAddButton(
+                      label: context.t('addContact'),
+                      onTap: () => _add(uid),
+                    ),
                   ],
                 );
               },

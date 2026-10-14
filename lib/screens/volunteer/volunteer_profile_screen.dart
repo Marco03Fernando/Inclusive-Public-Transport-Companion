@@ -19,7 +19,8 @@ class VolunteerProfileScreen extends StatelessWidget {
   Future<void> _logOut(BuildContext context) async {
     await context.read<AuthState>().signOut();
     if (!context.mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil(Routes.roleSelect, (route) => false);
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil(Routes.roleSelect, (route) => false);
   }
 
   @override
@@ -45,7 +46,10 @@ class VolunteerProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (!hasRealName) ...[const DemoDataBadge(), const SizedBox(height: 4)],
+                  if (!hasRealName) ...[
+                    const DemoDataBadge(),
+                    const SizedBox(height: 4),
+                  ],
                   const DemoDataBadge(),
                   const SizedBox(height: 8),
                   SettingsLinkRow(
@@ -54,21 +58,36 @@ class VolunteerProfileScreen extends StatelessWidget {
                     trailingText: 'Colombo 3–6',
                   ),
                   const SizedBox(height: 10),
-                  SettingsLinkRow(label: context.t('notificationPrefs'), onTap: () {}),
+                  SettingsLinkRow(
+                    label: context.t('notificationPrefs'),
+                    onTap: () {},
+                  ),
                   const SizedBox(height: 10),
                   SettingsLinkRow(
                     label: context.t('assistanceRequestsTitle'),
-                    onTap: () => Navigator.of(context).pushReplacementNamed(Routes.volunteerAssistanceRequests),
+                    onTap: () => Navigator.of(
+                      context,
+                    ).pushReplacementNamed(Routes.volunteerAssistanceRequests),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     context.t('appearanceTitle'),
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: palette.text,
+                    ),
                   ),
                   const SizedBox(height: 10),
-                  ThemeModeSelector(mode: state.themeMode, onChanged: state.setThemeMode),
+                  ThemeModeSelector(
+                    mode: state.themeMode,
+                    onChanged: state.setThemeMode,
+                  ),
                   const SizedBox(height: 18),
-                  TextDangerButton(label: context.t('logOut'), onPressed: () => _logOut(context)),
+                  TextDangerButton(
+                    label: context.t('logOut'),
+                    onPressed: () => _logOut(context),
+                  ),
                 ],
               ),
             ),

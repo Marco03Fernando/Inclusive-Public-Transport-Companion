@@ -27,17 +27,31 @@ class GreetingHeader extends StatelessWidget {
           bottomRight: Radius.circular(28),
         ),
         boxShadow: [
-          BoxShadow(color: palette.heroGradientStart.withValues(alpha: 0.35), blurRadius: 24, offset: const Offset(0, 10)),
+          BoxShadow(
+            color: palette.heroGradientStart.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(greeting, style: TextStyle(fontSize: 13, color: palette.onAccent.withValues(alpha: 0.85))),
+          Text(
+            greeting,
+            style: TextStyle(
+              fontSize: 13,
+              color: palette.onAccent.withValues(alpha: 0.85),
+            ),
+          ),
           const SizedBox(height: 2),
           Text(
             name,
-            style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 22, color: palette.onAccent),
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w800,
+              fontSize: 22,
+              color: palette.onAccent,
+            ),
           ),
         ],
       ),
@@ -47,7 +61,12 @@ class GreetingHeader extends StatelessWidget {
 
 /// The centered avatar + name + role pill atop the profile screens.
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key, required this.initials, required this.name, required this.roleLabel});
+  const ProfileHeader({
+    super.key,
+    required this.initials,
+    required this.name,
+    required this.roleLabel,
+  });
 
   final String initials;
   final String name;
@@ -59,7 +78,9 @@ class ProfileHeader extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: palette.border))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: palette.border)),
+      ),
       child: Column(
         children: [
           Container(
@@ -69,22 +90,46 @@ class ProfileHeader extends StatelessWidget {
             decoration: BoxDecoration(
               color: palette.accentSoft,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 14, offset: const Offset(0, 6))],
+              boxShadow: [
+                BoxShadow(
+                  color: palette.shadow,
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Text(
               initials,
-              style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 22, color: palette.accent),
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w800,
+                fontSize: 22,
+                color: palette.accent,
+              ),
             ),
           ),
           const SizedBox(height: 8),
-          Text(name, style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 17, color: palette.text)),
+          Text(
+            name,
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w700,
+              fontSize: 17,
+              color: palette.text,
+            ),
+          ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            decoration: BoxDecoration(color: palette.accentSoft, borderRadius: BorderRadius.circular(999)),
+            decoration: BoxDecoration(
+              color: palette.accentSoft,
+              borderRadius: BorderRadius.circular(999),
+            ),
             child: Text(
               roleLabel,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: palette.accent),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: palette.accent,
+              ),
             ),
           ),
         ],

@@ -27,7 +27,11 @@ const _tabLabelKeys = {
 /// name against each [TabDef]'s match set, exactly like the design's
 /// `bottomTabs` builder.
 class AppBottomNavBar extends StatelessWidget {
-  const AppBottomNavBar({super.key, required this.role, required this.currentRoute});
+  const AppBottomNavBar({
+    super.key,
+    required this.role,
+    required this.currentRoute,
+  });
 
   final AppRole role;
   final String currentRoute;
@@ -39,8 +43,17 @@ class AppBottomNavBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: palette.surface,
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(22), topRight: Radius.circular(22)),
-        boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 20, offset: const Offset(0, -6))],
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(22),
+          topRight: Radius.circular(22),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: palette.shadow,
+            blurRadius: 20,
+            offset: const Offset(0, -6),
+          ),
+        ],
       ),
       child: SafeArea(
         top: false,
@@ -54,7 +67,9 @@ class AppBottomNavBar extends StatelessWidget {
                 child: InkWell(
                   onTap: active
                       ? null
-                      : () => Navigator.of(context).pushReplacementNamed(tab.target),
+                      : () =>
+                            Navigator.of(context)
+                                .pushReplacementNamed(tab.target),
                   borderRadius: BorderRadius.circular(14),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -71,7 +86,9 @@ class AppBottomNavBar extends StatelessWidget {
                           context.t(_tabLabelKeys[tab.tab]!),
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                            fontWeight: active
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                             color: color,
                           ),
                         ),

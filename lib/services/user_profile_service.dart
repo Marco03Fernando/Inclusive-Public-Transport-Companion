@@ -7,27 +7,38 @@ import '../models/contact.dart';
 import '../models/user_profile.dart';
 
 class UserProfileService {
-  UserProfileService({FirebaseFirestore? firestore}) : _db = firestore ?? FirebaseFirestore.instance;
+  UserProfileService({FirebaseFirestore? firestore})
+    : _db = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _db;
 
-  DocumentReference<Map<String, dynamic>> _userDoc(String uid) => _db.collection('users').doc(uid);
+  DocumentReference<Map<String, dynamic>> _userDoc(String uid) =>
+      _db.collection('users').doc(uid);
 
-  CollectionReference<Map<String, dynamic>> _contactsCol(String uid) => _userDoc(uid).collection('contacts');
+  CollectionReference<Map<String, dynamic>> _contactsCol(String uid) =>
+      _userDoc(uid).collection('contacts');
 
+  /// Creates `users/{uid}`. Only passenger/volunteer can be created from
+  /// the app — admin accounts are promoted by hand in the Firebase console
+  /// (and the Firestore rules reject a client-written admin role anyway).
   Future<void> createProfile({
     required String uid,
     required AppRole role,
     required String name,
+    String email = '',
     required String phone,
     required String dob,
     required List<AccessNeed> accessNeeds,
     required bool isAnonymous,
   }) {
+    if (role == AppRole.admin) {
+      throw ArgumentError('Admin profiles cannot be created from the app.');
+    }
     final profile = UserProfile(
       uid: uid,
       role: role,
       name: name,
+      email: email,
       phone: phone,
       dob: dob,
       accessNeeds: accessNeeds,
@@ -40,7 +51,31 @@ class UserProfileService {
     final snap = await _userDoc(uid).get();
     final data = snap.data();
     if (data == null) return null;
-    return data['role'] == 'volunteer' ? AppRole.volunteer : AppRole.passenger;
+    return AppRole.fromName(data['role']);
+  }
+
+  /// Reads the role for a signed-in account. An account without a profile
+  /// (e.g. created in the console without a Firestore document) gets a
+  /// normal passenger profile created for it — never an admin one.
+  Future<AppRole> getOrCreateRole({
+    required String uid,
+    String? email,
+    String? displayName,
+  }) async {
+    final role = await getRole(uid);
+    if (role != null) return role;
+    final mail = email ?? '';
+    await createProfile(
+      uid: uid,
+      role: AppRole.passenger,
+      name: displayName ?? mail.split('@').first,
+      email: mail,
+      phone: '',
+      dob: '',
+      accessNeeds: const [],
+      isAnonymous: false,
+    );
+    return AppRole.passenger;
   }
 
   Stream<UserProfile?> watchProfile(String uid) {
@@ -53,18 +88,26 @@ class UserProfileService {
 
   Future<void> updateAccessNeeds(String uid, List<AccessNeed> accessNeeds) {
     return _userDoc(uid).update({
-      'accessNeeds': accessNeeds.map((n) => {'id': n.id, 'checked': n.checked}).toList(),
+      'accessNeeds': accessNeeds
+          .map((n) => {'id': n.id, 'checked': n.checked})
+          .toList(),
     });
   }
 
   Stream<List<Contact>> watchContacts(String uid) {
-    return _contactsCol(uid).orderBy('createdAt').snapshots().map(
-          (snap) => snap.docs.map((doc) => Contact.fromMap(doc.id, doc.data())).toList(),
+    return _contactsCol(uid)
+        .orderBy('createdAt')
+        .snapshots()
+        .map(
+          (snap) => snap.docs
+              .map((doc) => Contact.fromMap(doc.id, doc.data()))
+              .toList(),
         );
   }
 
   Future<void> addContact(String uid, Contact contact) {
-    return _contactsCol(uid).add({...contact.toMap(), 'createdAt': FieldValue.serverTimestamp()});
+    return _contactsCol(uid)
+        .add({...contact.toMap(), 'createdAt': FieldValue.serverTimestamp()});
   }
 
   Future<void> updateContact(String uid, Contact contact) {

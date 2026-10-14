@@ -12,7 +12,4 @@ class RouteRequest {
   final bool computeAlternativeRoutes;
 }
 
-enum TransitPreference {
-  fewerTransfers,
-  lessWalking,
-}
+enum TransitPreference { fewerTransfers, lessWalking }

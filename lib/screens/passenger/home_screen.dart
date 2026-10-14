@@ -18,7 +18,9 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final profile = context.watch<AuthState>().profile;
-    final displayName = (profile?.name.isNotEmpty ?? false) ? profile!.name : 'Kamala Fernando';
+    final displayName = (profile?.name.isNotEmpty ?? false)
+        ? profile!.name
+        : 'Kamala Fernando';
     return AppScaffold(
       routeName: Routes.home,
       scrollableBody: false,
@@ -26,13 +28,19 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            GreetingHeader(greeting: context.t('goodAfternoon'), name: displayName),
+            GreetingHeader(
+              greeting: context.t('goodAfternoon'),
+              name: displayName,
+            ),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (profile == null) ...[const DemoDataBadge(), const SizedBox(height: 4)],
+                  if (profile == null) ...[
+                    const DemoDataBadge(),
+                    const SizedBox(height: 4),
+                  ],
                   const DemoDataBadge(),
                   AlertBanner(
                     label: context.t('routeAlertLabel'),
@@ -46,7 +54,9 @@ class HomeScreen extends StatelessWidget {
                         child: ActionCard(
                           title: context.t('planJourney'),
                           description: context.t('planJourneyDesc'),
-                          onTap: () => Navigator.of(context).pushReplacementNamed(Routes.planSearch),
+                          onTap: () =>
+                              Navigator.of(context)
+                                  .pushReplacementNamed(Routes.planSearch),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -54,7 +64,9 @@ class HomeScreen extends StatelessWidget {
                         child: ActionCard(
                           title: context.t('shareJourney'),
                           description: context.t('shareJourneyDesc'),
-                          onTap: () => Navigator.of(context).pushReplacementNamed(Routes.shareSetup),
+                          onTap: () =>
+                              Navigator.of(context)
+                                  .pushReplacementNamed(Routes.shareSetup),
                         ),
                       ),
                     ],
@@ -63,17 +75,25 @@ class HomeScreen extends StatelessWidget {
                   ActionCard(
                     title: context.t('reportCondition'),
                     description: context.t('reportConditionDescHome'),
-                    onTap: () => Navigator.of(context).pushReplacementNamed(Routes.reportForm),
+                    onTap: () =>
+                        Navigator.of(context)
+                            .pushReplacementNamed(Routes.reportForm),
                   ),
                   const SizedBox(height: 14),
                   Text(
                     context.t('recentActivity'),
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: palette.text),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: palette.text,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const DemoDataBadge(),
                   NoteCard(
-                    child: const Text('Your journey to Bambalapitiya was shared with Nimal Perera on Aug 19'),
+                    child: const Text(
+                      'Your journey to Bambalapitiya was shared with Nimal Perera on Aug 19',
+                    ),
                   ),
                 ],
               ),

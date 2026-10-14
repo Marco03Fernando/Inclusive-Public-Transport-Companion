@@ -5,7 +5,12 @@ import '../core/theme/app_theme.dart';
 /// Diagonal-hatch placeholder standing in for a real map, with an optional
 /// dashed route line — matches the design's "MAP · ..." reference tiles.
 class MapPlaceholder extends StatelessWidget {
-  const MapPlaceholder({super.key, required this.label, this.height = 150, this.showRoute = false});
+  const MapPlaceholder({
+    super.key,
+    required this.label,
+    this.height = 150,
+    this.showRoute = false,
+  });
 
   final String label;
   final double height;
@@ -17,29 +22,47 @@ class MapPlaceholder extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: height,
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: palette.border))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: palette.border)),
+      ),
       child: Stack(
         alignment: Alignment.center,
         children: [
           CustomPaint(
             size: Size.infinite,
-            painter: _HatchPainter(base: palette.surface, stripe: palette.surface2),
+            painter: _HatchPainter(
+              base: palette.surface,
+              stripe: palette.surface2,
+            ),
           ),
           if (showRoute)
             CustomPaint(
               size: Size.infinite,
-              painter: _RoutePainter(accent: palette.cta, danger: palette.danger),
+              painter: _RoutePainter(
+                accent: palette.cta,
+                danger: palette.danger,
+              ),
             ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: palette.surface,
               borderRadius: BorderRadius.circular(10),
-              boxShadow: [BoxShadow(color: palette.shadow, blurRadius: 8, offset: const Offset(0, 3))],
+              boxShadow: [
+                BoxShadow(
+                  color: palette.shadow,
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: Text(
               label,
-              style: TextStyle(fontSize: 11, color: palette.muted, fontFamily: 'monospace'),
+              style: TextStyle(
+                fontSize: 11,
+                color: palette.muted,
+                fontFamily: 'monospace',
+              ),
             ),
           ),
         ],
@@ -64,7 +87,11 @@ class _HatchPainter extends CustomPainter {
     const gap = 20.0;
     final diag = size.width + size.height;
     for (double x = -size.height; x < diag; x += gap) {
-      canvas.drawLine(Offset(x, 0), Offset(x + size.height, size.height), paint);
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x + size.height, size.height),
+        paint,
+      );
     }
   }
 
@@ -87,8 +114,22 @@ class _RoutePainter extends CustomPainter {
 
     final path = Path()
       ..moveTo(p(20, 90).dx, p(20, 90).dy)
-      ..cubicTo(p(90, 90).dx, p(90, 90).dy, p(100, 30).dx, p(100, 30).dy, p(170, 30).dx, p(170, 30).dy)
-      ..cubicTo(p(210, 30).dx, p(210, 30).dy, p(250, 70).dx, p(250, 70).dy, p(300, 20).dx, p(300, 20).dy);
+      ..cubicTo(
+        p(90, 90).dx,
+        p(90, 90).dy,
+        p(100, 30).dx,
+        p(100, 30).dy,
+        p(170, 30).dx,
+        p(170, 30).dy,
+      )
+      ..cubicTo(
+        p(210, 30).dx,
+        p(210, 30).dy,
+        p(250, 70).dx,
+        p(250, 70).dy,
+        p(300, 20).dx,
+        p(300, 20).dy,
+      );
 
     final dashPaint = Paint()
       ..color = accent
@@ -109,7 +150,11 @@ class _RoutePainter extends CustomPainter {
       while (distance < metric.length) {
         final len = draw ? dashLength : gapLength;
         final next = (distance + len).clamp(0, metric.length);
-        if (draw) dashed.addPath(metric.extractPath(distance, next.toDouble()), Offset.zero);
+        if (draw)
+          dashed.addPath(
+            metric.extractPath(distance, next.toDouble()),
+            Offset.zero,
+          );
         distance = next.toDouble();
         draw = !draw;
       }

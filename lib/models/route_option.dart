@@ -17,11 +17,7 @@ class RouteOption {
 }
 
 class RouteStep {
-  const RouteStep({
-    required this.n,
-    required this.text,
-    required this.detail,
-  });
+  const RouteStep({required this.n, required this.text, required this.detail});
 
   final int n;
   final String text;

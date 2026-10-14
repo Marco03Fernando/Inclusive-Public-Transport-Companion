@@ -24,10 +24,17 @@ class RouteStepItem extends StatelessWidget {
                 width: 26,
                 height: 26,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(color: palette.accent, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: palette.accent,
+                  shape: BoxShape.circle,
+                ),
                 child: Text(
                   '${step.n}',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
               ),
               if (!isLast)
@@ -47,9 +54,19 @@ class RouteStepItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(step.text, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: palette.text)),
+                  Text(
+                    step.text,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: palette.text,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(step.detail, style: TextStyle(fontSize: 12, color: palette.muted)),
+                  Text(
+                    step.detail,
+                    style: TextStyle(fontSize: 12, color: palette.muted),
+                  ),
                 ],
               ),
             ),
