@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sos_widget_description">One-tap SOS for Colombo Pal</string>
+    <string name="sos_widget_label">SOS</string>
+    <string name="sos_widget_hint">Tap for help</string>
+
+    <string name="sos_service_channel_name">SOS shortcut</string>
+    <string name="sos_service_title">SOS shortcut is on</string>
+    <string name="sos_service_text">Press volume up and down alternately %1$d times quickly to call for help</string>
+
+    <string name="sos_alert_channel_name">SOS alerts</string>
+    <string name="sos_alert_title">SOS triggered</string>
+    <string name="sos_alert_text">Tap to contact your guardians or call an ambulance</string>
+</resources>

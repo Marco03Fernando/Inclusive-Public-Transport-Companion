@@ -14,9 +14,22 @@ import 'sos_contact_row.dart';
 /// The SOS confirm -> press-and-hold -> activated modal, reachable from
 /// every eligible passenger screen. Mirrors the design's 3-second hold
 /// timer and countdown ring.
-Future<void> showSosDialog(BuildContext context) {
+///
+/// [immediate] skips the hold step and goes straight to the activated state.
+/// Used by the external shortcuts (widget, volume presses),
+/// where the gesture itself was the deliberate confirmation.
+Future<void> showSosDialog(BuildContext context, {bool immediate = false}) {
   final appState = context.read<AppState>();
-  appState.openSosConfirm();
+  if (appState.sosStage != SosStage.hidden) {
+    // Already open: just escalate it, never stack a second dialog.
+    if (immediate) appState.activateSos();
+    return Future.value();
+  }
+  if (immediate) {
+    appState.activateSos();
+  } else {
+    appState.openSosConfirm();
+  }
   return showDialog(
     context: context,
     barrierColor: Colors.black.withValues(alpha: 0.55),

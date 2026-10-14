@@ -42,6 +42,7 @@ import 'screens/volunteer/volunteer_profile_screen.dart';
 import 'services/auth_service.dart';
 import 'services/condition_report_service.dart';
 import 'widgets/auth_gate.dart';
+import 'widgets/sos_trigger_host.dart';
 
 class ColomboPalApp extends StatelessWidget {
   const ColomboPalApp({super.key});
@@ -110,6 +111,7 @@ class ColomboPalApp extends StatelessWidget {
             child: MaterialApp(
               title: 'Colombo Pal',
               debugShowCheckedModeBanner: false,
+              navigatorKey: rootNavigatorKey,
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
               themeMode: state.themeMode,
@@ -125,7 +127,7 @@ class ColomboPalApp extends StatelessWidget {
                       maxScaleFactor: 1.3,
                     ),
                   ),
-                  child: child!,
+                  child: SosTriggerHost(child: child ?? const SizedBox.shrink()),
                 );
               },
               home: const AuthGate(),
