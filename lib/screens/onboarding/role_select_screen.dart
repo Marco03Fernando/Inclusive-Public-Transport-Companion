@@ -10,7 +10,6 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/buttons.dart';
-import '../../widgets/colombo_skyline.dart';
 import '../../widgets/language_toggle.dart';
 
 /// The app's entry / "Get Started" screen (route [Routes.roleSelect]).
@@ -67,13 +66,13 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
       routeName: Routes.roleSelect,
       scrollableBody: false,
       body: DecoratedBox(
-        // Soft wash from the brand tint at the top into the page colour.
+        // Soft sky wash from the brand tint at the top into the page colour.
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [palette.accentSoft.withValues(alpha: 0.55), palette.bg],
-            stops: const [0, 0.55],
+            colors: [palette.accentSoft.withValues(alpha: 0.7), palette.bg],
+            stops: const [0, 0.6],
           ),
         ),
         child: LayoutBuilder(
@@ -83,29 +82,27 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
               // Lets the Spacer below push the actions to the bottom on tall
               // screens, while short / large-text screens simply scroll.
               child: IntrinsicHeight(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 10, 22, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: BrandMark(),
-                            ),
-                          ),
-                          LanguageToggle(
-                            locale: state.locale,
-                            onChanged: state.setLocale,
-                          ),
-                        ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 10, 22, 0),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: LanguageToggle(
+                          locale: state.locale,
+                          onChanged: state.setLocale,
+                        ),
                       ),
-                      const SizedBox(height: 26),
-                      Semantics(
+                    ),
+                    const _BrandHeader(),
+                    const SizedBox(height: 18),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 22),
+                      child: Semantics(
                         header: true,
                         child: Text.rich(
+                          textAlign: TextAlign.center,
                           TextSpan(
                             children: [
                               TextSpan(
@@ -126,69 +123,70 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Text(
+                    ),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
                         context.t('appTagline'),
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
                           color: palette.muted,
                           height: 1.45,
                         ),
                       ),
-                      const SizedBox(height: 22),
-                      _HeroScene(width: constraints.maxWidth - 44),
-                      const SizedBox(height: 18),
-                      const _Benefits(),
-                      const SizedBox(height: 22),
-                      const Spacer(),
-                      PrimaryButton(
+                    ),
+                    const Expanded(child: _SceneWithBenefits()),
+                    const SizedBox(height: 14),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 22),
+                      child: PrimaryButton(
                         label: context.t('getStarted'),
                         onPressed: _getStarted,
                       ),
-                      const SizedBox(height: 6),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            context.t('haveAccount'),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          context.t('haveAccount'),
+                          style: TextStyle(fontSize: 14, color: palette.muted),
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              Navigator.of(context).pushNamed(Routes.login),
+                          child: Text(
+                            context.t('logIn'),
                             style: TextStyle(
                               fontSize: 14,
-                              color: palette.muted,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.of(context).pushNamed(Routes.login),
-                            child: Text(
-                              context.t('logIn'),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: palette.accent,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Center(
-                        child: TextButton(
-                          onPressed: _guestLoading
-                              ? null
-                              : () => _continueAsGuest(context),
-                          child: Text(
-                            _guestLoading
-                                ? context.t('loading')
-                                : context.t('continueAsGuest'),
-                            style: TextStyle(
-                              color: palette.muted,
-                              fontWeight: FontWeight.w600,
+                              color: palette.accent,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ),
+                      ],
+                    ),
+                    Center(
+                      child: TextButton(
+                        onPressed: _guestLoading
+                            ? null
+                            : () => _continueAsGuest(context),
+                        child: Text(
+                          _guestLoading
+                              ? context.t('loading')
+                              : context.t('continueAsGuest'),
+                          style: TextStyle(
+                            color: palette.muted,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ),
               ),
             ),
@@ -199,51 +197,107 @@ class _RoleSelectScreenState extends State<RoleSelectScreen> {
   }
 }
 
-/// Rounded hero card: Colombo waterfront scene with the brand badge.
-class _HeroScene extends StatelessWidget {
-  const _HeroScene({required this.width});
-
-  /// Available width; sizes the badge without a LayoutBuilder (which
-  /// would not support the screen's IntrinsicHeight).
-  final double width;
-
-  static const _aspect = 1.45;
+/// Centred logo badge with the "Colombo Pal" wordmark beneath it.
+class _BrandHeader extends StatelessWidget {
+  const _BrandHeader();
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return AspectRatio(
-      aspectRatio: _aspect,
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          border: palette.cardOutline,
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [palette.accentSoft, palette.surface],
+    return Semantics(
+      label: 'Colombo Pal',
+      excludeSemantics: true,
+      child: Column(
+        children: [
+          const BrandBadge(size: 92),
+          const SizedBox(height: 10),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Colombo ',
+                  style: TextStyle(color: palette.text),
+                ),
+                TextSpan(
+                  text: 'Pal',
+                  style: TextStyle(color: palette.accent),
+                ),
+              ],
+            ),
+            style: GoogleFonts.manrope(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+            ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: palette.shadow,
-              blurRadius: 24,
-              offset: const Offset(0, 10),
+        ],
+      ),
+    );
+  }
+}
+
+/// Full-width scene artwork, faded into the page at its top and bottom, with
+/// the benefits card overlapping its lower edge.
+class _SceneWithBenefits extends StatelessWidget {
+  const _SceneWithBenefits();
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    // Takes all the space between the text and the buttons: the artwork
+    // fills it (anchored to the bottom) and the benefits card rests on it.
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 340),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ExcludeSemantics(
+              child: ShaderMask(
+                // Long, soft fades so the scene melts into the sky above and
+                // the page colour below instead of ending in an edge.
+                shaderCallback: (rect) => const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black,
+                    Colors.black,
+                    Colors.transparent,
+                  ],
+                  stops: [0, 0.4, 0.84, 1],
+                ).createShader(rect),
+                blendMode: BlendMode.dstIn,
+                child: Image.asset(
+                  'assets/artwork/inclusive_travel_people_and_bus.png',
+                  fit: BoxFit.cover,
+                  alignment: const Alignment(-0.25, 0.4),
+                ),
+              ),
             ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Tower to one side so the badge doesn't hide it.
-            const Positioned.fill(child: ColomboSkyline(towerAt: 0.2)),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: width / _aspect * 0.10,
-              child: Center(child: BrandBadge(size: width / _aspect * 0.62)),
+          ),
+          // Page-colour veil under the card so its text stays readable.
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 60,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [palette.bg.withValues(alpha: 0), palette.bg],
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+          const Positioned(
+            left: 22,
+            right: 22,
+            bottom: 0,
+            child: _Benefits(),
+          ),
+        ],
       ),
     );
   }
