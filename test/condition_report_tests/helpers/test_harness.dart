@@ -98,6 +98,10 @@ class FakeReportRepository implements ConditionReportRepository {
     _emit(report.userId);
   }
 
+  /// Route scoring isn't exercised by these tests.
+  @override
+  Future<List<ConditionReport>> getRouteEligibleReports() async => const [];
+
   @override
   Future<ConditionReport> createReport(ConditionReport report) async {
     createCalls.add(report);
