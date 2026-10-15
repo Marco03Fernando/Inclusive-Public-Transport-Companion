@@ -3,10 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:colombo_pal/core/routes.dart';
 import 'package:colombo_pal/core/state/app_state.dart';
 import 'package:colombo_pal/data/mock_data.dart';
-import 'package:colombo_pal/models/condition_report.dart';
 import 'package:colombo_pal/models/user_profile.dart';
-import 'package:colombo_pal/utils/validators.dart';
 
+// Condition Reporting tests live in test/condition_report_tests/.
 void main() {
   group('users/{uid}.role', () {
     test('maps every stored value onto AppRole', () {
@@ -48,52 +47,6 @@ void main() {
     test('admin dashboard has no passenger chrome', () {
       expect(Routes.showsBottomNav(Routes.admin), isFalse);
       expect(Routes.showsSos(Routes.admin, AppRole.admin), isFalse);
-    });
-  });
-
-  group('condition reports', () {
-    test('existing Firestore enum names still parse', () {
-      for (final name in ['brokenRamp', 'noSeat', 'overcrowded', 'unsafe']) {
-        expect(ConditionType.values.byName(name).name, name);
-      }
-      for (final name in ['underReview', 'verified', 'accepted', 'rejected']) {
-        expect(ReportStatus.values.byName(name).name, name);
-      }
-    });
-
-    test('form draft becomes an under-review report', () {
-      final draft = ConditionReportDraft(
-        subject: ReportSubject.bus,
-        vehicleOrStationNumber: ' nb-1234 ',
-        reportLocation: const ReportLocation(
-          latitude: 6.9,
-          longitude: 79.8,
-          label: 'Current location attached',
-        ),
-        conditionType: ConditionType.brokenRamp,
-        description: 'Ramp is bent and will not lower.',
-      );
-      final report = ConditionReport.fromDraft(draft);
-      expect(report.status, ReportStatus.underReview);
-      expect(report.title, 'Bus nb-1234');
-      expect(report.location.hasCoordinates, isTrue);
-      expect(report.id, isEmpty);
-    });
-
-    test('validators guard the report form', () {
-      expect(ReportValidators.subject(null), isNotNull);
-      expect(ReportValidators.conditionType(null), isNotNull);
-      expect(
-        ReportValidators.vehicleOrStationNumber('', ReportSubject.other),
-        isNull,
-      );
-      expect(
-        ReportValidators.vehicleOrStationNumber('', ReportSubject.bus),
-        isNotNull,
-      );
-      expect(ReportValidators.location(''), isNotNull);
-      expect(ReportValidators.description('too short'), isNotNull);
-      expect(ReportValidators.description('Long enough description'), isNull);
     });
   });
 }

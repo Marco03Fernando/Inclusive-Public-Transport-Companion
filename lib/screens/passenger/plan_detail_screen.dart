@@ -100,8 +100,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       routeName: Routes.planDetail,
       title: widget.route.routeName,
       scrollableBody: false,
-      onBack: () =>
-          Navigator.of(context).pushReplacementNamed(Routes.planResults),
+
+      onBack: () => Navigator.of(context).pop(),
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -148,8 +149,6 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                   if (routeSteps.isEmpty)
                     const Text('No step-by-step instructions available.')
                   else ...[
-                    
-
                     for (var i = 0; i < routeSteps.length; i++)
                       RouteStepItem(
                         step: routeSteps[i],
