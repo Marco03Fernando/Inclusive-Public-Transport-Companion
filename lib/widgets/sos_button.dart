@@ -7,8 +7,7 @@ import '../core/theme/app_theme.dart';
 /// The floating emergency SOS button. Scaffold already raises the FAB above
 /// a bottom nav bar when both are present, so no manual offset is needed.
 ///
-/// A labelled pill (icon + "SOS") in the emergency colour, at least 56dp
-/// tall. Tapping only OPENS the confirmation dialog — the alert itself
+/// A 64dp circle with "SOS" text inside, in the emergency colour. Tapping only OPENS the confirmation dialog — the alert itself
 /// still needs the 3-second hold there, so it can't fire by accident.
 /// Screen readers announce "Emergency SOS" plus a hint saying a
 /// confirmation follows.
@@ -26,24 +25,26 @@ class SosButton extends StatelessWidget {
       hint: context.t('sosA11yHint'),
       excludeSemantics: true,
       onTap: onPressed,
-      child: FloatingActionButton.extended(
-        heroTag: 'sos',
-        onPressed: onPressed,
-        backgroundColor: palette.danger,
-        foregroundColor: palette.onDanger,
-        elevation: palette.isHighContrast ? 0 : 4,
-        shape: StadiumBorder(
-          side: palette.isHighContrast
-              ? BorderSide(color: palette.text, width: 2)
-              : BorderSide.none,
-        ),
-        icon: const Icon(Icons.sos_rounded, size: 22),
-        label: Text(
-          'SOS',
-          style: GoogleFonts.manrope(
-            fontWeight: FontWeight.w800,
-            fontSize: 15,
-            letterSpacing: 1,
+      child: SizedBox.square(
+        dimension: 64,
+        child: FloatingActionButton(
+          heroTag: 'sos',
+          onPressed: onPressed,
+          backgroundColor: palette.danger,
+          foregroundColor: palette.onDanger,
+          elevation: palette.isHighContrast ? 0 : 4,
+          shape: CircleBorder(
+            side: palette.isHighContrast
+                ? BorderSide(color: palette.text, width: 2)
+                : BorderSide.none,
+          ),
+          child: Text(
+            'SOS',
+            style: GoogleFonts.manrope(
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
       ),

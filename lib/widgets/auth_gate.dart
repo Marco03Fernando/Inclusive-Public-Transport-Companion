@@ -9,9 +9,11 @@ import '../core/state/accessibility_settings.dart';
 import '../core/state/app_state.dart';
 import '../core/state/auth_state.dart';
 import '../screens/onboarding/role_select_screen.dart';
+import '../screens/onboarding/welcome_screen.dart';
 import '../screens/passenger/home_screen.dart';
 import '../screens/volunteer/volunteer_home_screen.dart';
 import '../services/firebase_bootstrap.dart';
+import '../services/onboarding_prefs.dart';
 import 'startup_splash.dart';
 
 /// Decides the very first screen once, at cold start, based on whether
@@ -31,6 +33,10 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   late Future<AppRole?> _roleFuture;
+
+  /// First launch with no saved session: show the welcome screens before
+  /// role select (once per install; see [OnboardingPrefs]).
+  bool _showWelcome = false;
 
   @override
   void initState() {
@@ -65,6 +71,7 @@ class _AuthGateState extends State<AuthGate> {
       if (!mounted) return role;
       await _adminCheckSettled(context.read<AdminAuthProvider>());
     }
+    if (role == null) _showWelcome = await OnboardingPrefs.shouldShowWelcome();
     return role;
   }
 
@@ -101,7 +108,8 @@ class _AuthGateState extends State<AuthGate> {
             AppRole.passenger => const HomeScreen(),
             AppRole.volunteer => const VolunteerHomeScreen(),
             AppRole.admin => const AdminGate(),
-            null => const RoleSelectScreen(),
+            null =>
+              _showWelcome ? const WelcomeScreen() : const RoleSelectScreen(),
           };
         }
         return AnimatedSwitcher(

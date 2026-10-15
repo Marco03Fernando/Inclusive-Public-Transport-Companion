@@ -87,6 +87,11 @@ flutter:
   # and the launcher / native-splash images are build-time inputs only.
   assets:
     - assets/branding/startup/colombopal_logo.png
+    # Icon artwork cropped + resized to 512 px for in-app use (Home header,
+    # welcome screens).
+    - assets/branding/colombopal_mark.png
+    # Illustrations for the welcome screens and Home.
+    - assets/artwork/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

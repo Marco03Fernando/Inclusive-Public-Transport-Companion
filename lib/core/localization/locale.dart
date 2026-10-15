@@ -16,6 +16,22 @@ class AppStrings {
 
   static const Map<String, String> en = {
     'appTagline': 'Travel safely and confidently around Colombo',
+    'homeWhereTo': 'Where would you like to go today?',
+    'exploreColomboTitle': 'Explore Colombo',
+    'exploreColomboDesc': 'Discover accessible routes around the city',
+    'requestAssistanceHomeDesc': 'Ask a nearby volunteer for help',
+    'onbSkip': 'Skip',
+    'onbNext': 'Next',
+    'onbGetStarted': 'Get Started',
+    'onb1Title': 'Safer journeys.\nA more inclusive Colombo.',
+    'onb1Body':
+        'Helping elderly travellers and people with disabilities get around with confidence.',
+    'onb2Title': 'Routes that fit your needs',
+    'onb2Body':
+        'Plan journeys with accessible stops, ramps and lifts, and see recent condition reports from the community.',
+    'onb3Title': 'Support when you need it',
+    'onb3Body':
+        'Share your journey with people you trust, ask volunteers for help, and use SOS at any time.',
     'registeringAs': 'I am registering as a',
     'rolePassenger': 'Passenger',
     'roleVolunteer': 'Volunteer',
@@ -357,6 +373,22 @@ class AppStrings {
 
   static const Map<String, String> si = {
     'appTagline': 'කොළඹ ආරක්ෂිතව හා විශ්වාසයෙන් සංචාරය කරන්න',
+    'homeWhereTo': 'අද ඔබට කොහේ යාමට අවශ්‍යද?',
+    'exploreColomboTitle': 'කොළඹ ගවේෂණය කරන්න',
+    'exploreColomboDesc': 'නගරය පුරා ප්‍රවේශ විය හැකි මාර්ග සොයා ගන්න',
+    'requestAssistanceHomeDesc': 'ආසන්නයේ සිටින ස්වේච්ඡා සේවකයෙකුගෙන් උදව් ඉල්ලන්න',
+    'onbSkip': 'මඟ හරින්න',
+    'onbNext': 'ඊළඟ',
+    'onbGetStarted': 'ආරම්භ කරන්න',
+    'onb1Title': 'ආරක්ෂිත ගමන්.\nසියලුදෙනා සඳහා කොළඹ.',
+    'onb1Body':
+        'වැඩිහිටියන්ට සහ ආබාධිත පුද්ගලයන්ට විශ්වාසයෙන් සංචාරය කිරීමට උදව් වේ.',
+    'onb2Title': 'ඔබේ අවශ්‍යතාවලට ගැළපෙන මාර්ග',
+    'onb2Body':
+        'ප්‍රවේශ විය හැකි නැවතුම්පොළවල්, රැම්ප් සහ ලිෆ්ට් සහිතව ගමන් සැලසුම් කරන්න, ප්‍රජාවේ මෑත වාර්තා බලන්න.',
+    'onb3Title': 'අවශ්‍ය විට සහාය',
+    'onb3Body':
+        'ඔබ විශ්වාස කරන අය සමඟ ගමන බෙදා ගන්න, ස්වේච්ඡා සේවකයන්ගෙන් උදව් ඉල්ලන්න, ඕනෑම වේලාවක SOS භාවිතා කරන්න.',
     'registeringAs': 'මම ලියාපදිංචි වන්නේ',
     'rolePassenger': 'මගියා',
     'roleVolunteer': 'ස්වේච්ඡා සේවක',

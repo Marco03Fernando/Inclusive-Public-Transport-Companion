@@ -49,3 +49,8 @@ app.*.map.json
 
 
 docs/
+
+# Node tooling (diagram scripts) and raw artwork exports; the app only uses
+# the copies under assets/artwork/.
+node_modules/
+colombo_pal_artworks/
