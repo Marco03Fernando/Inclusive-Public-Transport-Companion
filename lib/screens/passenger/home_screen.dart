@@ -11,7 +11,6 @@ import '../../providers/reports_provider.dart';
 import '../../widgets/accessibility_shortcut_button.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/brand_mark.dart';
-import '../../widgets/colombo_skyline.dart';
 import '../../widgets/condition_tile.dart';
 import '../../widgets/home_widgets.dart';
 import '../../widgets/read_aloud_button.dart';
@@ -192,13 +191,27 @@ class _GreetingBanner extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Skyline on the right, behind the text; it never sets the height.
-          const Positioned(
-            right: -8,
+          // Waterfront artwork on the right, faded into the card and behind
+          // the text; it never sets the banner's height.
+          Positioned(
+            right: 0,
             bottom: 0,
-            top: 18,
-            width: 150,
-            child: Opacity(opacity: 0.75, child: ColomboSkyline()),
+            top: 0,
+            width: 170,
+            child: ExcludeSemantics(
+              child: ShaderMask(
+                shaderCallback: (rect) => const LinearGradient(
+                  colors: [Colors.transparent, Colors.black],
+                  stops: [0, 0.6],
+                ).createShader(rect),
+                blendMode: BlendMode.dstIn,
+                child: Image.asset(
+                  'assets/artwork/colombo_skyline_waterfront.png',
+                  fit: BoxFit.cover,
+                  alignment: Alignment.centerRight,
+                ),
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
@@ -218,7 +231,7 @@ class _GreetingBanner extends StatelessWidget {
                   if (name != null) ...[
                     const SizedBox(height: 2),
                     FractionallySizedBox(
-                      widthFactor: 0.72,
+                      widthFactor: 0.62,
                       child: Semantics(
                         header: true,
                         child: Text(
@@ -237,7 +250,7 @@ class _GreetingBanner extends StatelessWidget {
                   ],
                   const SizedBox(height: 8),
                   FractionallySizedBox(
-                    widthFactor: 0.68,
+                    widthFactor: 0.6,
                     child: Text(
                       prompt,
                       style: TextStyle(
